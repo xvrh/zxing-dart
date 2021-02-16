@@ -26,31 +26,28 @@ import 'format_information.dart';
  * @author Sean Owen
  */
 class Version {
-
   /**
    * See ISO 18004:2006 Annex D.
    * Element i represents the raw version bits that specify version i + 7
    */
-   static final _VERSION_DECODE_INFO = [
-      0x07C94, 0x085BC, 0x09A99, 0x0A4D3, 0x0BBF6, //
-      0x0C762, 0x0D847, 0x0E60D, 0x0F928, 0x10B78,
-      0x1145D, 0x12A17, 0x13532, 0x149A6, 0x15683,
-      0x168C9, 0x177EC, 0x18EC4, 0x191E1, 0x1AFAB,
-      0x1B08E, 0x1CC1A, 0x1D33F, 0x1ED75, 0x1F250,
-      0x209D5, 0x216F0, 0x228BA, 0x2379F, 0x24B0B,
-      0x2542E, 0x26A64, 0x27541, 0x28C69, //
+  static final _VERSION_DECODE_INFO = [
+    0x07C94, 0x085BC, 0x09A99, 0x0A4D3, 0x0BBF6, //
+    0x0C762, 0x0D847, 0x0E60D, 0x0F928, 0x10B78,
+    0x1145D, 0x12A17, 0x13532, 0x149A6, 0x15683,
+    0x168C9, 0x177EC, 0x18EC4, 0x191E1, 0x1AFAB,
+    0x1B08E, 0x1CC1A, 0x1D33F, 0x1ED75, 0x1F250,
+    0x209D5, 0x216F0, 0x228BA, 0x2379F, 0x24B0B,
+    0x2542E, 0x26A64, 0x27541, 0x28C69, //
   ];
 
-   static final VERSIONS = buildVersions();
+  static final VERSIONS = buildVersions();
 
-   final int versionNumber;
-   final List<int> alignmentPatternCenters;
-   final List<ECBlocks> _ecBlocks;
-   late int _totalCodewords;
+  final int versionNumber;
+  final List<int> alignmentPatternCenters;
+  final List<ECBlocks> _ecBlocks;
+  late int _totalCodewords;
 
-   Version._(this. versionNumber,
-                  this.alignmentPatternCenters,
-                  this._ecBlocks) {
+  Version._(this.versionNumber, this.alignmentPatternCenters, this._ecBlocks) {
     int total = 0;
     int ecCodewords = _ecBlocks[0].ecCodewordsPerBlock;
     List<ECB> ecbArray = _ecBlocks[0].ecBlocks;
@@ -62,11 +59,11 @@ class Version {
 
   int get totalCodewords => _totalCodewords;
 
-   int get dimensionForVersion {
+  int get dimensionForVersion {
     return 17 + 4 * versionNumber;
   }
 
-   ECBlocks getECBlocksForLevel(ErrorCorrectionLevel ecLevel) {
+  ECBlocks getECBlocksForLevel(ErrorCorrectionLevel ecLevel) {
     return _ecBlocks[ecLevel.ordinal];
   }
 
@@ -77,20 +74,20 @@ class Version {
    * @return Version for a QR Code of that dimension
    * @throws FormatException if dimension is not 1 mod 4
    */
-   static Version getProvisionalVersionForDimension(int dimension) {
+  static Version getProvisionalVersionForDimension(int dimension) {
     if (dimension % 4 != 1) {
       throw FormatException();
     }
     try {
       return getVersionForNumber((dimension - 17) ~/ 4);
-    } on ArgumentError catch ( _) {
+    } on ArgumentError catch (_) {
       throw FormatException();
     }
   }
 
-   static Version getVersionForNumber(int versionNumber) {
+  static Version getVersionForNumber(int versionNumber) {
     if (versionNumber < 1 || versionNumber > 40) {
-      throw new ArgumentError();
+      throw ArgumentError();
     }
     return VERSIONS[versionNumber - 1];
   }
@@ -106,7 +103,8 @@ class Version {
       }
       // Otherwise see if this is the closest to a real version info bit string
       // we have seen so far
-      int bitsDifference = FormatInformation.numBitsDiffering(versionBits, targetVersion);
+      int bitsDifference =
+          FormatInformation.numBitsDiffering(versionBits, targetVersion);
       if (bitsDifference < bestDifference) {
         bestVersion = i + 7;
         bestDifference = bitsDifference;
@@ -126,7 +124,7 @@ class Version {
    */
   BitMatrix buildFunctionPattern() {
     int dimension = dimensionForVersion;
-    BitMatrix bitMatrix = new BitMatrix(dimension);
+    BitMatrix bitMatrix = BitMatrix(dimension);
 
     // Top left finder pattern + separator + format
     bitMatrix.setRegion(0, 0, 9, 9);
@@ -163,346 +161,474 @@ class Version {
   }
 
   @override
-   String toString() {
+  String toString() {
     return '$versionNumber';
   }
 
   /**
    * See ISO 18004:2006 6.5.1 Table 9
    */
-   static List<Version> buildVersions() {
+  static List<Version> buildVersions() {
     return [
-        new Version._(1, [],
-            [new ECBlocks(7, [new ECB(1, 19)]),
-            new ECBlocks(10, [new ECB(1, 16)]),
-            new ECBlocks(13, [new ECB(1, 13)]),
-            new ECBlocks(17, [new ECB(1, 9)]),]),
-        new Version._(2,  [6, 18],
-           [ new ECBlocks(10, [new ECB(1, 34)]),
-            new ECBlocks(16, [new ECB(1, 28)]),
-            new ECBlocks(22, [new ECB(1, 22)]),
-            new ECBlocks(28, [new ECB(1, 16)])]),
-        new Version._(3, [6, 22],
-            [new ECBlocks(15, [new ECB(1, 55)]),
-            new ECBlocks(26, [new ECB(1, 44)]),
-            new ECBlocks(18, [new ECB(2, 17)]),
-            new ECBlocks(22, [new ECB(2, 13)])]),
-        new Version._(4, [6, 26],
-            [new ECBlocks(20, [new ECB(1, 80)]),
-            new ECBlocks(18, [new ECB(2, 32)]),
-            new ECBlocks(26, [new ECB(2, 24)]),
-            new ECBlocks(16, [new ECB(4, 9)])]),
-        new Version._(5, [6, 30],
-            [new ECBlocks(26, [new ECB(1, 108)]),
-            new ECBlocks(24, [new ECB(2, 43)]),
-            new ECBlocks(18, [new ECB(2, 15),
-                new ECB(2, 16)]),
-            new ECBlocks(22, [new ECB(2, 11),
-                new ECB(2, 12)])]),
-        new Version._(6, [6, 34],
-            new ECBlocks(18, new ECB(2, 68)),
-            new ECBlocks(16, new ECB(4, 27)),
-            new ECBlocks(24, new ECB(4, 19)),
-            new ECBlocks(28, new ECB(4, 15))),
-        new Version._(7, new int[]{6, 22, 38},
-            new ECBlocks(20, new ECB(2, 78)),
-            new ECBlocks(18, new ECB(4, 31)),
-            new ECBlocks(18, new ECB(2, 14),
-                new ECB(4, 15)),
-            new ECBlocks(26, new ECB(4, 13),
-                new ECB(1, 14))),
-        new Version._(8, new int[]{6, 24, 42},
-            new ECBlocks(24, new ECB(2, 97)),
-            new ECBlocks(22, new ECB(2, 38),
-                new ECB(2, 39)),
-            new ECBlocks(22, new ECB(4, 18),
-                new ECB(2, 19)),
-            new ECBlocks(26, new ECB(4, 14),
-                new ECB(2, 15))),
-        new Version._(9, new int[]{6, 26, 46},
-            new ECBlocks(30, new ECB(2, 116)),
-            new ECBlocks(22, new ECB(3, 36),
-                new ECB(2, 37)),
-            new ECBlocks(20, new ECB(4, 16),
-                new ECB(4, 17)),
-            new ECBlocks(24, new ECB(4, 12),
-                new ECB(4, 13))),
-        new Version._(10, new int[]{6, 28, 50},
-            new ECBlocks(18, new ECB(2, 68),
-                new ECB(2, 69)),
-            new ECBlocks(26, new ECB(4, 43),
-                new ECB(1, 44)),
-            new ECBlocks(24, new ECB(6, 19),
-                new ECB(2, 20)),
-            new ECBlocks(28, new ECB(6, 15),
-                new ECB(2, 16))),
-        new Version._(11, new int[]{6, 30, 54},
-            new ECBlocks(20, new ECB(4, 81)),
-            new ECBlocks(30, new ECB(1, 50),
-                new ECB(4, 51)),
-            new ECBlocks(28, new ECB(4, 22),
-                new ECB(4, 23)),
-            new ECBlocks(24, new ECB(3, 12),
-                new ECB(8, 13))),
-        new Version._(12, new int[]{6, 32, 58},
-            new ECBlocks(24, new ECB(2, 92),
-                new ECB(2, 93)),
-            new ECBlocks(22, new ECB(6, 36),
-                new ECB(2, 37)),
-            new ECBlocks(26, new ECB(4, 20),
-                new ECB(6, 21)),
-            new ECBlocks(28, new ECB(7, 14),
-                new ECB(4, 15))),
-        new Version._(13, new int[]{6, 34, 62},
-            new ECBlocks(26, new ECB(4, 107)),
-            new ECBlocks(22, new ECB(8, 37),
-                new ECB(1, 38)),
-            new ECBlocks(24, new ECB(8, 20),
-                new ECB(4, 21)),
-            new ECBlocks(22, new ECB(12, 11),
-                new ECB(4, 12))),
-        new Version._(14, new int[]{6, 26, 46, 66},
-            new ECBlocks(30, new ECB(3, 115),
-                new ECB(1, 116)),
-            new ECBlocks(24, new ECB(4, 40),
-                new ECB(5, 41)),
-            new ECBlocks(20, new ECB(11, 16),
-                new ECB(5, 17)),
-            new ECBlocks(24, new ECB(11, 12),
-                new ECB(5, 13))),
-        new Version._(15, new int[]{6, 26, 48, 70},
-            new ECBlocks(22, new ECB(5, 87),
-                new ECB(1, 88)),
-            new ECBlocks(24, new ECB(5, 41),
-                new ECB(5, 42)),
-            new ECBlocks(30, new ECB(5, 24),
-                new ECB(7, 25)),
-            new ECBlocks(24, new ECB(11, 12),
-                new ECB(7, 13))),
-        new Version._(16, new int[]{6, 26, 50, 74},
-            new ECBlocks(24, new ECB(5, 98),
-                new ECB(1, 99)),
-            new ECBlocks(28, new ECB(7, 45),
-                new ECB(3, 46)),
-            new ECBlocks(24, new ECB(15, 19),
-                new ECB(2, 20)),
-            new ECBlocks(30, new ECB(3, 15),
-                new ECB(13, 16))),
-        new Version._(17, new int[]{6, 30, 54, 78},
-            new ECBlocks(28, new ECB(1, 107),
-                new ECB(5, 108)),
-            new ECBlocks(28, new ECB(10, 46),
-                new ECB(1, 47)),
-            new ECBlocks(28, new ECB(1, 22),
-                new ECB(15, 23)),
-            new ECBlocks(28, new ECB(2, 14),
-                new ECB(17, 15))),
-        new Version._(18, new int[]{6, 30, 56, 82},
-            new ECBlocks(30, new ECB(5, 120),
-                new ECB(1, 121)),
-            new ECBlocks(26, new ECB(9, 43),
-                new ECB(4, 44)),
-            new ECBlocks(28, new ECB(17, 22),
-                new ECB(1, 23)),
-            new ECBlocks(28, new ECB(2, 14),
-                new ECB(19, 15))),
-        new Version._(19, new int[]{6, 30, 58, 86},
-            new ECBlocks(28, new ECB(3, 113),
-                new ECB(4, 114)),
-            new ECBlocks(26, new ECB(3, 44),
-                new ECB(11, 45)),
-            new ECBlocks(26, new ECB(17, 21),
-                new ECB(4, 22)),
-            new ECBlocks(26, new ECB(9, 13),
-                new ECB(16, 14))),
-        new Version._(20, new int[]{6, 34, 62, 90},
-            new ECBlocks(28, new ECB(3, 107),
-                new ECB(5, 108)),
-            new ECBlocks(26, new ECB(3, 41),
-                new ECB(13, 42)),
-            new ECBlocks(30, new ECB(15, 24),
-                new ECB(5, 25)),
-            new ECBlocks(28, new ECB(15, 15),
-                new ECB(10, 16))),
-        new Version._(21, new int[]{6, 28, 50, 72, 94},
-            new ECBlocks(28, new ECB(4, 116),
-                new ECB(4, 117)),
-            new ECBlocks(26, new ECB(17, 42)),
-            new ECBlocks(28, new ECB(17, 22),
-                new ECB(6, 23)),
-            new ECBlocks(30, new ECB(19, 16),
-                new ECB(6, 17))),
-        new Version._(22, new int[]{6, 26, 50, 74, 98},
-            new ECBlocks(28, new ECB(2, 111),
-                new ECB(7, 112)),
-            new ECBlocks(28, new ECB(17, 46)),
-            new ECBlocks(30, new ECB(7, 24),
-                new ECB(16, 25)),
-            new ECBlocks(24, new ECB(34, 13))),
-        new Version._(23, new int[]{6, 30, 54, 78, 102},
-            new ECBlocks(30, new ECB(4, 121),
-                new ECB(5, 122)),
-            new ECBlocks(28, new ECB(4, 47),
-                new ECB(14, 48)),
-            new ECBlocks(30, new ECB(11, 24),
-                new ECB(14, 25)),
-            new ECBlocks(30, new ECB(16, 15),
-                new ECB(14, 16))),
-        new Version._(24, new int[]{6, 28, 54, 80, 106},
-            new ECBlocks(30, new ECB(6, 117),
-                new ECB(4, 118)),
-            new ECBlocks(28, new ECB(6, 45),
-                new ECB(14, 46)),
-            new ECBlocks(30, new ECB(11, 24),
-                new ECB(16, 25)),
-            new ECBlocks(30, new ECB(30, 16),
-                new ECB(2, 17))),
-        new Version._(25, new int[]{6, 32, 58, 84, 110},
-            new ECBlocks(26, new ECB(8, 106),
-                new ECB(4, 107)),
-            new ECBlocks(28, new ECB(8, 47),
-                new ECB(13, 48)),
-            new ECBlocks(30, new ECB(7, 24),
-                new ECB(22, 25)),
-            new ECBlocks(30, new ECB(22, 15),
-                new ECB(13, 16))),
-        new Version._(26, new int[]{6, 30, 58, 86, 114},
-            new ECBlocks(28, new ECB(10, 114),
-                new ECB(2, 115)),
-            new ECBlocks(28, new ECB(19, 46),
-                new ECB(4, 47)),
-            new ECBlocks(28, new ECB(28, 22),
-                new ECB(6, 23)),
-            new ECBlocks(30, new ECB(33, 16),
-                new ECB(4, 17))),
-        new Version._(27, new int[]{6, 34, 62, 90, 118},
-            new ECBlocks(30, new ECB(8, 122),
-                new ECB(4, 123)),
-            new ECBlocks(28, new ECB(22, 45),
-                new ECB(3, 46)),
-            new ECBlocks(30, new ECB(8, 23),
-                new ECB(26, 24)),
-            new ECBlocks(30, new ECB(12, 15),
-                new ECB(28, 16))),
-        new Version._(28, new int[]{6, 26, 50, 74, 98, 122},
-            new ECBlocks(30, new ECB(3, 117),
-                new ECB(10, 118)),
-            new ECBlocks(28, new ECB(3, 45),
-                new ECB(23, 46)),
-            new ECBlocks(30, new ECB(4, 24),
-                new ECB(31, 25)),
-            new ECBlocks(30, new ECB(11, 15),
-                new ECB(31, 16))),
-        new Version._(29, new int[]{6, 30, 54, 78, 102, 126},
-            new ECBlocks(30, new ECB(7, 116),
-                new ECB(7, 117)),
-            new ECBlocks(28, new ECB(21, 45),
-                new ECB(7, 46)),
-            new ECBlocks(30, new ECB(1, 23),
-                new ECB(37, 24)),
-            new ECBlocks(30, new ECB(19, 15),
-                new ECB(26, 16))),
-        new Version._(30, new int[]{6, 26, 52, 78, 104, 130},
-            new ECBlocks(30, new ECB(5, 115),
-                new ECB(10, 116)),
-            new ECBlocks(28, new ECB(19, 47),
-                new ECB(10, 48)),
-            new ECBlocks(30, new ECB(15, 24),
-                new ECB(25, 25)),
-            new ECBlocks(30, new ECB(23, 15),
-                new ECB(25, 16))),
-        new Version._(31, new int[]{6, 30, 56, 82, 108, 134},
-            new ECBlocks(30, new ECB(13, 115),
-                new ECB(3, 116)),
-            new ECBlocks(28, new ECB(2, 46),
-                new ECB(29, 47)),
-            new ECBlocks(30, new ECB(42, 24),
-                new ECB(1, 25)),
-            new ECBlocks(30, new ECB(23, 15),
-                new ECB(28, 16))),
-        new Version._(32, new int[]{6, 34, 60, 86, 112, 138},
-            new ECBlocks(30, new ECB(17, 115)),
-            new ECBlocks(28, new ECB(10, 46),
-                new ECB(23, 47)),
-            new ECBlocks(30, new ECB(10, 24),
-                new ECB(35, 25)),
-            new ECBlocks(30, new ECB(19, 15),
-                new ECB(35, 16))),
-        new Version._(33, new int[]{6, 30, 58, 86, 114, 142},
-            new ECBlocks(30, new ECB(17, 115),
-                new ECB(1, 116)),
-            new ECBlocks(28, new ECB(14, 46),
-                new ECB(21, 47)),
-            new ECBlocks(30, new ECB(29, 24),
-                new ECB(19, 25)),
-            new ECBlocks(30, new ECB(11, 15),
-                new ECB(46, 16))),
-        new Version._(34, new int[]{6, 34, 62, 90, 118, 146},
-            new ECBlocks(30, new ECB(13, 115),
-                new ECB(6, 116)),
-            new ECBlocks(28, new ECB(14, 46),
-                new ECB(23, 47)),
-            new ECBlocks(30, new ECB(44, 24),
-                new ECB(7, 25)),
-            new ECBlocks(30, new ECB(59, 16),
-                new ECB(1, 17))),
-        new Version._(35, new int[]{6, 30, 54, 78, 102, 126, 150},
-            new ECBlocks(30, new ECB(12, 121),
-                new ECB(7, 122)),
-            new ECBlocks(28, new ECB(12, 47),
-                new ECB(26, 48)),
-            new ECBlocks(30, new ECB(39, 24),
-                new ECB(14, 25)),
-            new ECBlocks(30, new ECB(22, 15),
-                new ECB(41, 16))),
-        new Version._(36, new int[]{6, 24, 50, 76, 102, 128, 154},
-            new ECBlocks(30, new ECB(6, 121),
-                new ECB(14, 122)),
-            new ECBlocks(28, new ECB(6, 47),
-                new ECB(34, 48)),
-            new ECBlocks(30, new ECB(46, 24),
-                new ECB(10, 25)),
-            new ECBlocks(30, new ECB(2, 15),
-                new ECB(64, 16))),
-        new Version._(37, new int[]{6, 28, 54, 80, 106, 132, 158},
-            new ECBlocks(30, new ECB(17, 122),
-                new ECB(4, 123)),
-            new ECBlocks(28, new ECB(29, 46),
-                new ECB(14, 47)),
-            new ECBlocks(30, new ECB(49, 24),
-                new ECB(10, 25)),
-            new ECBlocks(30, new ECB(24, 15),
-                new ECB(46, 16))),
-        new Version._(38, new int[]{6, 32, 58, 84, 110, 136, 162},
-            new ECBlocks(30, new ECB(4, 122),
-                new ECB(18, 123)),
-            new ECBlocks(28, new ECB(13, 46),
-                new ECB(32, 47)),
-            new ECBlocks(30, new ECB(48, 24),
-                new ECB(14, 25)),
-            new ECBlocks(30, new ECB(42, 15),
-                new ECB(32, 16))),
-        new Version._(39, new int[]{6, 26, 54, 82, 110, 138, 166},
-            new ECBlocks(30, new ECB(20, 117),
-                new ECB(4, 118)),
-            new ECBlocks(28, new ECB(40, 47),
-                new ECB(7, 48)),
-            new ECBlocks(30, new ECB(43, 24),
-                new ECB(22, 25)),
-            new ECBlocks(30, new ECB(10, 15),
-                new ECB(67, 16))),
-        new Version._(40, new int[]{6, 30, 58, 86, 114, 142, 170},
-            new ECBlocks(30, new ECB(19, 118),
-                new ECB(6, 119)),
-            new ECBlocks(28, new ECB(18, 47),
-                new ECB(31, 48)),
-            new ECBlocks(30, new ECB(34, 24),
-                new ECB(34, 25)),
-            new ECBlocks(30, new ECB(20, 15),
-                new ECB(61, 16)))
+      Version._(1, [], [
+        ECBlocks(7, [ECB(1, 19)]),
+        ECBlocks(10, [ECB(1, 16)]),
+        ECBlocks(13, [ECB(1, 13)]),
+        ECBlocks(17, [ECB(1, 9)]),
+      ]),
+      Version._(2, [
+        6,
+        18
+      ], [
+        ECBlocks(10, [ECB(1, 34)]),
+        ECBlocks(16, [ECB(1, 28)]),
+        ECBlocks(22, [ECB(1, 22)]),
+        ECBlocks(28, [ECB(1, 16)])
+      ]),
+      Version._(3, [
+        6,
+        22
+      ], [
+        ECBlocks(15, [ECB(1, 55)]),
+        ECBlocks(26, [ECB(1, 44)]),
+        ECBlocks(18, [ECB(2, 17)]),
+        ECBlocks(22, [ECB(2, 13)])
+      ]),
+      Version._(4, [
+        6,
+        26
+      ], [
+        ECBlocks(20, [ECB(1, 80)]),
+        ECBlocks(18, [ECB(2, 32)]),
+        ECBlocks(26, [ECB(2, 24)]),
+        ECBlocks(16, [ECB(4, 9)])
+      ]),
+      Version._(5, [
+        6,
+        30
+      ], [
+        ECBlocks(26, [ECB(1, 108)]),
+        ECBlocks(24, [ECB(2, 43)]),
+        ECBlocks(18, [ECB(2, 15), ECB(2, 16)]),
+        ECBlocks(22, [ECB(2, 11), ECB(2, 12)])
+      ]),
+      Version._(6, [
+        6,
+        34
+      ], [
+        ECBlocks(18, [ECB(2, 68)]),
+        ECBlocks(16, [ECB(4, 27)]),
+        ECBlocks(24, [ECB(4, 19)]),
+        ECBlocks(28, [ECB(4, 15)])
+      ]),
+      Version._(7, [
+        6,
+        22,
+        38
+      ], [
+        ECBlocks(20, [ECB(2, 78)]),
+        ECBlocks(18, [ECB(4, 31)]),
+        ECBlocks(18, [ECB(2, 14), ECB(4, 15)]),
+        ECBlocks(26, [ECB(4, 13), ECB(1, 14)])
+      ]),
+      Version._(8, [
+        6,
+        24,
+        42
+      ], [
+        ECBlocks(24, [ECB(2, 97)]),
+        ECBlocks(22, [ECB(2, 38), ECB(2, 39)]),
+        ECBlocks(22, [ECB(4, 18), ECB(2, 19)]),
+        ECBlocks(26, [ECB(4, 14), ECB(2, 15)])
+      ]),
+      Version._(9, [
+        6,
+        26,
+        46
+      ], [
+        ECBlocks(30, [ECB(2, 116)]),
+        ECBlocks(22, [ECB(3, 36), ECB(2, 37)]),
+        ECBlocks(20, [ECB(4, 16), ECB(4, 17)]),
+        ECBlocks(24, [ECB(4, 12), ECB(4, 13)])
+      ]),
+      Version._(10, [
+        6,
+        28,
+        50
+      ], [
+        ECBlocks(18, [ECB(2, 68), ECB(2, 69)]),
+        ECBlocks(26, [ECB(4, 43), ECB(1, 44)]),
+        ECBlocks(24, [ECB(6, 19), ECB(2, 20)]),
+        ECBlocks(28, [ECB(6, 15), ECB(2, 16)])
+      ]),
+      Version._(11, [
+        6,
+        30,
+        54
+      ], [
+        ECBlocks(20, [ECB(4, 81)]),
+        ECBlocks(30, [ECB(1, 50), ECB(4, 51)]),
+        ECBlocks(28, [ECB(4, 22), ECB(4, 23)]),
+        ECBlocks(24, [ECB(3, 12), ECB(8, 13)])
+      ]),
+      Version._(12, [
+        6,
+        32,
+        58
+      ], [
+        ECBlocks(24, [ECB(2, 92), ECB(2, 93)]),
+        ECBlocks(22, [ECB(6, 36), ECB(2, 37)]),
+        ECBlocks(26, [ECB(4, 20), ECB(6, 21)]),
+        ECBlocks(28, [ECB(7, 14), ECB(4, 15)])
+      ]),
+      Version._(13, [
+        6,
+        34,
+        62
+      ], [
+        ECBlocks(26, [ECB(4, 107)]),
+        ECBlocks(22, [ECB(8, 37), ECB(1, 38)]),
+        ECBlocks(24, [ECB(8, 20), ECB(4, 21)]),
+        ECBlocks(22, [ECB(12, 11), ECB(4, 12)])
+      ]),
+      Version._(14, [
+        6,
+        26,
+        46,
+        66
+      ], [
+        ECBlocks(30, [ECB(3, 115), ECB(1, 116)]),
+        ECBlocks(24, [ECB(4, 40), ECB(5, 41)]),
+        ECBlocks(20, [ECB(11, 16), ECB(5, 17)]),
+        ECBlocks(24, [ECB(11, 12), ECB(5, 13)])
+      ]),
+      Version._(15, [
+        6,
+        26,
+        48,
+        70
+      ], [
+        ECBlocks(22, [ECB(5, 87), ECB(1, 88)]),
+        ECBlocks(24, [ECB(5, 41), ECB(5, 42)]),
+        ECBlocks(30, [ECB(5, 24), ECB(7, 25)]),
+        ECBlocks(24, [ECB(11, 12), ECB(7, 13)])
+      ]),
+      Version._(16, [
+        6,
+        26,
+        50,
+        74
+      ], [
+        ECBlocks(24, [ECB(5, 98), ECB(1, 99)]),
+        ECBlocks(28, [ECB(7, 45), ECB(3, 46)]),
+        ECBlocks(24, [ECB(15, 19), ECB(2, 20)]),
+        ECBlocks(30, [ECB(3, 15), ECB(13, 16)])
+      ]),
+      Version._(17, [
+        6,
+        30,
+        54,
+        78
+      ], [
+        ECBlocks(28, [ECB(1, 107), ECB(5, 108)]),
+        ECBlocks(28, [ECB(10, 46), ECB(1, 47)]),
+        ECBlocks(28, [ECB(1, 22), ECB(15, 23)]),
+        ECBlocks(28, [ECB(2, 14), ECB(17, 15)])
+      ]),
+      Version._(18, [
+        6,
+        30,
+        56,
+        82
+      ], [
+        ECBlocks(30, [ECB(5, 120), ECB(1, 121)]),
+        ECBlocks(26, [ECB(9, 43), ECB(4, 44)]),
+        ECBlocks(28, [ECB(17, 22), ECB(1, 23)]),
+        ECBlocks(28, [ECB(2, 14), ECB(19, 15)])
+      ]),
+      Version._(19, [
+        6,
+        30,
+        58,
+        86
+      ], [
+        ECBlocks(28, [ECB(3, 113), ECB(4, 114)]),
+        ECBlocks(26, [ECB(3, 44), ECB(11, 45)]),
+        ECBlocks(26, [ECB(17, 21), ECB(4, 22)]),
+        ECBlocks(26, [ECB(9, 13), ECB(16, 14)])
+      ]),
+      Version._(20, [
+        6,
+        34,
+        62,
+        90
+      ], [
+        ECBlocks(28, [ECB(3, 107), ECB(5, 108)]),
+        ECBlocks(26, [ECB(3, 41), ECB(13, 42)]),
+        ECBlocks(30, [ECB(15, 24), ECB(5, 25)]),
+        ECBlocks(28, [ECB(15, 15), ECB(10, 16)])
+      ]),
+      Version._(21, [
+        6,
+        28,
+        50,
+        72,
+        94
+      ], [
+        ECBlocks(28, [ECB(4, 116), ECB(4, 117)]),
+        ECBlocks(26, [ECB(17, 42)]),
+        ECBlocks(28, [ECB(17, 22), ECB(6, 23)]),
+        ECBlocks(30, [ECB(19, 16), ECB(6, 17)])
+      ]),
+      Version._(22, [
+        6,
+        26,
+        50,
+        74,
+        98
+      ], [
+        ECBlocks(28, [ECB(2, 111), ECB(7, 112)]),
+        ECBlocks(28, [ECB(17, 46)]),
+        ECBlocks(30, [ECB(7, 24), ECB(16, 25)]),
+        ECBlocks(24, [ECB(34, 13)])
+      ]),
+      Version._(23, [
+        6,
+        30,
+        54,
+        78,
+        102
+      ], [
+        ECBlocks(30, [ECB(4, 121), ECB(5, 122)]),
+        ECBlocks(28, [ECB(4, 47), ECB(14, 48)]),
+        ECBlocks(30, [ECB(11, 24), ECB(14, 25)]),
+        ECBlocks(30, [ECB(16, 15), ECB(14, 16)])
+      ]),
+      Version._(24, [
+        6,
+        28,
+        54,
+        80,
+        106
+      ], [
+        ECBlocks(30, [ECB(6, 117), ECB(4, 118)]),
+        ECBlocks(28, [ECB(6, 45), ECB(14, 46)]),
+        ECBlocks(30, [ECB(11, 24), ECB(16, 25)]),
+        ECBlocks(30, [ECB(30, 16), ECB(2, 17)])
+      ]),
+      Version._(25, [
+        6,
+        32,
+        58,
+        84,
+        110
+      ], [
+        ECBlocks(26, [ECB(8, 106), ECB(4, 107)]),
+        ECBlocks(28, [ECB(8, 47), ECB(13, 48)]),
+        ECBlocks(30, [ECB(7, 24), ECB(22, 25)]),
+        ECBlocks(30, [ECB(22, 15), ECB(13, 16)])
+      ]),
+      Version._(26, [
+        6,
+        30,
+        58,
+        86,
+        114
+      ], [
+        ECBlocks(28, [ECB(10, 114), ECB(2, 115)]),
+        ECBlocks(28, [ECB(19, 46), ECB(4, 47)]),
+        ECBlocks(28, [ECB(28, 22), ECB(6, 23)]),
+        ECBlocks(30, [ECB(33, 16), ECB(4, 17)])
+      ]),
+      Version._(27, [
+        6,
+        34,
+        62,
+        90,
+        118
+      ], [
+        ECBlocks(30, [ECB(8, 122), ECB(4, 123)]),
+        ECBlocks(28, [ECB(22, 45), ECB(3, 46)]),
+        ECBlocks(30, [ECB(8, 23), ECB(26, 24)]),
+        ECBlocks(30, [ECB(12, 15), ECB(28, 16)])
+      ]),
+      Version._(28, [
+        6,
+        26,
+        50,
+        74,
+        98,
+        122
+      ], [
+        ECBlocks(30, [ECB(3, 117), ECB(10, 118)]),
+        ECBlocks(28, [ECB(3, 45), ECB(23, 46)]),
+        ECBlocks(30, [ECB(4, 24), ECB(31, 25)]),
+        ECBlocks(30, [ECB(11, 15), ECB(31, 16)])
+      ]),
+      Version._(29, [
+        6,
+        30,
+        54,
+        78,
+        102,
+        126
+      ], [
+        ECBlocks(30, [ECB(7, 116), ECB(7, 117)]),
+        ECBlocks(28, [ECB(21, 45), ECB(7, 46)]),
+        ECBlocks(30, [ECB(1, 23), ECB(37, 24)]),
+        ECBlocks(30, [ECB(19, 15), ECB(26, 16)])
+      ]),
+      Version._(30, [
+        6,
+        26,
+        52,
+        78,
+        104,
+        130
+      ], [
+        ECBlocks(30, [ECB(5, 115), ECB(10, 116)]),
+        ECBlocks(28, [ECB(19, 47), ECB(10, 48)]),
+        ECBlocks(30, [ECB(15, 24), ECB(25, 25)]),
+        ECBlocks(30, [ECB(23, 15), ECB(25, 16)])
+      ]),
+      Version._(31, [
+        6,
+        30,
+        56,
+        82,
+        108,
+        134
+      ], [
+        ECBlocks(30, [ECB(13, 115), ECB(3, 116)]),
+        ECBlocks(28, [ECB(2, 46), ECB(29, 47)]),
+        ECBlocks(30, [ECB(42, 24), ECB(1, 25)]),
+        ECBlocks(30, [ECB(23, 15), ECB(28, 16)])
+      ]),
+      Version._(32, [
+        6,
+        34,
+        60,
+        86,
+        112,
+        138
+      ], [
+        ECBlocks(30, [ECB(17, 115)]),
+        ECBlocks(28, [ECB(10, 46), ECB(23, 47)]),
+        ECBlocks(30, [ECB(10, 24), ECB(35, 25)]),
+        ECBlocks(30, [ECB(19, 15), ECB(35, 16)])
+      ]),
+      Version._(33, [
+        6,
+        30,
+        58,
+        86,
+        114,
+        142
+      ], [
+        ECBlocks(30, [ECB(17, 115), ECB(1, 116)]),
+        ECBlocks(28, [ECB(14, 46), ECB(21, 47)]),
+        ECBlocks(30, [ECB(29, 24), ECB(19, 25)]),
+        ECBlocks(30, [ECB(11, 15), ECB(46, 16)])
+      ]),
+      Version._(34, [
+        6,
+        34,
+        62,
+        90,
+        118,
+        146
+      ], [
+        ECBlocks(30, [ECB(13, 115), ECB(6, 116)]),
+        ECBlocks(28, [ECB(14, 46), ECB(23, 47)]),
+        ECBlocks(30, [ECB(44, 24), ECB(7, 25)]),
+        ECBlocks(30, [ECB(59, 16), ECB(1, 17)])
+      ]),
+      Version._(35, [
+        6,
+        30,
+        54,
+        78,
+        102,
+        126,
+        150
+      ], [
+        ECBlocks(30, [ECB(12, 121), ECB(7, 122)]),
+        ECBlocks(28, [ECB(12, 47), ECB(26, 48)]),
+        ECBlocks(30, [ECB(39, 24), ECB(14, 25)]),
+        ECBlocks(30, [ECB(22, 15), ECB(41, 16)])
+      ]),
+      Version._(36, [
+        6,
+        24,
+        50,
+        76,
+        102,
+        128,
+        154
+      ], [
+        ECBlocks(30, [ECB(6, 121), ECB(14, 122)]),
+        ECBlocks(28, [ECB(6, 47), ECB(34, 48)]),
+        ECBlocks(30, [ECB(46, 24), ECB(10, 25)]),
+        ECBlocks(30, [ECB(2, 15), ECB(64, 16)])
+      ]),
+      Version._(37, [
+        6,
+        28,
+        54,
+        80,
+        106,
+        132,
+        158
+      ], [
+        ECBlocks(30, [ECB(17, 122), ECB(4, 123)]),
+        ECBlocks(28, [ECB(29, 46), ECB(14, 47)]),
+        ECBlocks(30, [ECB(49, 24), ECB(10, 25)]),
+        ECBlocks(30, [ECB(24, 15), ECB(46, 16)])
+      ]),
+      Version._(38, [
+        6,
+        32,
+        58,
+        84,
+        110,
+        136,
+        162
+      ], [
+        ECBlocks(30, [ECB(4, 122), ECB(18, 123)]),
+        ECBlocks(28, [ECB(13, 46), ECB(32, 47)]),
+        ECBlocks(30, [ECB(48, 24), ECB(14, 25)]),
+        ECBlocks(30, [ECB(42, 15), ECB(32, 16)])
+      ]),
+      Version._(39, [
+        6,
+        26,
+        54,
+        82,
+        110,
+        138,
+        166
+      ], [
+        ECBlocks(30, [ECB(20, 117), ECB(4, 118)]),
+        ECBlocks(28, [ECB(40, 47), ECB(7, 48)]),
+        ECBlocks(30, [ECB(43, 24), ECB(22, 25)]),
+        ECBlocks(30, [ECB(10, 15), ECB(67, 16)])
+      ]),
+      Version._(40, [
+        6,
+        30,
+        58,
+        86,
+        114,
+        142,
+        170
+      ], [
+        ECBlocks(30, [ECB(19, 118), ECB(6, 119)]),
+        ECBlocks(28, [ECB(18, 47), ECB(31, 48)]),
+        ECBlocks(30, [ECB(34, 24), ECB(34, 25)]),
+        ECBlocks(30, [ECB(20, 15), ECB(61, 16)])
+      ])
     ];
   }
-
 }
 
 /**
@@ -512,24 +638,22 @@ class Version {
  * will be the same across all blocks within one version.</p>
  */
 class ECBlocks {
- final int ecCodewordsPerBlock;
- final List<ECB> ecBlocks;
+  final int ecCodewordsPerBlock;
+  final List<ECB> ecBlocks;
 
-ECBlocks(this.ecCodewordsPerBlock, this.ecBlocks);
+  ECBlocks(this.ecCodewordsPerBlock, this.ecBlocks);
 
+  int get numBlocks {
+    int total = 0;
+    for (ECB ecBlock in ecBlocks) {
+      total += ecBlock.count;
+    }
+    return total;
+  }
 
- int get numBlocks {
-int total = 0;
-for (ECB ecBlock in ecBlocks) {
-total += ecBlock.count;
-}
-return total;
-}
-
- int getTotalECCodewords() {
-return ecCodewordsPerBlock * numBlocks;
-}
-
+  int getTotalECCodewords() {
+    return ecCodewordsPerBlock * numBlocks;
+  }
 }
 
 /**
@@ -538,8 +662,8 @@ return ecCodewordsPerBlock * numBlocks;
  * parameters is used consecutively in the QR code version's format.</p>
  */
 class ECB {
- final int count;
- final int dataCodewords;
+  final int count;
+  final int dataCodewords;
 
-ECB(this.count, this.dataCodewords);
+  ECB(this.count, this.dataCodewords);
 }

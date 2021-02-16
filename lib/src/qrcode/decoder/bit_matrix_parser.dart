@@ -18,8 +18,10 @@ import 'dart:typed_data';
 
 import 'package:zxing/src/common/bit_matrix.dart';
 
+import 'data_mask.dart';
 import 'format_information.dart';
-/*
+import 'version.dart';
+
 /**
  * @author Sean Owen
  */
@@ -49,7 +51,7 @@ class BitMatrixParser {
    */
   FormatInformation readFormatInformation() {
     if (_parsedFormatInfo != null) {
-      return _parsedFormatInfo;
+      return _parsedFormatInfo!;
     }
 
     // Read top-left format info bits
@@ -80,7 +82,7 @@ class BitMatrixParser {
     _parsedFormatInfo = FormatInformation.decodeFormatInformation(
         formatInfoBits1, formatInfoBits2);
     if (_parsedFormatInfo != null) {
-      return _parsedFormatInfo;
+      return _parsedFormatInfo!;
     }
     throw FormatException();
   }
@@ -94,12 +96,12 @@ class BitMatrixParser {
    */
   Version readVersion() {
     if (_parsedVersion != null) {
-      return _parsedVersion;
+      return _parsedVersion!;
     }
 
     int dimension = _bitMatrix.height;
 
-    int provisionalVersion = (dimension - 17) / 4;
+    int provisionalVersion = (dimension - 17) ~/ 4;
     if (provisionalVersion <= 6) {
       return Version.getVersionForNumber(provisionalVersion);
     }
@@ -113,10 +115,10 @@ class BitMatrixParser {
       }
     }
 
-    Version theParsedVersion = Version.decodeVersionInformation(versionBits);
+    var theParsedVersion = Version.decodeVersionInformation(versionBits);
     if (theParsedVersion != null &&
-        theParsedVersion.getDimensionForVersion() == dimension) {
-      parsedVersion = theParsedVersion;
+        theParsedVersion.dimensionForVersion == dimension) {
+      _parsedVersion = theParsedVersion;
       return theParsedVersion;
     }
 
@@ -130,15 +132,15 @@ class BitMatrixParser {
 
     theParsedVersion = Version.decodeVersionInformation(versionBits);
     if (theParsedVersion != null &&
-        theParsedVersion.getDimensionForVersion() == dimension) {
-      parsedVersion = theParsedVersion;
+        theParsedVersion.dimensionForVersion == dimension) {
+      _parsedVersion = theParsedVersion;
       return theParsedVersion;
     }
     throw FormatException();
   }
 
   int _copyBit(int i, int j, int versionBits) {
-    bool bit = mirror ? _bitMatrix.get(j, i) : _bitMatrix.get(i, j);
+    bool bit = _mirror ? _bitMatrix.get(j, i) : _bitMatrix.get(i, j);
     return bit ? (versionBits << 1) | 0x1 : versionBits << 1;
   }
 
@@ -156,14 +158,14 @@ class BitMatrixParser {
 
     // Get the data mask for the format used in this QR Code. This will exclude
     // some bits from reading as we wind through the bit matrix.
-    DataMask dataMask = DataMask.values()[formatInfo.getDataMask()];
+    DataMask dataMask = DataMask.values[formatInfo.dataMask];
     int dimension = _bitMatrix.height;
     dataMask.unmaskBitMatrix(_bitMatrix, dimension);
 
     BitMatrix functionPattern = version.buildFunctionPattern();
 
     bool readingUp = true;
-    Uint8List result = Uint8List(version.getTotalCodewords());
+    Uint8List result = Uint8List(version.totalCodewords);
     int resultOffset = 0;
     int currentByte = 0;
     int bitsRead = 0;
@@ -197,8 +199,8 @@ class BitMatrixParser {
       }
       readingUp ^= true; // readingUp = !readingUp; // switch directions
     }
-    if (resultOffset != version.getTotalCodewords()) {
-      throw FormatException.getFormatInstance();
+    if (resultOffset != version.totalCodewords) {
+      throw FormatException();
     }
     return result;
   }
@@ -210,7 +212,7 @@ class BitMatrixParser {
     if (_parsedFormatInfo == null) {
       return; // We have no format information, and have no data mask
     }
-    DataMask dataMask = DataMask.values()[_parsedFormatInfo.getDataMask()];
+    DataMask dataMask = DataMask.values[_parsedFormatInfo!.dataMask];
     int dimension = _bitMatrix.height;
     dataMask.unmaskBitMatrix(_bitMatrix, dimension);
   }
@@ -241,4 +243,3 @@ class BitMatrixParser {
     }
   }
 }
-*/

@@ -17,9 +17,20 @@
 import 'dart:typed_data';
 
 import 'package:zxing/src/common/bit_matrix.dart';
+import 'package:zxing/src/common/decoder_result.dart';
+import 'package:zxing/src/common/reedsolomon/generic_gf.dart';
+import 'package:zxing/src/common/reedsolomon/reed_solomon_decoder.dart';
+import 'package:zxing/src/common/reedsolomon/reed_solomon_exception.dart';
+import 'package:zxing/src/qrcode/decoder/version.dart';
 
+import '../../checksum_exception.dart';
 import '../../decode_hint_type.dart';
-/*
+import 'bit_matrix_parser.dart';
+import 'data_block.dart';
+import 'decoded_bit_stream_parser.dart';
+import 'error_correction_level.dart';
+import 'qr_code_decoder_meta_data.dart';
+
 /**
  * <p>The main class which implements QR Code decoding -- as opposed to locating and extracting
  * the QR Code from an image.</p>
@@ -27,11 +38,8 @@ import '../../decode_hint_type.dart';
  * @author Sean Owen
  */
 class Decoder {
-  final ReedSolomonDecoder rsDecoder;
-
-  Decoder() {
-    rsDecoder = new ReedSolomonDecoder(GenericGF.QR_CODE_FIELD_256);
-  }
+  final ReedSolomonDecoder rsDecoder =
+      ReedSolomonDecoder(GenericGF.QR_CODE_FIELD_256);
 
   /**
    * <p>Decodes a QR Code represented as a {@link BitMatrix}. A 1 or "true" is taken to mean a black module.</p>
@@ -45,8 +53,8 @@ class Decoder {
   DecoderResult decode(BitMatrix bits, {Map<DecodeHintType, Object?>? hints}) {
     // Construct a parser and read version, error-correction level
     BitMatrixParser parser = new BitMatrixParser(bits);
-    FormatException fe = null;
-    ChecksumException ce = null;
+    FormatException? fe = null;
+    ChecksumException? ce = null;
     try {
       return _decode(parser, hints);
     } on FormatException catch (e) {
@@ -80,21 +88,21 @@ class Decoder {
       DecoderResult result = _decode(parser, hints);
 
       // Success! Notify the caller that the code was mirrored.
-      result.setOther(new QRCodeDecoderMetaData(true));
+      result.other = new QRCodeDecoderMetaData(mirrored: true);
 
       return result;
-    } on FormatException catch (e) {
+    } on FormatException catch (_) {
       // Throw the exception from the original reading
       if (fe != null) {
         throw fe;
       }
-      throw ce; // If fe is null, this can't be
-    } on ChecksumException catch (e) {
+      throw ce!; // If fe is null, this can't be
+    } on ChecksumException catch (_) {
       // Throw the exception from the original reading
       if (fe != null) {
         throw fe;
       }
-      throw ce; // If fe is null, this can't be
+      throw ce!; // If fe is null, this can't be
     }
   }
 
@@ -102,7 +110,7 @@ class Decoder {
       BitMatrixParser parser, Map<DecodeHintType, Object?>? hints) {
     Version version = parser.readVersion();
     ErrorCorrectionLevel ecLevel =
-        parser.readFormatInformation().getErrorCorrectionLevel();
+        parser.readFormatInformation().errorCorrectionLevel;
 
     // Read codewords
     Uint8List codewords = parser.readCodewords();
@@ -120,7 +128,7 @@ class Decoder {
 
     // Error-correct and copy data blocks together into a stream of bytes
     for (DataBlock dataBlock in dataBlocks) {
-      Uint8List codewordBytes = dataBlock.getCodewords();
+      Uint8List codewordBytes = dataBlock.codewords;
       int numDataCodewords = dataBlock.getNumDataCodewords();
       _correctErrors(codewordBytes, numDataCodewords);
       for (int i = 0; i < numDataCodewords; i++) {
@@ -143,14 +151,14 @@ class Decoder {
   void _correctErrors(Uint8List codewordBytes, int numDataCodewords) {
     int numCodewords = codewordBytes.length;
     // First read into an array of ints
-    var codewordsInts = List<int>.filled(numCodewords, 0);
+    var codewordsInts = Int32List(numCodewords);
     for (int i = 0; i < numCodewords; i++) {
       codewordsInts[i] = codewordBytes[i] & 0xFF;
     }
     try {
       rsDecoder.decode(codewordsInts, codewordBytes.length - numDataCodewords);
-    } on ReedSolomonException catch (ignored) {
-      throw ChecksumException.getChecksumInstance();
+    } on ReedSolomonException catch (_) {
+      throw ChecksumException();
     }
     // Copy back into array of bytes -- only need to worry about the bytes that were data
     // We don't care about errors in the error-correction codewords
@@ -159,4 +167,3 @@ class Decoder {
     }
   }
 }
-*/

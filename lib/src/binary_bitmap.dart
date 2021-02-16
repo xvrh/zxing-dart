@@ -136,7 +136,7 @@ class BinaryBitmap {
   String toString() {
     try {
       return getBlackMatrix().toString();
-    } on NotFoundException catch (e) {
+    } on NotFoundException catch (_) {
       return "";
     }
   }
