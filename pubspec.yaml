@@ -1,0 +1,18 @@
+name: zxing
+description: A multi-format 1D/2D barcode image processing library implemented in Dart. This is a port of the Android library.
+version: 0.0.1
+homepage: https://github.com/xvrh/zxing-dart
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  collection:
+  fixnum:
+  meta:
+
+dev_dependencies:
+  test:
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
