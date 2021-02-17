@@ -38,7 +38,7 @@ class BitMatrix {
   int _width;
   int _height;
   int _rowSize;
-  Uint32List _bits;
+  Int32List _bits;
 
   /// Creates an empty {@code BitMatrix}.
   ///
@@ -52,7 +52,7 @@ class BitMatrix {
     }
 
     var rowSize = (width + 31) ~/ 32;
-    return BitMatrix._(width, height, rowSize, Uint32List(rowSize * height));
+    return BitMatrix._(width, height, rowSize, Int32List(rowSize * height));
   }
 
   BitMatrix._(this._width, this._height, this._rowSize, this._bits);
@@ -290,7 +290,7 @@ class BitMatrix {
     int newWidth = height;
     int newHeight = width;
     int newRowSize = (newWidth + 31) ~/ 32;
-    Uint32List newBits = Uint32List(newRowSize * newHeight);
+    Int32List newBits = Int32List(newRowSize * newHeight);
 
     for (int y = 0; y < height; y++) {
       for (int x = 0; x < width; x++) {
@@ -471,6 +471,6 @@ class BitMatrix {
 
   BitMatrix clone() {
     return BitMatrix._(
-        width, height, rowSize, Uint32List(_bits.length)..setAll(0, _bits));
+        width, height, rowSize, Int32List(_bits.length)..setAll(0, _bits));
   }
 }

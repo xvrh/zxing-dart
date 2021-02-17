@@ -23,7 +23,7 @@ import 'package:zxing/src/rgb_luminance_source.dart';
  * Tests {@link RGBLuminanceSource}.
  */
 void main() {
-  late final RGBLuminanceSource source;
+  late RGBLuminanceSource source;
 
   setUp(() {
     source = RGBLuminanceSource(
