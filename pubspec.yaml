@@ -12,6 +12,7 @@ dependencies:
   meta:
 
 dev_dependencies:
+  image:
   test:
 
 # For information on the generic Dart part of this file, see the

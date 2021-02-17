@@ -24,7 +24,7 @@ import 'package:zxing/src/common/reedsolomon/reed_solomon_exception.dart';
 import 'package:zxing/src/qrcode/decoder/version.dart';
 
 import '../../checksum_exception.dart';
-import '../../decode_hint_type.dart';
+import '../../decode_hint.dart';
 import 'bit_matrix_parser.dart';
 import 'data_block.dart';
 import 'decoded_bit_stream_parser.dart';
@@ -50,7 +50,7 @@ class Decoder {
    * @throws FormatException if the QR Code cannot be decoded
    * @throws ChecksumException if error correction fails
    */
-  DecoderResult decode(BitMatrix bits, {Map<DecodeHintType, Object?>? hints}) {
+  DecoderResult decode(BitMatrix bits, {required Hints hints}) {
     // Construct a parser and read version, error-correction level
     BitMatrixParser parser = new BitMatrixParser(bits);
     FormatException? fe = null;
@@ -106,8 +106,7 @@ class Decoder {
     }
   }
 
-  DecoderResult _decode(
-      BitMatrixParser parser, Map<DecodeHintType, Object?>? hints) {
+  DecoderResult _decode(BitMatrixParser parser, Hints hints) {
     Version version = parser.readVersion();
     ErrorCorrectionLevel ecLevel =
         parser.readFormatInformation().errorCorrectionLevel;

@@ -17,7 +17,7 @@
 import 'package:zxing/src/result.dart';
 
 import 'binary_bitmap.dart';
-import 'decode_hint_type.dart';
+import 'decode_hint.dart';
 
 /**
  * Implementations of this interface can decode an image of a barcode in some format into
@@ -46,7 +46,7 @@ abstract class Reader {
    * @throws ChecksumException if a potential barcode is found but does not pass its checksum
    * @throws FormatException if a potential barcode is found but format is invalid
    */
-  Result decode(BinaryBitmap image, {Map<DecodeHintType, Object>? hints});
+  Result decode(BinaryBitmap image, {required Hints hints});
 
   /**
    * Resets any internal state the implementation has after a decode, to prepare it

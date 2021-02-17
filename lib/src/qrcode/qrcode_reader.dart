@@ -20,7 +20,7 @@ import 'package:zxing/src/common/detector_result.dart';
 
 import '../barcode_format.dart';
 import '../binary_bitmap.dart';
-import '../decode_hint_type.dart';
+import '../decode_hint.dart';
 import '../reader.dart';
 import '../result.dart';
 import '../result_metadata_type.dart';
@@ -49,10 +49,10 @@ class QRCodeReader implements Reader {
    * @throws ChecksumException if error correction fails
    */
   @override
-  Result decode(BinaryBitmap image, {Map<DecodeHintType, Object?>? hints}) {
+  Result decode(BinaryBitmap image, {required Hints hints}) {
     DecoderResult decoderResult;
     List<ResultPoint> points;
-    if (hints != null && hints.containsKey(DecodeHintType.PURE_BARCODE)) {
+    if (hints.contains(DecodeHintType.PURE_BARCODE)) {
       BitMatrix bits = _extractPureBits(image.getBlackMatrix());
       decoderResult = decoder.decode(bits, hints: hints);
       points = NO_POINTS;

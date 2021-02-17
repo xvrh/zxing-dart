@@ -397,7 +397,7 @@ void main() {
 }
 
 void corrupt(List<int> received, int howMany, Random random, int max) {
-  var corrupted = new BitArray(received.length);
+  var corrupted = new BitSetArray(received.length);
   for (int j = 0; j < howMany; j++) {
     int location = random.nextInt(received.length);
     int value = random.nextInt(max);

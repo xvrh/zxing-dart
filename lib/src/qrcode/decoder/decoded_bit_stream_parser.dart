@@ -21,7 +21,7 @@ import 'package:zxing/src/common/bit_source.dart';
 import 'package:zxing/src/common/character_set_eci.dart';
 import 'package:zxing/src/common/decoder_result.dart';
 
-import '../../decode_hint_type.dart';
+import '../../decode_hint.dart';
 import 'error_correction_level.dart';
 import 'mode.dart';
 import 'version.dart';
@@ -45,7 +45,7 @@ class DecodedBitStreamParser {
   DecodedBitStreamParser._() {}
 
   static DecoderResult decode(Uint8List bytes, Version version,
-      ErrorCorrectionLevel? ecLevel, Map<DecodeHintType, Object?>? hints) {
+      ErrorCorrectionLevel? ecLevel, Hints hints) {
     BitSource bits = new BitSource(bytes);
     var result = new StringBuffer();
     var byteSegments = <Uint8List>[];
@@ -209,7 +209,7 @@ class DecodedBitStreamParser {
       int count,
       CharacterSetECI? currentCharacterSetECI,
       List<Uint8List> byteSegments,
-      Map<DecodeHintType, Object?>? hints) {
+      Hints hints) {
     // Don't crash trying to read more bits than we have available.
     if (8 * count > bits.available()) {
       throw FormatException();

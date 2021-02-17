@@ -18,7 +18,7 @@ import 'dart:typed_data';
 
 import 'package:zxing/src/common/bit_matrix.dart';
 
-import '../../decode_hint_type.dart';
+import '../../decode_hint.dart';
 import '../../not_found_exception.dart';
 import '../../result_point.dart';
 import '../../result_point_callback.dart';
@@ -53,9 +53,8 @@ class FinderPatternFinder {
   FinderPatternFinder(this.image, {ResultPointCallback? resultPointCallback})
       : _resultPointCallback = resultPointCallback;
 
-  FinderPatternInfo find(Map<DecodeHintType, Object?>? hints) {
-    bool tryHarder =
-        hints != null && hints.containsKey(DecodeHintType.TRY_HARDER);
+  FinderPatternInfo find(Hints hints) {
+    bool tryHarder = hints.contains(DecodeHintType.TRY_HARDER);
     int maxI = image.height;
     int maxJ = image.width;
     // We are looking for black/white/black/white/black modules in

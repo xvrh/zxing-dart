@@ -22,7 +22,7 @@ import 'package:zxing/src/common/grid_sampler.dart';
 import 'package:zxing/src/common/perspective_transform.dart';
 import 'package:zxing/src/qrcode/decoder/version.dart';
 
-import '../../decode_hint_type.dart';
+import '../../decode_hint.dart';
 import '../../not_found_exception.dart';
 import '../../result_point.dart';
 import '../../result_point_callback.dart';
@@ -56,10 +56,8 @@ class Detector {
    * @throws NotFoundException if QR Code cannot be found
    * @throws FormatException if a QR Code cannot be decoded
    */
-  DetectorResult detect({Map<DecodeHintType, Object?>? hints}) {
-    _resultPointCallback = hints == null
-        ? null
-        : hints.get(DecodeHintType.NEED_RESULT_POINT_CALLBACK);
+  DetectorResult detect({required Hints hints}) {
+    _resultPointCallback = hints.get(DecodeHintType.NEED_RESULT_POINT_CALLBACK);
 
     FinderPatternFinder finder = new FinderPatternFinder(image,
         resultPointCallback: _resultPointCallback);

@@ -244,31 +244,31 @@ List<int> _cloneList(List<int> list) {
 }
 
 /// Bit array to store bits.
-class BitArray extends BitSet {
+class BitSetArray extends BitSet {
   Uint32List _data;
   int _length;
 
-  BitArray._(this._data) : _length = _data.length << 5;
+  BitSetArray._(this._data) : _length = _data.length << 5;
 
   /// Creates a bit array with maximum [length] items.
   ///
   /// [length] will be rounded up to match the 32-bit boundary.
-  factory BitArray(int length) =>
-      BitArray._(Uint32List(_bufferLength32(length)));
+  factory BitSetArray(int length) =>
+      BitSetArray._(Uint32List(_bufferLength32(length)));
 
   /// Creates a bit array using a byte buffer.
-  factory BitArray.fromByteBuffer(ByteBuffer buffer) {
+  factory BitSetArray.fromByteBuffer(ByteBuffer buffer) {
     final data = buffer.asUint32List();
-    return BitArray._(data);
+    return BitSetArray._(data);
   }
 
   /// Creates a bit array using a generic bit set.
-  factory BitArray.fromBitSet(BitSet set, {int? length}) {
+  factory BitSetArray.fromBitSet(BitSet set, {int? length}) {
     length ??= set.length;
     final setDataLength = _bufferLength32(set.length);
     final data = Uint32List(_bufferLength32(length));
     data.setRange(0, setDataLength, set.asUint32Iterable());
-    return BitArray._(data);
+    return BitSetArray._(data);
   }
 
   /// The value of the bit with the specified [index].
@@ -286,7 +286,7 @@ class BitArray extends BitSet {
     }
   }
 
-  /// The number of bit in this [BitArray].
+  /// The number of bit in this [BitSetArray].
   ///
   /// [length] will be rounded up to match the 32-bit boundary.
   ///
@@ -309,12 +309,12 @@ class BitArray extends BitSet {
       .asUint8List()
       .fold(0, (sum, value) => sum + _cardinalityBitCounts[value]);
 
-  /// Whether the [BitArray] is empty == has only zero values.
+  /// Whether the [BitSetArray] is empty == has only zero values.
   bool get isEmpty {
     return _data.every((i) => i == 0);
   }
 
-  /// Whether the [BitArray] is not empty == has set values.
+  /// Whether the [BitSetArray] is not empty == has set values.
   bool get isNotEmpty {
     return _data.any((i) => i != 0);
   }
@@ -329,7 +329,7 @@ class BitArray extends BitSet {
     indexes.forEach(clearBit);
   }
 
-  /// Sets all of the bits in the current [BitArray] to false.
+  /// Sets all of the bits in the current [BitSetArray] to false.
   void clearAll() {
     for (int i = 0; i < _data.length; i++) {
       _data[i] = 0;
@@ -346,7 +346,7 @@ class BitArray extends BitSet {
     indexes.forEach(setBit);
   }
 
-  /// Sets all the bit values in the current [BitArray] to true.
+  /// Sets all the bit values in the current [BitSetArray] to true.
   void setAll() {
     for (int i = 0; i < _data.length; i++) {
       _data[i] = -1;
@@ -363,14 +363,14 @@ class BitArray extends BitSet {
     indexes.forEach(invertBit);
   }
 
-  /// Inverts all the bit values in the current [BitArray].
+  /// Inverts all the bit values in the current [BitSetArray].
   void invertAll() {
     for (int i = 0; i < _data.length; i++) {
       _data[i] = ~(_data[i]);
     }
   }
 
-  /// Update the current [BitArray] using a logical AND operation with the
+  /// Update the current [BitSetArray] using a logical AND operation with the
   /// corresponding elements in the specified [set].
   /// Excess size of the [set] is ignored.
   void and(BitSet set) {
@@ -384,7 +384,7 @@ class BitArray extends BitSet {
     }
   }
 
-  /// Update the current [BitArray] using a logical AND NOT operation with the
+  /// Update the current [BitSetArray] using a logical AND NOT operation with the
   /// corresponding elements in the specified [set].
   /// Excess size of the [set] is ignored.
   void andNot(BitSet set) {
@@ -394,7 +394,7 @@ class BitArray extends BitSet {
     }
   }
 
-  /// Update the current [BitArray] using a logical OR operation with the
+  /// Update the current [BitSetArray] using a logical OR operation with the
   /// corresponding elements in the specified [set].
   /// Excess size of the [set] is ignored.
   void or(BitSet set) {
@@ -404,7 +404,7 @@ class BitArray extends BitSet {
     }
   }
 
-  /// Update the current [BitArray] using a logical XOR operation with the
+  /// Update the current [BitSetArray] using a logical XOR operation with the
   /// corresponding elements in the specified [set].
   /// Excess size of the [set] is ignored.
   void xor(BitSet set) {
@@ -414,33 +414,33 @@ class BitArray extends BitSet {
     }
   }
 
-  /// Creates a copy of the current [BitArray].
+  /// Creates a copy of the current [BitSetArray].
   @override
-  BitArray clone() {
+  BitSetArray clone() {
     final newData = Uint32List(_data.length);
     newData.setRange(0, _data.length, _data);
-    return BitArray._(newData);
+    return BitSetArray._(newData);
   }
 
-  /// Creates a [BitArray] using a logical AND operation with the
+  /// Creates a [BitSetArray] using a logical AND operation with the
   /// corresponding elements in the specified [set].
   /// Excess size of the [set] is ignored.
-  BitArray operator &(BitSet set) => clone()..and(set);
+  BitSetArray operator &(BitSet set) => clone()..and(set);
 
-  /// Creates a [BitArray] using a logical AND NOT operation with the
+  /// Creates a [BitSetArray] using a logical AND NOT operation with the
   /// corresponding elements in the specified [set].
   /// Excess size of the [set] is ignored.
-  BitArray operator %(BitSet set) => clone()..andNot(set);
+  BitSetArray operator %(BitSet set) => clone()..andNot(set);
 
-  /// Creates a [BitArray] using a logical OR operation with the
+  /// Creates a [BitSetArray] using a logical OR operation with the
   /// corresponding elements in the specified [set].
   /// Excess size of the [set] is ignored.
-  BitArray operator |(BitSet set) => clone()..or(set);
+  BitSetArray operator |(BitSet set) => clone()..or(set);
 
-  /// Creates a [BitArray] using a logical XOR operation with the
+  /// Creates a [BitSetArray] using a logical XOR operation with the
   /// corresponding elements in the specified [set].
   /// Excess size of the [set] is ignored.
-  BitArray operator ^(BitSet set) => clone()..xor(set);
+  BitSetArray operator ^(BitSet set) => clone()..xor(set);
 
   /// Creates a string of 0s and 1s of the content of the array.
   String toBinaryString() {
@@ -451,7 +451,7 @@ class BitArray extends BitSet {
     return sb.toString();
   }
 
-  /// The backing, mutable byte buffer of the [BitArray].
+  /// The backing, mutable byte buffer of the [BitSetArray].
   /// Use with caution.
   ByteBuffer get byteBuffer => _data.buffer;
 
@@ -484,7 +484,7 @@ int _cardinalityOfByte(int value) {
 }
 
 class _IntIterable extends IterableBase<int> {
-  final BitArray _array;
+  final BitSetArray _array;
   final bool _value;
   _IntIterable(this._array, this._value);
 

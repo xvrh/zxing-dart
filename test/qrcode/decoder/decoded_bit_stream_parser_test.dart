@@ -15,6 +15,7 @@
  */
 
 import 'package:test/test.dart';
+import 'package:zxing/src/decode_hint.dart';
 import 'package:zxing/src/qrcode/decoder/decoded_bit_stream_parser.dart';
 import 'package:zxing/src/qrcode/decoder/version.dart';
 
@@ -28,8 +29,8 @@ void main() {
     builder.write(0xF1, 8);
     builder.write(0xF2, 8);
     builder.write(0xF3, 8);
-    String result = DecodedBitStreamParser.decode(
-            builder.toByteArray(), Version.getVersionForNumber(1), null, null)
+    String result = DecodedBitStreamParser.decode(builder.toByteArray(),
+            Version.getVersionForNumber(1), null, Hints())
         .text;
     //expect(result, "\u00f1\u00f2\u00f3");
     expect(result, hasLength(3));
