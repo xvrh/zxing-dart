@@ -50,9 +50,14 @@ class Result {
 
   final DateTime time;
 
-  Result(this.text, this.rawBytes, this.format, {int? numBits, DateTime? time})
+  Result(this.text, this.rawBytes, this.format,
+      {List<ResultPoint>? points, int? numBits, DateTime? time})
       : numBits = numBits ?? (rawBytes == null ? 0 : 8 * rawBytes.length),
-        time = time ?? DateTime.now();
+        time = time ?? DateTime.now() {
+    if (points != null) {
+      resultPoints.addAll(points);
+    }
+  }
 
   void putMetadata(ResultMetadataType type, Object value) {
     resultMetadata[type] = value;

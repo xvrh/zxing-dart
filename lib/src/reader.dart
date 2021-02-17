@@ -33,17 +33,6 @@ import 'decode_hint_type.dart';
  */
 abstract class Reader {
   /**
-   * Locates and decodes a barcode in some format within an image.
-   *
-   * @param image image of barcode to decode
-   * @return String which the barcode encodes
-   * @throws NotFoundException if no potential barcode is found
-   * @throws ChecksumException if a potential barcode is found but does not pass its checksum
-   * @throws FormatException if a potential barcode is found but format is invalid
-   */
-  Result decode(BinaryBitmap image);
-
-  /**
    * Locates and decodes a barcode in some format within an image. This method also accepts
    * hints, each possibly associated to some data, which may help the implementation decode.
    *
@@ -57,7 +46,7 @@ abstract class Reader {
    * @throws ChecksumException if a potential barcode is found but does not pass its checksum
    * @throws FormatException if a potential barcode is found but format is invalid
    */
-  Result decodeWithHints(BinaryBitmap image, Map<DecodeHintType, Object> hints);
+  Result decode(BinaryBitmap image, {Map<DecodeHintType, Object>? hints});
 
   /**
    * Resets any internal state the implementation has after a decode, to prepare it

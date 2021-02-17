@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 ZXing authors
+ * Copyright 2009 ZXing authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import 'reader_exception.dart';
+import 'result_point.dart';
 
 /**
- * Thrown when a barcode was not found in the image. It might have been
- * partially detected but could not be confirmed.
+ * Callback which is invoked when a possible result point (significant
+ * point in the barcode image such as a corner) is found.
  *
- * @author Sean Owen
+ * @see DecodeHintType#NEED_RESULT_POINT_CALLBACK
  */
-class NotFoundException extends ReaderException {}
+typedef ResultPointCallback = void Function(ResultPoint point);
