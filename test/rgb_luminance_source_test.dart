@@ -29,7 +29,7 @@ void main() {
     source = RGBLuminanceSource(
       3,
       3,
-      Uint32List.fromList(<int>[
+      Int32List.fromList(<int>[
         0x000000, 0x7F7F7F, 0xFFFFFF,
         0xFF0000, 0x00FF00, 0x0000FF,
         0x0000FF, 0x00FF00, 0xFF0000, //

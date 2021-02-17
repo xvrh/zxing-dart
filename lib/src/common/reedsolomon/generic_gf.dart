@@ -16,6 +16,8 @@
 
 import 'dart:typed_data';
 
+import 'package:fixnum/fixnum.dart';
+
 import 'generic_gf_poly.dart';
 
 /**
@@ -113,7 +115,7 @@ class GenericGF {
    * @return sum/difference of a and b
    */
   static int addOrSubtract(int a, int b) {
-    return a ^ b;
+    return (Int32(a) ^ Int32(b)).toInt();
   }
 
   /**

@@ -62,6 +62,7 @@ class DataBlock {
       for (int i = 0; i < ecBlock.count; i++) {
         int numDataCodewords = ecBlock.dataCodewords;
         int numBlockCodewords = ecBlocks.ecCodewordsPerBlock + numDataCodewords;
+        ++numResultBlocks;
         result.add(DataBlock(numDataCodewords, Uint8List(numBlockCodewords)));
       }
     }

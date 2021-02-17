@@ -20,4 +20,10 @@ import 'reader_exception.dart';
 /// was not returned because its checksum feature failed.
 ///
 /// @author Sean Owen
-class ChecksumException extends ReaderException {}
+class ChecksumException extends ReaderException {
+  final Object innerException;
+
+  ChecksumException(this.innerException);
+
+  String toString() => 'ChecksumException(inner: $innerException)';
+}

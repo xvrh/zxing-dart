@@ -2,9 +2,13 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 import 'package:zxing/src/binary_bitmap.dart';
+import 'package:zxing/src/common/hybrid_binarizer.dart';
 import 'package:zxing/src/decode_hint.dart';
 import 'package:zxing/src/luminance_source.dart';
 import 'package:zxing/src/qrcode/qrcode_reader.dart';
+
+import '../image_luminance_source.dart';
+import 'package:image/image.dart' as img;
 
 void main() {
   var qrReader = QRCodeReader();
@@ -25,10 +29,12 @@ void main() {
 
       //TODO(xha): loop: one normal and one with Hint tryHarder
 
-      //LuminanceSource source = new BufferedImageLuminanceSource(rotatedImage);
-      //BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+      var image = img.decodePng(pngFile.readAsBytesSync())!;
 
-      //var result = qrReader.decode(image, hints: Hints());
+      LuminanceSource source = new ImageLuminanceSource(image);
+      BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+
+      var result = qrReader.decode(bitmap, hints: Hints());
 
       expect(result.text, expected);
     }

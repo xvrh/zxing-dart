@@ -155,7 +155,7 @@ class ReedSolomonDecoder {
     }
     if (e != numErrors) {
       throw new ReedSolomonException(
-          "Error locator degree does not match number of roots");
+          "Error locator degree does not match number of roots ($e != $numErrors)");
     }
     return result;
   }

@@ -34,7 +34,7 @@ import 'finder_pattern_info.dart';
  * @author Sean Owen
  */
 class FinderPatternFinder {
-  static final int _CENTER_QUORUM = 2;
+  static final int CENTER_QUORUM = 2;
   static final int MIN_SKIP = 3; // 1 pixel/module times 3 modules/center
   static final int MAX_MODULES =
       97; // support up to version 20 for mobile clients
@@ -42,16 +42,15 @@ class FinderPatternFinder {
   final BitMatrix image;
   final possibleCenters = <FinderPattern>[];
   bool _hasSkipped = false;
-  final _crossCheckStateCount = Int32List(5);
-  final ResultPointCallback? _resultPointCallback;
+  final Int32List _crossCheckStateCount = Int32List(5);
+  final ResultPointCallback? resultPointCallback;
 
   /**
    * <p>Creates a finder that will search the image for three finder patterns.</p>
    *
    * @param image image to search
    */
-  FinderPatternFinder(this.image, {ResultPointCallback? resultPointCallback})
-      : _resultPointCallback = resultPointCallback;
+  FinderPatternFinder(this.image, {this.resultPointCallback});
 
   FinderPatternInfo find(Hints hints) {
     bool tryHarder = hints.contains(DecodeHintType.TRY_HARDER);
@@ -91,7 +90,7 @@ class FinderPatternFinder {
               // A winner?
               if (foundPatternCross(stateCount)) {
                 // Yes
-                bool confirmed = handlePossibleCenter(stateCount, i, j);
+                bool confirmed = _handlePossibleCenter(stateCount, i, j);
                 if (confirmed) {
                   // Start examining every other line. Checking each line turned out to be too
                   // expensive and didn't improve performance.
@@ -136,7 +135,7 @@ class FinderPatternFinder {
         }
       }
       if (foundPatternCross(stateCount)) {
-        bool confirmed = handlePossibleCenter(stateCount, i, maxJ);
+        bool confirmed = _handlePossibleCenter(stateCount, i, maxJ);
         if (confirmed) {
           iSkip = stateCount[0];
           if (_hasSkipped) {
@@ -147,7 +146,7 @@ class FinderPatternFinder {
       }
     }
 
-    var patternInfo = _selectBestPatterns();
+    List<FinderPattern> patternInfo = _selectBestPatterns();
     ResultPoint.orderBestPatterns(patternInfo);
 
     return new FinderPatternInfo(patternInfo);
@@ -222,7 +221,7 @@ class FinderPatternFinder {
 
   static void doClearCounts(Int32List counts) {
     for (var i = 0; i < counts.length; i++) {
-      counts[0] = 0;
+      counts[i] = 0;
     }
   }
 
@@ -328,7 +327,7 @@ class FinderPatternFinder {
     BitMatrix image = this.image;
 
     int maxI = image.height;
-    var stateCount = _getCrossCheckStateCount();
+    Int32List stateCount = _getCrossCheckStateCount();
 
     // Start counting up from center
     int i = startI;
@@ -406,7 +405,7 @@ class FinderPatternFinder {
     BitMatrix image = this.image;
 
     int maxJ = image.width;
-    var stateCount = _getCrossCheckStateCount();
+    Int32List stateCount = _getCrossCheckStateCount();
 
     int j = startJ;
     while (j >= 0 && image.get(j, centerI)) {
@@ -488,7 +487,7 @@ class FinderPatternFinder {
    * @param j end of possible finder pattern in row
    * @return true if a finder pattern candidate was found this time
    */
-  bool handlePossibleCenter(Int32List stateCount, int i, int j) {
+  bool _handlePossibleCenter(Int32List stateCount, int i, int j) {
     int stateCountTotal = stateCount[0] +
         stateCount[1] +
         stateCount[2] +
@@ -519,8 +518,8 @@ class FinderPatternFinder {
           FinderPattern point =
               new FinderPattern(centerJ, centerI, estimatedModuleSize);
           possibleCenters.add(point);
-          if (_resultPointCallback != null) {
-            _resultPointCallback!(point);
+          if (resultPointCallback != null) {
+            resultPointCallback!(point);
           }
         }
         return true;
@@ -540,9 +539,9 @@ class FinderPatternFinder {
     if (max <= 1) {
       return 0;
     }
-    ResultPoint? firstConfirmedCenter;
+    ResultPoint? firstConfirmedCenter = null;
     for (FinderPattern center in possibleCenters) {
-      if (center.count >= _CENTER_QUORUM) {
+      if (center.count >= CENTER_QUORUM) {
         if (firstConfirmedCenter == null) {
           firstConfirmedCenter = center;
         } else {
@@ -571,7 +570,7 @@ class FinderPatternFinder {
     double totalModuleSize = 0.0;
     int max = possibleCenters.length;
     for (FinderPattern pattern in possibleCenters) {
-      if (pattern.count >= _CENTER_QUORUM) {
+      if (pattern.count >= CENTER_QUORUM) {
         confirmedCount++;
         totalModuleSize += pattern.estimatedModuleSize;
       }
@@ -594,7 +593,7 @@ class FinderPatternFinder {
   /**
    * Get square of distance between a and b.
    */
-  static double _squaredDistance(FinderPattern a, FinderPattern b) {
+  static double squaredDistance(FinderPattern a, FinderPattern b) {
     double x = a.x - b.x;
     double y = a.y - b.y;
     return x * x + y * y;
@@ -623,7 +622,7 @@ class FinderPatternFinder {
 
       for (int j = i + 1; j < possibleCenters.length - 1; j++) {
         FinderPattern fpj = possibleCenters[j];
-        double squares0 = _squaredDistance(fpi, fpj);
+        double squares0 = squaredDistance(fpi, fpj);
 
         for (int k = j + 1; k < possibleCenters.length; k++) {
           FinderPattern fpk = possibleCenters[k];
@@ -634,8 +633,8 @@ class FinderPatternFinder {
           }
 
           double a = squares0;
-          double b = _squaredDistance(fpj, fpk);
-          double c = _squaredDistance(fpi, fpk);
+          double b = squaredDistance(fpj, fpk);
+          double c = squaredDistance(fpi, fpk);
 
           // sorts ascending - inlined
           if (a < b) {
@@ -693,7 +692,7 @@ class FinderPatternFinder {
     return bestPatterns.cast();
   }
 
-  static int _comparePattern(FinderPattern center1, FinderPattern center2) {
+  int _comparePattern(FinderPattern center1, FinderPattern center2) {
     return center1.estimatedModuleSize.compareTo(center2.estimatedModuleSize);
   }
 }

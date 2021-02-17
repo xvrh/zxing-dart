@@ -32,7 +32,7 @@ class RGBLuminanceSource extends LuminanceSource {
   final int _left;
   final int _top;
 
-  RGBLuminanceSource(this._dataWidth, this._dataHeight, Uint32List pixels)
+  RGBLuminanceSource(this._dataWidth, this._dataHeight, Int32List pixels)
       : _left = 0,
         _top = 0,
         super(_dataWidth, _dataHeight) {

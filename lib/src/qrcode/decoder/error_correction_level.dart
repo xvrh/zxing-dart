@@ -22,19 +22,20 @@
  */
 class ErrorCorrectionLevel {
   /** L = ~7% correction */
-  static final L = ErrorCorrectionLevel._(0x01);
+  static final L = ErrorCorrectionLevel._(0x01, 'L');
   /** M = ~15% correction */
-  static final M = ErrorCorrectionLevel._(0x00);
+  static final M = ErrorCorrectionLevel._(0x00, 'M');
   /** Q = ~25% correction */
-  static final Q = ErrorCorrectionLevel._(0x03);
+  static final Q = ErrorCorrectionLevel._(0x03, 'Q');
   /** H = ~30% correction */
-  static final H = ErrorCorrectionLevel._(0x02);
+  static final H = ErrorCorrectionLevel._(0x02, 'H');
 
   static final FOR_BITS = [M, L, H, Q];
 
   final int bits;
+  final String name;
 
-  ErrorCorrectionLevel._(this.bits);
+  ErrorCorrectionLevel._(this.bits, this.name);
 
   int get ordinal => FOR_BITS.indexOf(this);
 
@@ -48,4 +49,6 @@ class ErrorCorrectionLevel {
     }
     return FOR_BITS[bits];
   }
+
+  String toString() => 'ErrorCorrectionLevel.$name';
 }

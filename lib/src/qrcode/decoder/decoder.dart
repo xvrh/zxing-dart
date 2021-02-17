@@ -156,8 +156,8 @@ class Decoder {
     }
     try {
       rsDecoder.decode(codewordsInts, codewordBytes.length - numDataCodewords);
-    } on ReedSolomonException catch (_) {
-      throw ChecksumException();
+    } on ReedSolomonException catch (e) {
+      throw ChecksumException(e);
     }
     // Copy back into array of bytes -- only need to worry about the bytes that were data
     // We don't care about errors in the error-correction codewords
