@@ -22,22 +22,21 @@
  */
 class ErrorCorrectionLevel {
   /** L = ~7% correction */
-  static final L = ErrorCorrectionLevel._(0x01, 'L');
+  static final L = ErrorCorrectionLevel._(0, 0x01, 'L');
   /** M = ~15% correction */
-  static final M = ErrorCorrectionLevel._(0x00, 'M');
+  static final M = ErrorCorrectionLevel._(1, 0x00, 'M');
   /** Q = ~25% correction */
-  static final Q = ErrorCorrectionLevel._(0x03, 'Q');
+  static final Q = ErrorCorrectionLevel._(2, 0x03, 'Q');
   /** H = ~30% correction */
-  static final H = ErrorCorrectionLevel._(0x02, 'H');
+  static final H = ErrorCorrectionLevel._(3, 0x02, 'H');
 
   static final FOR_BITS = [M, L, H, Q];
 
+  final int ordinal;
   final int bits;
   final String name;
 
-  ErrorCorrectionLevel._(this.bits, this.name);
-
-  int get ordinal => FOR_BITS.indexOf(this);
+  ErrorCorrectionLevel._(this.ordinal, this.bits, this.name);
 
   /**
    * @param bits int containing the two bits encoding a QR Code's error correction level

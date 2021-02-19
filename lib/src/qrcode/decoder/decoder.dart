@@ -112,7 +112,7 @@ class Decoder {
         parser.readFormatInformation().errorCorrectionLevel;
 
     // Read codewords
-    Uint8List codewords = parser.readCodewords();
+    Int8List codewords = parser.readCodewords();
     // Separate into data blocks
     List<DataBlock> dataBlocks =
         DataBlock.getDataBlocks(codewords, version, ecLevel);
@@ -122,12 +122,12 @@ class Decoder {
     for (DataBlock dataBlock in dataBlocks) {
       totalBytes += dataBlock.getNumDataCodewords();
     }
-    Uint8List resultBytes = Uint8List(totalBytes);
+    Int8List resultBytes = Int8List(totalBytes);
     int resultOffset = 0;
 
     // Error-correct and copy data blocks together into a stream of bytes
     for (DataBlock dataBlock in dataBlocks) {
-      Uint8List codewordBytes = dataBlock.codewords;
+      Int8List codewordBytes = dataBlock.codewords;
       int numDataCodewords = dataBlock.getNumDataCodewords();
       _correctErrors(codewordBytes, numDataCodewords);
       for (int i = 0; i < numDataCodewords; i++) {
@@ -147,7 +147,7 @@ class Decoder {
    * @param numDataCodewords number of codewords that are data bytes
    * @throws ChecksumException if error correction fails
    */
-  void _correctErrors(Uint8List codewordBytes, int numDataCodewords) {
+  void _correctErrors(Int8List codewordBytes, int numDataCodewords) {
     int numCodewords = codewordBytes.length;
     // First read into an array of ints
     var codewordsInts = Int32List(numCodewords);

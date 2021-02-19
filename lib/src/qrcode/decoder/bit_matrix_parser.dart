@@ -152,7 +152,7 @@ class BitMatrixParser {
    * @return bytes encoded within the QR Code
    * @throws FormatException if the exact number of bytes expected is not read
    */
-  Uint8List readCodewords() {
+  Int8List readCodewords() {
     FormatInformation formatInfo = readFormatInformation();
     Version version = readVersion();
 
@@ -165,7 +165,7 @@ class BitMatrixParser {
     BitMatrix functionPattern = version.buildFunctionPattern();
 
     bool readingUp = true;
-    Uint8List result = Uint8List(version.totalCodewords);
+    Int8List result = Int8List(version.totalCodewords);
     int resultOffset = 0;
     int currentByte = 0;
     int bitsRead = 0;

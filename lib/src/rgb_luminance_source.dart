@@ -15,6 +15,8 @@
  */
 
 import 'dart:typed_data';
+import 'package:fixnum/fixnum.dart';
+
 import 'common/system.dart' as system;
 import 'luminance_source.dart';
 
@@ -26,7 +28,7 @@ import 'luminance_source.dart';
  * @author Betaminos
  */
 class RGBLuminanceSource extends LuminanceSource {
-  late final Uint8List _luminances;
+  late final Int8List _luminances;
   final int _dataWidth;
   final int _dataHeight;
   final int _left;
@@ -41,18 +43,18 @@ class RGBLuminanceSource extends LuminanceSource {
     //
     // Total number of pixels suffices, can ignore shape
     int size = _dataWidth * _dataHeight;
-    _luminances = Uint8List(size);
+    _luminances = Int8List(size);
     for (int offset = 0; offset < size; offset++) {
       int pixel = pixels[offset];
       int r = (pixel >> 16) & 0xff; // red
       int g2 = (pixel >> 7) & 0x1fe; // 2 * green
       int b = pixel & 0xff; // blue
       // Calculate green-favouring average cheaply
-      _luminances[offset] = ((r + g2 + b) ~/ 4);
+      _luminances[offset] = ((r + g2 + b) ~/ 4).toInt();
     }
   }
 
-  RGBLuminanceSource.crop(Uint8List pixels, this._dataWidth, this._dataHeight,
+  RGBLuminanceSource.crop(Int8List pixels, this._dataWidth, this._dataHeight,
       this._left, this._top, int width, int height)
       : _luminances = pixels,
         super(width, height) {
@@ -62,13 +64,13 @@ class RGBLuminanceSource extends LuminanceSource {
   }
 
   @override
-  Uint8List getRow(int y, Uint8List? row) {
+  Int8List getRow(int y, Int8List? row) {
     if (y < 0 || y >= height) {
       throw new ArgumentError("Requested row is outside the image: $y");
     }
     int width = this.width;
     if (row == null || row.length < width) {
-      row = Uint8List(width);
+      row = Int8List(width);
     }
     int offset = (y + _top) * _dataWidth + _left;
     system.arraycopy(_luminances, offset, row, 0, width);
@@ -76,7 +78,7 @@ class RGBLuminanceSource extends LuminanceSource {
   }
 
   @override
-  Uint8List getMatrix() {
+  Int8List getMatrix() {
     int width = this.width;
     int height = this.height;
 
@@ -87,7 +89,7 @@ class RGBLuminanceSource extends LuminanceSource {
     }
 
     int area = width * height;
-    Uint8List matrix = Uint8List(area);
+    Int8List matrix = Int8List(area);
     int inputOffset = _top * _dataWidth + _left;
 
     // If the width matches the full width of the underlying data, perform a single copy.

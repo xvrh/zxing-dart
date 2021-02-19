@@ -48,7 +48,7 @@ abstract class LuminanceSource {
    *            Always use the returned object, and ignore the .length of the array.
    * @return An array containing the luminance data.
    */
-  Uint8List getRow(int y, Uint8List? row);
+  Int8List getRow(int y, Int8List? row);
 
   /**
    * Fetches luminance data for the underlying bitmap. Values should be fetched using:
@@ -58,7 +58,7 @@ abstract class LuminanceSource {
    *         larger than width * height bytes on some platforms. Do not modify the contents
    *         of the result.
    */
-  Uint8List getMatrix();
+  Int8List getMatrix();
 
   /**
    * @return Whether this subclass supports cropping.
@@ -121,7 +121,7 @@ abstract class LuminanceSource {
 
   @override
   String toString() {
-    Uint8List row = Uint8List(width);
+    Int8List row = Int8List(width);
     var result = new StringBuffer();
     for (int y = 0; y < height; y++) {
       row = getRow(y, row);

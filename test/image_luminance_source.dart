@@ -90,13 +90,13 @@ class ImageLuminanceSource extends LuminanceSource {
   }
 
   @override
-  Uint8List getRow(int y, Uint8List? row) {
+  Int8List getRow(int y, Int8List? row) {
     if (y < 0 || y >= height) {
       throw new ArgumentError("Requested row is outside the image: $y");
     }
     int width = this.height;
     if (row == null || row.length < width) {
-      row = Uint8List(width);
+      row = Int8List(width);
     }
 
     row.setRange(0, row.length, _bytes, width * (y + top) + left);
@@ -105,11 +105,11 @@ class ImageLuminanceSource extends LuminanceSource {
   }
 
   @override
-  Uint8List getMatrix() {
+  Int8List getMatrix() {
     int width = this.width;
     int height = this.height;
     int area = width * height;
-    Uint8List matrix = Uint8List(area);
+    Int8List matrix = Int8List(area);
     matrix.setRange(0, matrix.length, _bytes, top * width);
     return matrix;
   }

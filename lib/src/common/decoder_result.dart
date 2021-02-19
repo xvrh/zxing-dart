@@ -25,7 +25,7 @@ import 'dart:typed_data';
  */
 class DecoderResult {
   /// @return raw bytes representing the result, or {@code null} if not applicable
-  final Uint8List? rawBytes;
+  final Int8List? rawBytes;
   /**
     * @return how many bits of {@link #getRawBytes()} are valid; typically 8 times its length
     */
@@ -39,7 +39,7 @@ class DecoderResult {
   /**
     * @return list of byte segments in the result, or {@code null} if not applicable
     */
-  final List<Uint8List>? byteSegments;
+  final List<Int8List>? byteSegments;
 
   /**
     * @return name of error correction level used, or {@code null} if not applicable

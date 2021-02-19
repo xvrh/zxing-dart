@@ -251,7 +251,7 @@ class BitArray {
  * @param offset position in array to start writing
  * @param numBytes how many bytes to write
  */
-  void toBytes(int bitOffset, Uint8List array, int offset, int numBytes) {
+  void toBytes(int bitOffset, Int8List array, int offset, int numBytes) {
     for (int i = 0; i < numBytes; i++) {
       int theByte = 0;
       for (int j = 0; j < 8; j++) {

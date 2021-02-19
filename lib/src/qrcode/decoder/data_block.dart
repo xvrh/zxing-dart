@@ -28,7 +28,7 @@ import 'version.dart';
  */
 class DataBlock {
   final int numDataCodewords;
-  final Uint8List codewords;
+  final Int8List codewords;
 
   DataBlock(this.numDataCodewords, this.codewords);
 
@@ -44,7 +44,7 @@ class DataBlock {
    *         QR Code
    */
   static List<DataBlock> getDataBlocks(
-      Uint8List rawCodewords, Version version, ErrorCorrectionLevel ecLevel) {
+      Int8List rawCodewords, Version version, ErrorCorrectionLevel ecLevel) {
     if (rawCodewords.length != version.totalCodewords) {
       throw new ArgumentError();
     }
@@ -63,7 +63,7 @@ class DataBlock {
         int numDataCodewords = ecBlock.dataCodewords;
         int numBlockCodewords = ecBlocks.ecCodewordsPerBlock + numDataCodewords;
         ++numResultBlocks;
-        result.add(DataBlock(numDataCodewords, Uint8List(numBlockCodewords)));
+        result.add(DataBlock(numDataCodewords, Int8List(numBlockCodewords)));
       }
     }
 

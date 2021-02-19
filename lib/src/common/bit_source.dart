@@ -27,7 +27,7 @@ import 'dart:math' as math;
  * @author Sean Owen
  */
 class BitSource {
-  final Uint8List bytes;
+  final Int8List bytes;
   int _byteOffset = 0;
   int _bitOffset = 0;
 

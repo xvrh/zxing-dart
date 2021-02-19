@@ -44,11 +44,11 @@ class DecodedBitStreamParser {
 
   DecodedBitStreamParser._() {}
 
-  static DecoderResult decode(Uint8List bytes, Version version,
+  static DecoderResult decode(Int8List bytes, Version version,
       ErrorCorrectionLevel? ecLevel, Hints hints) {
     BitSource bits = new BitSource(bytes);
     var result = new StringBuffer();
-    var byteSegments = <Uint8List>[];
+    var byteSegments = <Int8List>[];
     int symbolSequence = -1;
     int parityData = -1;
 
@@ -149,7 +149,7 @@ class DecodedBitStreamParser {
 
     // Each character will require 2 bytes. Read the characters as 2-byte pairs
     // and decode as GB2312 afterwards
-    Uint8List buffer = Uint8List(2 * count);
+    Int8List buffer = Int8List(2 * count);
     int offset = 0;
     while (count > 0) {
       // Each 13 bits encodes a 2-byte character
@@ -181,7 +181,7 @@ class DecodedBitStreamParser {
 
     // Each character will require 2 bytes. Read the characters as 2-byte pairs
     // and decode as Shift_JIS afterwards
-    Uint8List buffer = Uint8List(2 * count);
+    Int8List buffer = Int8List(2 * count);
     int offset = 0;
     while (count > 0) {
       // Each 13 bits encodes a 2-byte character
@@ -208,14 +208,14 @@ class DecodedBitStreamParser {
       StringBuffer result,
       int count,
       CharacterSetECI? currentCharacterSetECI,
-      List<Uint8List> byteSegments,
+      List<Int8List> byteSegments,
       Hints hints) {
     // Don't crash trying to read more bits than we have available.
     if (8 * count > bits.available()) {
       throw FormatException();
     }
 
-    Uint8List readBytes = Uint8List(count);
+    Int8List readBytes = Int8List(count);
     for (int i = 0; i < count; i++) {
       readBytes[i] = bits.readBits(8);
     }

@@ -30,7 +30,7 @@ class Result {
   final String text;
 
   /// @return raw bytes encoded by the barcode, if applicable, otherwise {@code null}
-  final Uint8List? rawBytes;
+  final Int8List? rawBytes;
 
   /// @return how many bits of {@link #getRawBytes()} are valid; typically 8 times its length
   final int numBits;

@@ -49,10 +49,10 @@ class BitSourceBuilder {
     }
   }
 
-  Uint8List toByteArray() {
+  Int8List toByteArray() {
     if (_bitsLeftInNextByte < 8) {
       write(0, _bitsLeftInNextByte);
     }
-    return output.toBytes();
+    return output.toBytes().buffer.asInt8List();
   }
 }

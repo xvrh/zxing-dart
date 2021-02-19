@@ -654,6 +654,8 @@ class ECBlocks {
   int getTotalECCodewords() {
     return ecCodewordsPerBlock * numBlocks;
   }
+
+  String toString() => 'ECBlocks($ecBlocks, $ecCodewordsPerBlock)';
 }
 
 /**
@@ -666,4 +668,6 @@ class ECB {
   final int dataCodewords;
 
   ECB(this.count, this.dataCodewords);
+
+  String toString() => 'ECB($count, $dataCodewords)';
 }

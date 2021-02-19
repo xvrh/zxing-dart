@@ -21,22 +21,24 @@ void main() {
         .listSync()
         .whereType<File>()
         .where((f) => p.extension(f.path) == '.png')) {
-      //TODO(xha): .bin and .metadata.txt
-      var metadataFile = File(p.setExtension(pngFile.path, '.txt'));
-      var expected = metadataFile.readAsStringSync();
+      test('${pngFile.path}', () {
+        //TODO(xha): .bin and .metadata.txt
+        var metadataFile = File(p.setExtension(pngFile.path, '.txt'));
+        var expected = metadataFile.readAsStringSync();
 
-      //TODO(xha): use int mustPassCount, int tryHarderCount, maxMisreads, maxTryHarderMisreads, float rotation
+        //TODO(xha): use int mustPassCount, int tryHarderCount, maxMisreads, maxTryHarderMisreads, float rotation
 
-      //TODO(xha): loop: one normal and one with Hint tryHarder
+        //TODO(xha): loop: one normal and one with Hint tryHarder
 
-      var image = img.decodePng(pngFile.readAsBytesSync())!;
+        var image = img.decodePng(pngFile.readAsBytesSync())!;
 
-      LuminanceSource source = new ImageLuminanceSource(image);
-      BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+        LuminanceSource source = new ImageLuminanceSource(image);
+        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
 
-      var result = qrReader.decode(bitmap, hints: Hints());
+        var result = qrReader.decode(bitmap, hints: Hints());
 
-      expect(result.text, expected);
+        expect(result.text, expected);
+      });
     }
   }
 }
