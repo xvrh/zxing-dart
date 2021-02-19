@@ -17,6 +17,7 @@
 import 'package:fixnum/fixnum.dart';
 import 'package:zxing/src/common/bit_matrix.dart';
 
+import '../../format_reader_exception.dart';
 import 'error_correction_level.dart';
 import 'format_information.dart';
 
@@ -72,16 +73,16 @@ class Version {
    *
    * @param dimension dimension in modules
    * @return Version for a QR Code of that dimension
-   * @throws FormatException if dimension is not 1 mod 4
+   * @throws FormatReaderException if dimension is not 1 mod 4
    */
   static Version getProvisionalVersionForDimension(int dimension) {
     if (dimension % 4 != 1) {
-      throw FormatException();
+      throw FormatReaderException();
     }
     try {
       return getVersionForNumber((dimension - 17) ~/ 4);
     } on ArgumentError catch (_) {
-      throw FormatException();
+      throw FormatReaderException();
     }
   }
 

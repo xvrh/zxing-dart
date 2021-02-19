@@ -54,9 +54,9 @@ class Detector {
    * @param hints optional hints to detector
    * @return {@link DetectorResult} encapsulating results of detecting a QR Code
    * @throws NotFoundException if QR Code cannot be found
-   * @throws FormatException if a QR Code cannot be decoded
+   * @throws FormatReaderException if a QR Code cannot be decoded
    */
-  DetectorResult detect({required Hints hints}) {
+  DetectorResult detect({required DecodeHints hints}) {
     _resultPointCallback = hints.get(DecodeHintType.NEED_RESULT_POINT_CALLBACK);
 
     FinderPatternFinder finder = new FinderPatternFinder(image,

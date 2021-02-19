@@ -16,6 +16,8 @@
 
 import 'dart:convert';
 
+import '../format_reader_exception.dart';
+
 /// Encapsulates a Character Set ECI, according to "Extended Channel Interpretations" 5.3.1.1
 /// of ISO 18004.
 ///
@@ -89,7 +91,7 @@ class CharacterSetECI {
   /// @throws FormatException if ECI value is invalid
   static CharacterSetECI? getCharacterSetECIByValue(int value) {
     if (value < 0 || value >= 900) {
-      throw FormatException();
+      throw FormatReaderException();
     }
     return _VALUE_TO_ECI[value];
   }

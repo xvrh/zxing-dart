@@ -17,6 +17,7 @@
 import 'dart:typed_data';
 
 import 'package:zxing/src/common/bit_matrix.dart';
+import 'package:zxing/src/format_reader_exception.dart';
 
 import 'data_mask.dart';
 import 'format_information.dart';
@@ -33,12 +34,12 @@ class BitMatrixParser {
 
   /**
    * @param bitMatrix {@link BitMatrix} to parse
-   * @throws FormatException if dimension is not >= 21 and 1 mod 4
+   * @throws FormatReaderException if dimension is not >= 21 and 1 mod 4
    */
   BitMatrixParser(this._bitMatrix) {
     int dimension = _bitMatrix.height;
     if (dimension < 21 || (dimension & 0x03) != 1) {
-      throw FormatException();
+      throw FormatReaderException();
     }
   }
 
@@ -46,7 +47,7 @@ class BitMatrixParser {
    * <p>Reads format information from one of its two locations within the QR Code.</p>
    *
    * @return {@link FormatInformation} encapsulating the QR Code's format info
-   * @throws FormatException if both format information locations cannot be parsed as
+   * @throws FormatReaderException if both format information locations cannot be parsed as
    * the valid encoding of format information
    */
   FormatInformation readFormatInformation() {
@@ -84,14 +85,14 @@ class BitMatrixParser {
     if (_parsedFormatInfo != null) {
       return _parsedFormatInfo!;
     }
-    throw FormatException();
+    throw FormatReaderException();
   }
 
   /**
    * <p>Reads version information from one of its two locations within the QR Code.</p>
    *
    * @return {@link Version} encapsulating the QR Code's version
-   * @throws FormatException if both version information locations cannot be parsed as
+   * @throws FormatReaderException if both version information locations cannot be parsed as
    * the valid encoding of version information
    */
   Version readVersion() {
@@ -136,7 +137,7 @@ class BitMatrixParser {
       _parsedVersion = theParsedVersion;
       return theParsedVersion;
     }
-    throw FormatException();
+    throw FormatReaderException();
   }
 
   int _copyBit(int i, int j, int versionBits) {
@@ -150,7 +151,7 @@ class BitMatrixParser {
    * QR Code.</p>
    *
    * @return bytes encoded within the QR Code
-   * @throws FormatException if the exact number of bytes expected is not read
+   * @throws FormatReaderException if the exact number of bytes expected is not read
    */
   Int8List readCodewords() {
     FormatInformation formatInfo = readFormatInformation();
@@ -200,7 +201,7 @@ class BitMatrixParser {
       readingUp ^= true; // readingUp = !readingUp; // switch directions
     }
     if (resultOffset != version.totalCodewords) {
-      throw FormatException();
+      throw FormatReaderException();
     }
     return result;
   }

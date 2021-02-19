@@ -1,44 +1,37 @@
-import 'dart:io';
-import 'package:path/path.dart' as p;
-import 'package:test/test.dart';
-import 'package:zxing/src/binary_bitmap.dart';
-import 'package:zxing/src/common/hybrid_binarizer.dart';
-import 'package:zxing/src/decode_hint.dart';
-import 'package:zxing/src/luminance_source.dart';
-import 'package:zxing/src/qrcode/qrcode_reader.dart';
+import 'package:zxing/zxing.dart';
 
-import '../image_luminance_source.dart';
-import 'package:image/image.dart' as img;
+import '../goldens.dart';
 
 void main() {
   var qrReader = QRCodeReader();
 
-  for (Directory directory in Directory('test/resources/blackbox')
-      .listSync()
-      .whereType<Directory>()
-      .where((d) => p.basename(d.path).startsWith('qrcode-'))) {
-    for (var pngFile in directory
-        .listSync()
-        .whereType<File>()
-        .where((f) => p.extension(f.path) == '.png')) {
-      test('${pngFile.path}', () {
-        //TODO(xha): .bin and .metadata.txt
-        var metadataFile = File(p.setExtension(pngFile.path, '.txt'));
-        var expected = metadataFile.readAsStringSync();
+  testGolden('qrcode-1', qrReader, mustPassCount: 17);
+  testGolden('qrcode-1', qrReader, mustPassCount: 14, rotation: 90);
+  testGolden('qrcode-1', qrReader, mustPassCount: 17, rotation: 180);
+  testGolden('qrcode-1', qrReader, mustPassCount: 14, rotation: 270);
 
-        //TODO(xha): use int mustPassCount, int tryHarderCount, maxMisreads, maxTryHarderMisreads, float rotation
+  testGolden('qrcode-2', qrReader, mustPassCount: 31);
+  testGolden('qrcode-2', qrReader, mustPassCount: 30, rotation: 90);
+  testGolden('qrcode-2', qrReader, mustPassCount: 30, rotation: 180);
+  testGolden('qrcode-2', qrReader, mustPassCount: 30, rotation: 270);
 
-        //TODO(xha): loop: one normal and one with Hint tryHarder
+  testGolden('qrcode-3', qrReader, mustPassCount: 38);
+  testGolden('qrcode-3', qrReader, mustPassCount: 39, rotation: 90);
+  testGolden('qrcode-3', qrReader, mustPassCount: 36, rotation: 180);
+  testGolden('qrcode-3', qrReader, mustPassCount: 39, rotation: 270);
 
-        var image = img.decodePng(pngFile.readAsBytesSync())!;
+  testGolden('qrcode-4', qrReader, mustPassCount: 36);
+  testGolden('qrcode-4', qrReader, mustPassCount: 35, rotation: 90);
+  testGolden('qrcode-4', qrReader, mustPassCount: 35, rotation: 180);
+  testGolden('qrcode-4', qrReader, mustPassCount: 35, rotation: 270);
 
-        LuminanceSource source = new ImageLuminanceSource(image);
-        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+  testGolden('qrcode-5', qrReader, mustPassCount: 19);
+  testGolden('qrcode-5', qrReader, mustPassCount: 19, rotation: 90);
+  testGolden('qrcode-5', qrReader, mustPassCount: 19, rotation: 180);
+  testGolden('qrcode-5', qrReader, mustPassCount: 19, rotation: 270);
 
-        var result = qrReader.decode(bitmap, hints: Hints());
-
-        expect(result.text, expected);
-      });
-    }
-  }
+  testGolden('qrcode-6', qrReader, mustPassCount: 15);
+  testGolden('qrcode-6', qrReader, mustPassCount: 14, rotation: 90);
+  testGolden('qrcode-6', qrReader, mustPassCount: 13, rotation: 180);
+  testGolden('qrcode-6', qrReader, mustPassCount: 14, rotation: 270);
 }

@@ -25,6 +25,7 @@ import 'package:zxing/src/qrcode/decoder/version.dart';
 
 import '../../checksum_exception.dart';
 import '../../decode_hint.dart';
+import '../../format_reader_exception.dart';
 import 'bit_matrix_parser.dart';
 import 'data_block.dart';
 import 'decoded_bit_stream_parser.dart';
@@ -47,17 +48,17 @@ class Decoder {
    * @param bits booleans representing white/black QR Code modules
    * @param hints decoding hints that should be used to influence decoding
    * @return text and bytes encoded within the QR Code
-   * @throws FormatException if the QR Code cannot be decoded
+   * @throws FormatReaderException if the QR Code cannot be decoded
    * @throws ChecksumException if error correction fails
    */
-  DecoderResult decode(BitMatrix bits, {required Hints hints}) {
+  DecoderResult decode(BitMatrix bits, {required DecodeHints hints}) {
     // Construct a parser and read version, error-correction level
     BitMatrixParser parser = new BitMatrixParser(bits);
-    FormatException? fe = null;
+    FormatReaderException? fe = null;
     ChecksumException? ce = null;
     try {
       return _decode(parser, hints);
-    } on FormatException catch (e) {
+    } on FormatReaderException catch (e) {
       fe = e;
     } on ChecksumException catch (e) {
       ce = e;
@@ -91,7 +92,7 @@ class Decoder {
       result.other = new QRCodeDecoderMetaData(mirrored: true);
 
       return result;
-    } on FormatException catch (_) {
+    } on FormatReaderException catch (_) {
       // Throw the exception from the original reading
       if (fe != null) {
         throw fe;
@@ -106,7 +107,7 @@ class Decoder {
     }
   }
 
-  DecoderResult _decode(BitMatrixParser parser, Hints hints) {
+  DecoderResult _decode(BitMatrixParser parser, DecodeHints hints) {
     Version version = parser.readVersion();
     ErrorCorrectionLevel ecLevel =
         parser.readFormatInformation().errorCorrectionLevel;

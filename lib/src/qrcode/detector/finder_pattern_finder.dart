@@ -52,7 +52,7 @@ class FinderPatternFinder {
    */
   FinderPatternFinder(this.image, {this.resultPointCallback});
 
-  FinderPatternInfo find(Hints hints) {
+  FinderPatternInfo find(DecodeHints hints) {
     bool tryHarder = hints.contains(DecodeHintType.TRY_HARDER);
     int maxI = image.height;
     int maxJ = image.width;

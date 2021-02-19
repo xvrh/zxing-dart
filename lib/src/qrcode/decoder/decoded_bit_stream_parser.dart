@@ -22,6 +22,7 @@ import 'package:zxing/src/common/character_set_eci.dart';
 import 'package:zxing/src/common/decoder_result.dart';
 
 import '../../decode_hint.dart';
+import '../../format_reader_exception.dart';
 import 'error_correction_level.dart';
 import 'mode.dart';
 import 'version.dart';
@@ -45,7 +46,7 @@ class DecodedBitStreamParser {
   DecodedBitStreamParser._() {}
 
   static DecoderResult decode(Int8List bytes, Version version,
-      ErrorCorrectionLevel? ecLevel, Hints hints) {
+      ErrorCorrectionLevel? ecLevel, DecodeHints hints) {
     BitSource bits = new BitSource(bytes);
     var result = new StringBuffer();
     var byteSegments = <Int8List>[];
@@ -74,7 +75,7 @@ class DecodedBitStreamParser {
             break;
           case Mode.STRUCTURED_APPEND:
             if (bits.available() < 16) {
-              throw FormatException();
+              throw FormatReaderException();
             }
             // sequence number and parity is added later to the result metadata
             // Read next 8 bits (symbol sequence #) and 8 bits (parity data), then continue
@@ -87,7 +88,7 @@ class DecodedBitStreamParser {
             currentCharacterSetECI =
                 CharacterSetECI.getCharacterSetECIByValue(value);
             if (currentCharacterSetECI == null) {
-              throw FormatException();
+              throw FormatReaderException();
             }
             break;
           case Mode.HANZI:
@@ -118,14 +119,14 @@ class DecodedBitStreamParser {
                 _decodeKanjiSegment(bits, result, count);
                 break;
               default:
-                throw FormatException();
+                throw FormatReaderException();
             }
             break;
         }
       } while (mode != Mode.TERMINATOR);
     } on ArgumentError catch (_) {
       // from readBits() calls
-      throw FormatException();
+      throw FormatReaderException();
     }
 
     return new DecoderResult(
@@ -144,7 +145,7 @@ class DecodedBitStreamParser {
       BitSource bits, StringBuffer result, int count) {
     // Don't crash trying to read more bits than we have available.
     if (count * 13 > bits.available()) {
-      throw FormatException();
+      throw FormatReaderException();
     }
 
     // Each character will require 2 bytes. Read the characters as 2-byte pairs
@@ -176,7 +177,7 @@ class DecodedBitStreamParser {
       BitSource bits, StringBuffer result, int count) {
     // Don't crash trying to read more bits than we have available.
     if (count * 13 > bits.available()) {
-      throw FormatException();
+      throw FormatReaderException();
     }
 
     // Each character will require 2 bytes. Read the characters as 2-byte pairs
@@ -209,10 +210,10 @@ class DecodedBitStreamParser {
       int count,
       CharacterSetECI? currentCharacterSetECI,
       List<Int8List> byteSegments,
-      Hints hints) {
+      DecodeHints hints) {
     // Don't crash trying to read more bits than we have available.
     if (8 * count > bits.available()) {
-      throw FormatException();
+      throw FormatReaderException();
     }
 
     Int8List readBytes = Int8List(count);
@@ -238,7 +239,7 @@ class DecodedBitStreamParser {
 
   static String _toAlphaNumericChar(int value) {
     if (value >= _ALPHANUMERIC_CHARS.length) {
-      throw FormatException();
+      throw FormatReaderException();
     }
     return _ALPHANUMERIC_CHARS[value];
   }
@@ -249,7 +250,7 @@ class DecodedBitStreamParser {
     //int start = result.length;
     while (count > 1) {
       if (bits.available() < 11) {
-        throw FormatException();
+        throw FormatReaderException();
       }
       int nextTwoCharsBits = bits.readBits(11);
       result.write(_toAlphaNumericChar(nextTwoCharsBits ~/ 45));
@@ -259,7 +260,7 @@ class DecodedBitStreamParser {
     if (count == 1) {
       // special case: one character left
       if (bits.available() < 6) {
-        throw FormatException();
+        throw FormatReaderException();
       }
       result.write(_toAlphaNumericChar(bits.readBits(6)));
     }
@@ -288,11 +289,11 @@ class DecodedBitStreamParser {
     while (count >= 3) {
       // Each 10 bits encodes three digits
       if (bits.available() < 10) {
-        throw FormatException();
+        throw FormatReaderException();
       }
       int threeDigitsBits = bits.readBits(10);
       if (threeDigitsBits >= 1000) {
-        throw FormatException();
+        throw FormatReaderException();
       }
       result.write(_toAlphaNumericChar(threeDigitsBits ~/ 100));
       result.write(_toAlphaNumericChar((threeDigitsBits ~/ 10) % 10));
@@ -302,22 +303,22 @@ class DecodedBitStreamParser {
     if (count == 2) {
       // Two digits left over to read, encoded in 7 bits
       if (bits.available() < 7) {
-        throw FormatException();
+        throw FormatReaderException();
       }
       int twoDigitsBits = bits.readBits(7);
       if (twoDigitsBits >= 100) {
-        throw FormatException();
+        throw FormatReaderException();
       }
       result.write(_toAlphaNumericChar(twoDigitsBits ~/ 10));
       result.write(_toAlphaNumericChar(twoDigitsBits % 10));
     } else if (count == 1) {
       // One digit left over to read
       if (bits.available() < 4) {
-        throw FormatException();
+        throw FormatReaderException();
       }
       int digitBits = bits.readBits(4);
       if (digitBits >= 10) {
-        throw FormatException();
+        throw FormatReaderException();
       }
       result.write(_toAlphaNumericChar(digitBits));
     }
@@ -339,6 +340,6 @@ class DecodedBitStreamParser {
       int secondThirdBytes = bits.readBits(16);
       return ((firstByte & 0x1F) << 16) | secondThirdBytes;
     }
-    throw FormatException();
+    throw FormatReaderException();
   }
 }

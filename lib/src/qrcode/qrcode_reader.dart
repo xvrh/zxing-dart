@@ -45,11 +45,12 @@ class QRCodeReader implements Reader {
    *
    * @return a String representing the content encoded by the QR code
    * @throws NotFoundException if a QR code cannot be found
-   * @throws FormatException if a QR code cannot be decoded
+   * @throws FormatReaderException if a QR code cannot be decoded
    * @throws ChecksumException if error correction fails
    */
   @override
-  Result decode(BinaryBitmap image, {required Hints hints}) {
+  Result decode(BinaryBitmap image, {DecodeHints? hints}) {
+    hints ??= DecodeHints();
     DecoderResult decoderResult;
     List<ResultPoint> points;
     if (hints.contains(DecodeHintType.PURE_BARCODE)) {

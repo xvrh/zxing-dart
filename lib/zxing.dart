@@ -1,5 +1,10 @@
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+export 'src/reader.dart' show Reader;
+export 'src/result.dart' show Result;
+export 'src/qrcode/qrcode_reader.dart' show QRCodeReader;
+export 'src/binary_bitmap.dart' show BinaryBitmap;
+export 'src/binarizer.dart' show Binarizer;
+export 'src/decode_hint.dart' show DecodeHints, DecodeHintType;
+export 'src/luminance_source.dart' show LuminanceSource;
+export 'src/common/hybrid_binarizer.dart' show HybridBinarizer;
+export 'src/reader_exception.dart' show ReaderException;
+export 'src/not_found_exception.dart' show NotFoundException;

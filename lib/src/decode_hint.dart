@@ -97,7 +97,7 @@ class DecodeHintType<T> {
   static final ALLOWED_EAN_EXTENSIONS = DecodeHintType<List<int>>();
 }
 
-class Hints {
+class DecodeHints {
   final _hints = <DecodeHintType, Object?>{};
 
   void put<T>(DecodeHintType<T> type, [T? value]) {
