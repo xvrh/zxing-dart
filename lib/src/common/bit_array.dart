@@ -1,19 +1,3 @@
-/*
- * Copyright 2007 ZXing authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import 'dart:typed_data';
 import 'dart:math' as math;
 import 'package:fixnum/fixnum.dart';
@@ -22,8 +6,6 @@ import 'package:collection/collection.dart';
 import 'package:zxing/src/common/bits.dart';
 
 /// <p>A simple, fast array of bits, represented compactly by an array of ints internally.</p>
-///
-/// @author Sean Owen
 class BitArray {
   Int32List _bits;
   int _size;
@@ -118,7 +100,7 @@ class BitArray {
     return math.min(result, size);
   }
 
-/// Sets a block of 32 bits, starting at bit i.
+  /// Sets a block of 32 bits, starting at bit i.
   ///
   /// @param i first bit to set
   /// @param newBits the new value of the next 32 bits. Note again that the least-significant bit
@@ -127,7 +109,7 @@ class BitArray {
     _bits[i ~/ 32] = newBits;
   }
 
-/// Sets a range of bits.
+  /// Sets a range of bits.
   ///
   /// @param start start of range, inclusive.
   /// @param end end of range, exclusive
@@ -150,7 +132,7 @@ class BitArray {
     }
   }
 
-/// Clears all bits (sets to false).
+  /// Clears all bits (sets to false).
   void clear() {
     int max = _bits.length;
     for (int i = 0; i < max; i++) {
@@ -158,7 +140,7 @@ class BitArray {
     }
   }
 
-/// Efficient method to check if a range of bits is set, or not set.
+  /// Efficient method to check if a range of bits is set, or not set.
   ///
   /// @param start start of range, inclusive.
   /// @param end end of range, exclusive
@@ -198,7 +180,7 @@ class BitArray {
     _size++;
   }
 
-/// Appends the least-significant bits, from value, in order from most-significant to
+  /// Appends the least-significant bits, from value, in order from most-significant to
   /// least-significant. For example, appending 6 bits from 0x000001E will append the bits
   /// 0, 1, 1, 1, 1, 0 in that order.
   ///
@@ -233,7 +215,7 @@ class BitArray {
     }
   }
 
-///
+  ///
   /// @param bitOffset first bit to start writing
   /// @param array array to write into. Bytes are written most-significant byte first. This is the opposite
   ///  of the internal representation, which is exposed by {@link #getBitArray()}

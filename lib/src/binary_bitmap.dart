@@ -1,19 +1,3 @@
-/*
- * Copyright 2009 ZXing authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import 'common/bit_matrix.dart';
 import 'common/bit_array.dart';
 import 'binarizer.dart';
@@ -21,25 +5,23 @@ import 'not_found_exception.dart';
 
 /// This class is the core bitmap class used by ZXing to represent 1 bit data. Reader objects
 /// accept a BinaryBitmap and attempt to decode it.
-///
-/// @author dswitkin@google.com (Daniel Switkin)
 class BinaryBitmap {
   final Binarizer _binarizer;
   BitMatrix? _matrix;
 
   BinaryBitmap(this._binarizer);
 
-/// @return The width of the bitmap.
+  /// @return The width of the bitmap.
   int get width {
     return _binarizer.width;
   }
 
-/// @return The height of the bitmap.
+  /// @return The height of the bitmap.
   int get height {
     return _binarizer.height;
   }
 
-/// Converts one row of luminance data to 1 bit data. May actually do the conversion, or return
+  /// Converts one row of luminance data to 1 bit data. May actually do the conversion, or return
   /// cached data. Callers should assume this method is expensive and call it as seldom as possible.
   /// This method is intended for decoding 1D barcodes and may choose to apply sharpening.
   ///
@@ -52,7 +34,7 @@ class BinaryBitmap {
     return _binarizer.getBlackRow(y, row);
   }
 
-/// Converts a 2D array of luminance data to 1 bit. As above, assume this method is expensive
+  /// Converts a 2D array of luminance data to 1 bit. As above, assume this method is expensive
   /// and do not call it repeatedly. This method is intended for decoding 2D barcodes and may or
   /// may not apply sharpening. Therefore, a row from this matrix may not be identical to one
   /// fetched using getBlackRow(), so don't mix and match between them.
@@ -71,12 +53,12 @@ class BinaryBitmap {
     return _matrix!;
   }
 
-/// @return Whether this bitmap can be cropped.
+  /// @return Whether this bitmap can be cropped.
   bool get isCropSupported {
     return _binarizer.luminanceSource.isCropSupported;
   }
 
-/// Returns a new object with cropped image data. Implementations may keep a reference to the
+  /// Returns a new object with cropped image data. Implementations may keep a reference to the
   /// original data rather than a copy. Only callable if isCropSupported() is true.
   ///
   /// @param left The left coordinate, which must be in [0,getWidth())
@@ -89,12 +71,12 @@ class BinaryBitmap {
     return BinaryBitmap(_binarizer.createBinarizer(newSource));
   }
 
-/// @return Whether this bitmap supports counter-clockwise rotation.
+  /// @return Whether this bitmap supports counter-clockwise rotation.
   bool isRotateSupported() {
     return _binarizer.luminanceSource.isRotateSupported;
   }
 
-/// Returns a new object with rotated image data by 90 degrees counterclockwise.
+  /// Returns a new object with rotated image data by 90 degrees counterclockwise.
   /// Only callable if {@link #isRotateSupported()} is true.
   ///
   /// @return A rotated version of this object.
@@ -103,7 +85,7 @@ class BinaryBitmap {
     return BinaryBitmap(_binarizer.createBinarizer(newSource));
   }
 
-/// Returns a new object with rotated image data by 45 degrees counterclockwise.
+  /// Returns a new object with rotated image data by 45 degrees counterclockwise.
   /// Only callable if {@link #isRotateSupported()} is true.
   ///
   /// @return A rotated version of this object.
