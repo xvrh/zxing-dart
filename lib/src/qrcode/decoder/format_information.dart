@@ -1,6 +1,5 @@
 import 'package:fixnum/fixnum.dart';
-import 'package:zxing/src/common/bits.dart';
-
+import '../../common/bits.dart';
 import 'error_correction_level.dart';
 
 /// <p>Encapsulates a QR Code's format information, including the data mask used and

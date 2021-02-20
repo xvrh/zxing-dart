@@ -1,13 +1,10 @@
 import 'dart:typed_data';
-
-import 'package:zxing/src/common/bit_matrix.dart';
-import 'package:zxing/src/common/decoder_result.dart';
-import 'package:zxing/src/common/reedsolomon/generic_gf.dart';
-import 'package:zxing/src/common/reedsolomon/reed_solomon_decoder.dart';
-import 'package:zxing/src/common/reedsolomon/reed_solomon_exception.dart';
-import 'package:zxing/src/qrcode/decoder/version.dart';
-
 import '../../checksum_exception.dart';
+import '../../common/bit_matrix.dart';
+import '../../common/decoder_result.dart';
+import '../../common/reedsolomon/generic_gf.dart';
+import '../../common/reedsolomon/reed_solomon_decoder.dart';
+import '../../common/reedsolomon/reed_solomon_exception.dart';
 import '../../decode_hint.dart';
 import '../../format_reader_exception.dart';
 import 'bit_matrix_parser.dart';
@@ -15,6 +12,7 @@ import 'data_block.dart';
 import 'decoded_bit_stream_parser.dart';
 import 'error_correction_level.dart';
 import 'qr_code_decoder_meta_data.dart';
+import 'version.dart';
 
 /// <p>The main class which implements QR Code decoding -- as opposed to locating and extracting
 /// the QR Code from an image.</p>

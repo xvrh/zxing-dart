@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'error_correction_level.dart';
 import 'version.dart';
 

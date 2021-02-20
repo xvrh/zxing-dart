@@ -1,5 +1,5 @@
-import 'dart:typed_data';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 /// <p>This provides an easy abstraction to read bits at a time from a sequence of bytes, where the
 /// number of bits read is not often a multiple of 8.</p>

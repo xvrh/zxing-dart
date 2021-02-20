@@ -1,8 +1,7 @@
 import 'dart:typed_data';
-
+import '../system.dart' as system;
 import 'generic_gf.dart';
 import 'generic_gf_poly.dart';
-import '../system.dart' as system;
 
 /// <p>Implements Reed-Solomon encoding, as the name implies.</p>
 ///

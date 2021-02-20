@@ -1,7 +1,5 @@
 import 'dart:typed_data';
-
-import 'package:zxing/src/common/bit_matrix.dart';
-
+import '../../common/bit_matrix.dart';
 import '../../not_found_exception.dart';
 import '../../result_point_callback.dart';
 import 'alignment_pattern.dart';

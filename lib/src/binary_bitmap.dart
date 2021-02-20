@@ -1,6 +1,6 @@
-import 'common/bit_matrix.dart';
-import 'common/bit_array.dart';
 import 'binarizer.dart';
+import 'common/bit_array.dart';
+import 'common/bit_matrix.dart';
 import 'not_found_exception.dart';
 
 /// This class is the core bitmap class used by ZXing to represent 1 bit data. Reader objects
@@ -47,9 +47,7 @@ class BinaryBitmap {
     // 1. This work will never be done if the caller only installs 1D Reader objects, or if a
     //    1D Reader finds a barcode before the 2D Readers run.
     // 2. This work will only be done once even if the caller installs multiple 2D Readers.
-    if (_matrix == null) {
-      _matrix = _binarizer.getBlackMatrix();
-    }
+    _matrix ??= _binarizer.getBlackMatrix();
     return _matrix!;
   }
 
@@ -99,7 +97,7 @@ class BinaryBitmap {
     try {
       return getBlackMatrix().toString();
     } on NotFoundException catch (_) {
-      return "";
+      return '';
     }
   }
 }

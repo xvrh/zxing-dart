@@ -1,8 +1,7 @@
-import 'package:zxing/src/common/perspective_transform.dart';
-
 import '../not_found_exception.dart';
 import 'bit_matrix.dart';
 import 'grid_sampler.dart';
+import 'perspective_transform.dart';
 
 class DefaultGridSampler extends GridSampler {
   @override

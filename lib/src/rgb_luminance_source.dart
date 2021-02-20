@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'common/system.dart' as system;
 import 'luminance_source.dart';
 

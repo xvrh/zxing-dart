@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'luminance_source.dart';
 
 /// A wrapper implementation of {@link LuminanceSource} which inverts the luminances it returns -- black becomes

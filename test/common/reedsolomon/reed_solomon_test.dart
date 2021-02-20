@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'dart:typed_data';
-
 import 'package:test/test.dart';
 import 'package:zxing/src/common/bit_set.dart';
 import 'package:zxing/src/common/reedsolomon/generic_gf.dart';

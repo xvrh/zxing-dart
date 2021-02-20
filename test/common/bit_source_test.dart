@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:test/test.dart';
 import 'package:zxing/src/common/bit_source.dart';
 

@@ -1,9 +1,9 @@
-import 'dart:typed_data';
 import 'dart:math' as math;
+import 'dart:typed_data';
+import 'package:collection/collection.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:meta/meta.dart';
-import 'package:collection/collection.dart';
-import 'package:zxing/src/common/bits.dart';
+import 'bits.dart';
 
 /// <p>A simple, fast array of bits, represented compactly by an array of ints internally.</p>
 class BitArray {
@@ -280,12 +280,12 @@ class BitArray {
       return false;
     }
     return size == other.size &&
-        const ListEquality().equals(_bits, other._bits);
+        const ListEquality<int>().equals(_bits, other._bits);
   }
 
   @override
   int get hashCode {
-    return 31 * size + const ListEquality().hash(_bits);
+    return 31 * size + const ListEquality<int>().hash(_bits);
   }
 
   @override

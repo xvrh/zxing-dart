@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import '../binarizer.dart';
 import '../luminance_source.dart';
 import '../not_found_exception.dart';

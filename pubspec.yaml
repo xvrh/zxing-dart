@@ -12,6 +12,7 @@ dependencies:
   meta:
 
 dev_dependencies:
+  dart_style:
   image:
   test:
 

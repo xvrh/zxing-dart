@@ -1,6 +1,6 @@
 import 'dart:collection';
-import 'dart:typed_data';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 /// An integer-indexed collection to test membership status.
 abstract class BitSet {

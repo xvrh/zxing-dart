@@ -7,5 +7,6 @@ class ChecksumException extends ReaderException {
 
   ChecksumException(this.innerException);
 
+  @override
   String toString() => 'ChecksumException(inner: $innerException)';
 }

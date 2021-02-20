@@ -1,7 +1,5 @@
 import 'dart:typed_data';
-
 import 'package:meta/meta.dart';
-
 import 'inverted_luminance_source.dart';
 
 /// The purpose of this class hierarchy is to abstract different bitmap implementations across

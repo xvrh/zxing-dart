@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:test/test.dart';
 import 'package:zxing/src/common/reedsolomon/generic_gf.dart';
 import 'package:zxing/src/common/reedsolomon/generic_gf_poly.dart';

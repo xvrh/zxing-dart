@@ -1,5 +1,4 @@
 import 'package:meta/meta.dart';
-
 import 'common/bit_array.dart';
 import 'common/bit_matrix.dart';
 import 'luminance_source.dart';

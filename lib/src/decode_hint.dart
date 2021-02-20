@@ -1,5 +1,5 @@
-import 'package:zxing/src/barcode_format.dart';
-import 'package:zxing/src/result_point_callback.dart';
+import 'barcode_format.dart';
+import 'result_point_callback.dart';
 
 /// Encapsulates a type of hint that a caller may pass to a barcode reader to help it
 /// more quickly or accurately decode it. It is up to implementations to decide what,

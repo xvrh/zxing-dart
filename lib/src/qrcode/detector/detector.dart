@@ -1,15 +1,14 @@
 import 'dart:math' as math;
-import 'package:zxing/src/common/bit_matrix.dart';
-import 'package:zxing/src/common/detector/math_utils.dart';
-import 'package:zxing/src/common/detector_result.dart';
-import 'package:zxing/src/common/grid_sampler.dart';
-import 'package:zxing/src/common/perspective_transform.dart';
-import 'package:zxing/src/qrcode/decoder/version.dart';
-
+import '../../common/bit_matrix.dart';
+import '../../common/detector/math_utils.dart';
+import '../../common/detector_result.dart';
+import '../../common/grid_sampler.dart';
+import '../../common/perspective_transform.dart';
 import '../../decode_hint.dart';
 import '../../not_found_exception.dart';
 import '../../result_point.dart';
 import '../../result_point_callback.dart';
+import '../decoder/version.dart';
 import 'alignment_pattern.dart';
 import 'alignment_pattern_finder.dart';
 import 'finder_pattern.dart';

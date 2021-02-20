@@ -2,7 +2,6 @@ import 'package:test/test.dart';
 import 'package:zxing/src/decode_hint.dart';
 import 'package:zxing/src/qrcode/decoder/decoded_bit_stream_parser.dart';
 import 'package:zxing/src/qrcode/decoder/version.dart';
-
 import '../../common/bit_source_builder.dart';
 
 void main() {

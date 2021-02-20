@@ -1,7 +1,5 @@
 import 'dart:typed_data';
-
 import 'package:fixnum/fixnum.dart';
-
 import 'generic_gf_poly.dart';
 
 /// <p>This class contains utility methods for performing mathematical operations over

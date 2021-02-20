@@ -1,10 +1,8 @@
 import 'dart:io';
-
+import 'package:image/image.dart' as img;
+import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 import 'package:zxing/zxing.dart';
-import 'package:path/path.dart' as p;
-import 'package:image/image.dart' as img;
-
 import 'image_luminance_source.dart';
 
 void testGolden(

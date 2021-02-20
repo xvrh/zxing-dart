@@ -1,7 +1,6 @@
-import 'package:zxing/src/result.dart';
-
 import 'binary_bitmap.dart';
 import 'decode_hint.dart';
+import 'result.dart';
 
 /// Implementations of this interface can decode an image of a barcode in some format into
 /// the String it encodes. For example, {@link com.google.zxing.qrcode.QRCodeReader} can

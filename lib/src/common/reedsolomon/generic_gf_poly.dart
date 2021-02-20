@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 import '../system.dart' as system;
-
 import 'generic_gf.dart';
 
 /// <p>Represents a polynomial whose coefficients are elements of a GF.

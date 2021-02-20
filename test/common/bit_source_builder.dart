@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:fixnum/fixnum.dart';
 
 /// Class that lets one easily build an array of bytes by appending bits at a time.

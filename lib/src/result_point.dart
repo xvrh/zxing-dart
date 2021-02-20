@@ -1,4 +1,4 @@
-import 'package:zxing/src/common/detector/math_utils.dart';
+import 'common/detector/math_utils.dart';
 
 /// <p>Encapsulates a point of interest in an image containing a barcode. Typically, this
 /// would be the location of a finder pattern or the corner of the barcode, for example.</p>

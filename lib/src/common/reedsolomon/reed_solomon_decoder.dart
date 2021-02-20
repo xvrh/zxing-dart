@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'generic_gf.dart';
 import 'generic_gf_poly.dart';
 import 'reed_solomon_exception.dart';

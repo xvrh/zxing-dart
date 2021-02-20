@@ -1,6 +1,5 @@
 import 'package:fixnum/fixnum.dart';
-import 'package:zxing/src/common/bit_matrix.dart';
-
+import '../../common/bit_matrix.dart';
 import '../../format_reader_exception.dart';
 import 'error_correction_level.dart';
 import 'format_information.dart';

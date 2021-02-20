@@ -1,4 +1,4 @@
-import 'package:zxing/src/common/bit_matrix.dart';
+import '../../common/bit_matrix.dart';
 
 /// <p>Encapsulates data masks for the data bits in a QR code, per ISO 18004:2006 6.8. Implementations
 /// of this class can un-mask a raw BitMatrix. For simplicity, they will unmask the entire BitMatrix,

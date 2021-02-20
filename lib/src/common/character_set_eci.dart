@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import '../format_reader_exception.dart';
 
 const _defaultAscii = AsciiCodec(allowInvalid: true);

@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import '../../zxing.dart';
 
 /// Common string-related functions.

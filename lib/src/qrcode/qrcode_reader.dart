@@ -1,16 +1,15 @@
-import 'package:zxing/src/common/bit_matrix.dart';
-import 'package:zxing/src/common/decoder_result.dart';
-import 'package:zxing/src/common/detector_result.dart';
-
 import '../barcode_format.dart';
 import '../binary_bitmap.dart';
+import '../common/bit_matrix.dart';
+import '../common/decoder_result.dart';
+import '../common/detector_result.dart';
 import '../decode_hint.dart';
+import '../not_found_exception.dart';
 import '../reader.dart';
 import '../result.dart';
 import '../result_metadata_type.dart';
 import '../result_point.dart';
 import 'decoder/decoder.dart';
-import '../not_found_exception.dart';
 import 'decoder/qr_code_decoder_meta_data.dart';
 import 'detector/detector.dart';
 

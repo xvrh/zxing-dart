@@ -1,4 +1,4 @@
-import 'package:zxing/src/result_point.dart';
+import '../../result_point.dart';
 
 /// Meta-data container for QR Code decoding. Instances of this class may be used to convey information back to the
 /// decoding caller. Callers are expected to process this.

@@ -1,8 +1,6 @@
 import 'dart:typed_data';
-
 import 'package:collection/collection.dart';
 import 'package:fixnum/fixnum.dart';
-
 import 'bit_array.dart';
 
 /// <p>Represents a 2D matrix of bits. In function arguments below, and throughout the common
@@ -384,7 +382,7 @@ class BitMatrix {
     return width == other.width &&
         height == other.height &&
         rowSize == other.rowSize &&
-        const ListEquality().equals(_bits, other._bits);
+        const ListEquality<int>().equals(_bits, other._bits);
   }
 
   @override
@@ -393,7 +391,7 @@ class BitMatrix {
     hash = 31 * hash + width;
     hash = 31 * hash + height;
     hash = 31 * hash + rowSize;
-    hash = 31 * hash + const ListEquality().hash(_bits);
+    hash = 31 * hash + const ListEquality<int>().hash(_bits);
     return hash;
   }
 

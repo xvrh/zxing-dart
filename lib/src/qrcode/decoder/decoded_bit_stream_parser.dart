@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
-import 'package:zxing/src/common/bit_source.dart';
-import 'package:zxing/src/common/character_set_eci.dart';
-import 'package:zxing/src/common/decoder_result.dart';
-import 'package:zxing/src/common/string_utils.dart';
-
+import '../../common/bit_source.dart';
+import '../../common/character_set_eci.dart';
+import '../../common/decoder_result.dart';
+import '../../common/string_utils.dart';
 import '../../decode_hint.dart';
 import '../../format_reader_exception.dart';
 import 'error_correction_level.dart';

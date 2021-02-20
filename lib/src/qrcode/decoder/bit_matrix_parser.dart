@@ -1,8 +1,6 @@
 import 'dart:typed_data';
-
-import 'package:zxing/src/common/bit_matrix.dart';
-import 'package:zxing/src/format_reader_exception.dart';
-
+import '../../common/bit_matrix.dart';
+import '../../format_reader_exception.dart';
 import 'data_mask.dart';
 import 'format_information.dart';
 import 'version.dart';
