@@ -32,3 +32,5 @@ build/
 
 _*
 .*
+!.gitignore
+!.github

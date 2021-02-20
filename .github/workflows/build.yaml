@@ -1,0 +1,34 @@
+name: Build
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+jobs:
+  test:
+    name: Run tests ${{matrix.sdk}} on ${{matrix.os}}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        sdk: ['beta']
+    runs-on: ${{ matrix.os }}
+#    env:
+#      #In travis/docker we need the --no-sandbox flag in chrome
+#      CHROME_FORCE_NO_SANDBOX: true
+    steps:
+      - uses: dart-lang/setup-dart@v0.3
+        with:
+          sdk: ${{ matrix.sdk }}
+      - uses: actions/checkout@v2
+      - run: dart --version
+      - run: dart pub get
+      - run: dart analyze --fatal-infos --fatal-warnings .
+      - run: dart test
+      - run: dart tool/prepare_submit.dart
+      - name: "check for uncommitted changes"
+        run: |
+          git diff --exit-code --stat -- . \
+          || (echo "##[error] found changed files after build. please run 'dart tool/prepare_submit.dart'" \
+                   "and check in all changes" \
+              && exit 1)
+        shell: bash
