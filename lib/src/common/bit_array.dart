@@ -64,8 +64,8 @@ class BitArray {
     if (from >= size) {
       return size;
     }
-    int bitsOffset = from ~/ 32;
-    int currentBits = _bits[bitsOffset];
+    var bitsOffset = from ~/ 32;
+    var currentBits = _bits[bitsOffset];
     // mask off lesser bits first
     currentBits &= -(1 << (from & 0x1F));
     while (currentBits == 0) {
@@ -75,7 +75,7 @@ class BitArray {
       currentBits = _bits[bitsOffset];
     }
 
-    int result = (bitsOffset * 32) + numberOfTrailingZerosInt32(currentBits);
+    var result = (bitsOffset * 32) + numberOfTrailingZerosInt32(currentBits);
     return math.min(result, size);
   }
 
@@ -86,8 +86,8 @@ class BitArray {
     if (from >= size) {
       return size;
     }
-    int bitsOffset = from ~/ 32;
-    int currentBits = ~_bits[bitsOffset];
+    var bitsOffset = from ~/ 32;
+    var currentBits = ~_bits[bitsOffset];
     // mask off lesser bits first
     currentBits &= -(1 << (from & 0x1F));
     while (currentBits == 0) {
@@ -96,7 +96,7 @@ class BitArray {
       }
       currentBits = ~_bits[bitsOffset];
     }
-    int result = (bitsOffset * 32) + numberOfTrailingZerosInt32(currentBits);
+    var result = (bitsOffset * 32) + numberOfTrailingZerosInt32(currentBits);
     return math.min(result, size);
   }
 
@@ -121,21 +121,21 @@ class BitArray {
       return;
     }
     end--; // will be easier to treat this as the last actually set bit -- inclusive
-    int firstInt = start ~/ 32;
-    int lastInt = end ~/ 32;
-    for (int i = firstInt; i <= lastInt; i++) {
-      int firstBit = i > firstInt ? 0 : start & 0x1F;
-      int lastBit = i < lastInt ? 31 : end & 0x1F;
+    var firstInt = start ~/ 32;
+    var lastInt = end ~/ 32;
+    for (var i = firstInt; i <= lastInt; i++) {
+      var firstBit = i > firstInt ? 0 : start & 0x1F;
+      var lastBit = i < lastInt ? 31 : end & 0x1F;
       // Ones from firstBit to lastBit, inclusive
-      int mask = (2 << lastBit) - (1 << firstBit);
+      var mask = (2 << lastBit) - (1 << firstBit);
       _bits[i] |= mask;
     }
   }
 
   /// Clears all bits (sets to false).
   void clear() {
-    int max = _bits.length;
-    for (int i = 0; i < max; i++) {
+    var max = _bits.length;
+    for (var i = 0; i < max; i++) {
       _bits[i] = 0;
     }
   }
@@ -155,13 +155,13 @@ class BitArray {
       return true; // empty range matches
     }
     end--; // will be easier to treat this as the last actually set bit -- inclusive
-    int firstInt = start ~/ 32;
-    int lastInt = end ~/ 32;
-    for (int i = firstInt; i <= lastInt; i++) {
-      int firstBit = i > firstInt ? 0 : start & 0x1F;
-      int lastBit = i < lastInt ? 31 : end & 0x1F;
+    var firstInt = start ~/ 32;
+    var lastInt = end ~/ 32;
+    for (var i = firstInt; i <= lastInt; i++) {
+      var firstBit = i > firstInt ? 0 : start & 0x1F;
+      var lastBit = i < lastInt ? 31 : end & 0x1F;
       // Ones from firstBit to lastBit, inclusive
-      int mask = (2 << lastBit) - (1 << firstBit);
+      var mask = (2 << lastBit) - (1 << firstBit);
 
       // Return false if we're looking for 1s and the masked bits[i] isn't all 1s (that is,
       // equals the mask, or we're looking for 0s and the masked portion is not all 0s
@@ -188,18 +188,18 @@ class BitArray {
   /// @param numBits bits from value to append
   void appendBits(int value, int numBits) {
     if (numBits < 0 || numBits > 32) {
-      throw ArgumentError("Num bits must be between 0 and 32");
+      throw ArgumentError('Num bits must be between 0 and 32');
     }
     ensureCapacity(size + numBits);
-    for (int numBitsLeft = numBits; numBitsLeft > 0; numBitsLeft--) {
+    for (var numBitsLeft = numBits; numBitsLeft > 0; numBitsLeft--) {
       appendBit(((value >> (numBitsLeft - 1)) & 0x01) == 1);
     }
   }
 
   void appendBitArray(BitArray other) {
-    int otherSize = other.size;
+    var otherSize = other.size;
     ensureCapacity(size + otherSize);
-    for (int i = 0; i < otherSize; i++) {
+    for (var i = 0; i < otherSize; i++) {
       appendBit(other.get(i));
     }
   }
@@ -208,7 +208,7 @@ class BitArray {
     if (size != other.size) {
       throw ArgumentError("Sizes don't match");
     }
-    for (int i = 0; i < _bits.length; i++) {
+    for (var i = 0; i < _bits.length; i++) {
       // The last int could be incomplete (i.e. not have 32 bits in
       // it) but there is no problem since 0 XOR 0 == 0.
       _bits[i] ^= other._bits[i];
@@ -222,9 +222,9 @@ class BitArray {
   /// @param offset position in array to start writing
   /// @param numBytes how many bytes to write
   void toBytes(int bitOffset, Int8List array, int offset, int numBytes) {
-    for (int i = 0; i < numBytes; i++) {
-      int theByte = 0;
-      for (int j = 0; j < 8; j++) {
+    for (var i = 0; i < numBytes; i++) {
+      var theByte = 0;
+      for (var j = 0; j < 8; j++) {
         if (get(bitOffset)) {
           theByte |= 1 << (7 - j);
         }
@@ -242,11 +242,11 @@ class BitArray {
 
   /// Reverses all bits in the array.
   void reverse() {
-    Int32List newBits = Int32List(_bits.length);
+    var newBits = Int32List(_bits.length);
     // reverse all int's first
-    int len = (size - 1) ~/ 32;
-    int oldBitsLen = len + 1;
-    for (int i = 0; i < oldBitsLen; i++) {
+    var len = (size - 1) ~/ 32;
+    var oldBitsLen = len + 1;
+    for (var i = 0; i < oldBitsLen; i++) {
       var x = Int32(_bits[i]);
       x = ((x >> 1) & 0x55555555) | ((x & 0x55555555) << 1);
       x = ((x >> 2) & 0x33333333) | ((x & 0x33333333) << 2);
@@ -257,9 +257,9 @@ class BitArray {
     }
     // now correct the int's if the bit size isn't a multiple of 32
     if (size != oldBitsLen * 32) {
-      int leftOffset = oldBitsLen * 32 - size;
+      var leftOffset = oldBitsLen * 32 - size;
       var currentInt = Int32(newBits[0]).shiftRightUnsigned(leftOffset);
-      for (int i = 1; i < oldBitsLen; i++) {
+      for (var i = 1; i < oldBitsLen; i++) {
         var nextInt = Int32(newBits[i]);
         currentInt |= nextInt << (32 - leftOffset);
         newBits[i - 1] = currentInt.toInt();
@@ -291,7 +291,7 @@ class BitArray {
   @override
   String toString() {
     var result = StringBuffer(size + (size / 8) + 1);
-    for (int i = 0; i < size; i++) {
+    for (var i = 0; i < size; i++) {
       if ((i & 0x07) == 0) {
         result.write(' ');
       }

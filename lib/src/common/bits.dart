@@ -7,7 +7,7 @@
 /// Works because each bit in the 32 bit integer hash uniquely to the
 /// prime number 37. The lowest set bit is returned via (x & -x).
 int numberOfTrailingZerosInt32(int x) {
-  assert(x < 0x100000000, "only 32bit numbers  supported");
+  assert(x < 0x100000000, 'only 32bit numbers  supported');
   return _ntzLut32[(x & -x) % 37];
 }
 

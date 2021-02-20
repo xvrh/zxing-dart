@@ -41,23 +41,23 @@ class HybridBinarizer extends GlobalHistogramBinarizer {
     if (_matrix != null) {
       return _matrix!;
     }
-    LuminanceSource source = this.luminanceSource;
-    int width = source.width;
-    int height = source.height;
+    var source = luminanceSource;
+    var width = source.width;
+    var height = source.height;
     if (width >= _MINIMUM_DIMENSION && height >= _MINIMUM_DIMENSION) {
-      Int8List luminances = source.getMatrix();
-      int subWidth = width >> _BLOCK_SIZE_POWER;
+      var luminances = source.getMatrix();
+      var subWidth = width >> _BLOCK_SIZE_POWER;
       if ((width & _BLOCK_SIZE_MASK) != 0) {
         subWidth++;
       }
-      int subHeight = height >> _BLOCK_SIZE_POWER;
+      var subHeight = height >> _BLOCK_SIZE_POWER;
       if ((height & _BLOCK_SIZE_MASK) != 0) {
         subHeight++;
       }
-      List<Int32List> blackPoints =
+      var blackPoints =
           _calculateBlackPoints(luminances, subWidth, subHeight, width, height);
 
-      BitMatrix newMatrix = BitMatrix(width, height);
+      var newMatrix = BitMatrix(width, height);
       _calculateThresholdForBlock(luminances, subWidth, subHeight, width,
           height, blackPoints, newMatrix);
       _matrix = newMatrix;
@@ -84,30 +84,30 @@ class HybridBinarizer extends GlobalHistogramBinarizer {
       int height,
       List<Int32List> blackPoints,
       BitMatrix matrix) {
-    int maxYOffset = height - _BLOCK_SIZE;
-    int maxXOffset = width - _BLOCK_SIZE;
-    for (int y = 0; y < subHeight; y++) {
-      int yoffset = y << _BLOCK_SIZE_POWER;
+    var maxYOffset = height - _BLOCK_SIZE;
+    var maxXOffset = width - _BLOCK_SIZE;
+    for (var y = 0; y < subHeight; y++) {
+      var yoffset = y << _BLOCK_SIZE_POWER;
       if (yoffset > maxYOffset) {
         yoffset = maxYOffset;
       }
-      int top = _cap(y, subHeight - 3);
-      for (int x = 0; x < subWidth; x++) {
-        int xoffset = x << _BLOCK_SIZE_POWER;
+      var top = _cap(y, subHeight - 3);
+      for (var x = 0; x < subWidth; x++) {
+        var xoffset = x << _BLOCK_SIZE_POWER;
         if (xoffset > maxXOffset) {
           xoffset = maxXOffset;
         }
-        int left = _cap(x, subWidth - 3);
-        int sum = 0;
-        for (int z = -2; z <= 2; z++) {
-          Int32List blackRow = blackPoints[top + z];
+        var left = _cap(x, subWidth - 3);
+        var sum = 0;
+        for (var z = -2; z <= 2; z++) {
+          var blackRow = blackPoints[top + z];
           sum += blackRow[left - 2] +
               blackRow[left - 1] +
               blackRow[left] +
               blackRow[left + 1] +
               blackRow[left + 2];
         }
-        int average = sum ~/ 25;
+        var average = sum ~/ 25;
         _thresholdBlock(luminances, xoffset, yoffset, average, width, matrix);
       }
     }
@@ -123,7 +123,7 @@ class HybridBinarizer extends GlobalHistogramBinarizer {
     for (int y = 0, offset = yoffset * stride + xoffset;
         y < _BLOCK_SIZE;
         y++, offset += stride) {
-      for (int x = 0; x < _BLOCK_SIZE; x++) {
+      for (var x = 0; x < _BLOCK_SIZE; x++) {
         // Comparison needs to be <= so that black == 0 pixels are black even if the threshold is 0.
         if ((luminances[offset + x] & 0xFF) <= threshold) {
           matrix.set(xoffset + x, yoffset + y);
@@ -137,28 +137,28 @@ class HybridBinarizer extends GlobalHistogramBinarizer {
   ///  http://groups.google.com/group/zxing/browse_thread/thread/d06efa2c35a7ddc0
   static List<Int32List> _calculateBlackPoints(
       Int8List luminances, int subWidth, int subHeight, int width, int height) {
-    int maxYOffset = height - _BLOCK_SIZE;
-    int maxXOffset = width - _BLOCK_SIZE;
-    List<Int32List> blackPoints =
+    var maxYOffset = height - _BLOCK_SIZE;
+    var maxXOffset = width - _BLOCK_SIZE;
+    var blackPoints =
         List<Int32List>.generate(subHeight, (index) => Int32List(subWidth));
-    for (int y = 0; y < subHeight; y++) {
-      int yoffset = y << _BLOCK_SIZE_POWER;
+    for (var y = 0; y < subHeight; y++) {
+      var yoffset = y << _BLOCK_SIZE_POWER;
       if (yoffset > maxYOffset) {
         yoffset = maxYOffset;
       }
-      for (int x = 0; x < subWidth; x++) {
-        int xoffset = x << _BLOCK_SIZE_POWER;
+      for (var x = 0; x < subWidth; x++) {
+        var xoffset = x << _BLOCK_SIZE_POWER;
         if (xoffset > maxXOffset) {
           xoffset = maxXOffset;
         }
-        int sum = 0;
-        int min = 0xFF;
-        int max = 0;
+        var sum = 0;
+        var min = 0xFF;
+        var max = 0;
         for (int yy = 0, offset = yoffset * width + xoffset;
             yy < _BLOCK_SIZE;
             yy++, offset += width) {
-          for (int xx = 0; xx < _BLOCK_SIZE; xx++) {
-            int pixel = luminances[offset + xx] & 0xFF;
+          for (var xx = 0; xx < _BLOCK_SIZE; xx++) {
+            var pixel = luminances[offset + xx] & 0xFF;
             sum += pixel;
             // still looking for good contrast
             if (pixel < min) {
@@ -173,7 +173,7 @@ class HybridBinarizer extends GlobalHistogramBinarizer {
             // finish the rest of the rows quickly
             yy++;
             for (offset += width; yy < _BLOCK_SIZE; yy++, offset += width) {
-              for (int xx = 0; xx < _BLOCK_SIZE; xx++) {
+              for (var xx = 0; xx < _BLOCK_SIZE; xx++) {
                 sum += luminances[offset + xx] & 0xFF;
               }
             }
@@ -181,7 +181,7 @@ class HybridBinarizer extends GlobalHistogramBinarizer {
         }
 
         // The default estimate is the average of the values in the block.
-        int average = sum >> (_BLOCK_SIZE_POWER * 2);
+        var average = sum >> (_BLOCK_SIZE_POWER * 2);
         if (max - min <= _MIN_DYNAMIC_RANGE) {
           // If variation within the block is low, assume this is a block with only light or only
           // dark pixels. In that case we do not want to use the average, as it would divide this
@@ -199,7 +199,7 @@ class HybridBinarizer extends GlobalHistogramBinarizer {
             // the boundaries is used for the interior.
 
             // The (min < bp) is arbitrary but works better than other heuristics that were tried.
-            int averageNeighborBlackPoint = (blackPoints[y - 1][x] +
+            var averageNeighborBlackPoint = (blackPoints[y - 1][x] +
                     (2 * blackPoints[y][x - 1]) +
                     blackPoints[y - 1][x - 1]) ~/
                 4;

@@ -7,5 +7,6 @@ class ReedSolomonException implements Exception {
 
   ReedSolomonException(this.message);
 
+  @override
   String toString() => 'ReedSolomonException($message)';
 }

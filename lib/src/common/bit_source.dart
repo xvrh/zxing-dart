@@ -34,14 +34,14 @@ class BitSource {
       throw ArgumentError('numBits: $numBits');
     }
 
-    int result = 0;
+    var result = 0;
 
     // First, read remainder from current byte
     if (_bitOffset > 0) {
-      int bitsLeft = 8 - _bitOffset;
-      int toRead = math.min(numBits, bitsLeft);
-      int bitsToNotRead = bitsLeft - toRead;
-      int mask = (0xFF >> (8 - toRead)) << bitsToNotRead;
+      var bitsLeft = 8 - _bitOffset;
+      var toRead = math.min(numBits, bitsLeft);
+      var bitsToNotRead = bitsLeft - toRead;
+      var mask = (0xFF >> (8 - toRead)) << bitsToNotRead;
       result = (bytes[_byteOffset] & mask) >> bitsToNotRead;
       numBits -= toRead;
       _bitOffset += toRead;
@@ -61,8 +61,8 @@ class BitSource {
 
       // Finally read a partial byte
       if (numBits > 0) {
-        int bitsToNotRead = 8 - numBits;
-        int mask = (0xFF >> bitsToNotRead) << bitsToNotRead;
+        var bitsToNotRead = 8 - numBits;
+        var mask = (0xFF >> bitsToNotRead) << bitsToNotRead;
         result = (result << numBits) |
             ((bytes[_byteOffset] & mask) >> bitsToNotRead);
         _bitOffset += numBits;

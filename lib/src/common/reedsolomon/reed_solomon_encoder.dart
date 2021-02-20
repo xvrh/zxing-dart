@@ -17,10 +17,10 @@ class ReedSolomonEncoder {
 
   GenericGFPoly buildGenerator(int degree) {
     if (degree >= _cachedGenerators.length) {
-      GenericGFPoly lastGenerator =
+      var lastGenerator =
           _cachedGenerators[_cachedGenerators.length - 1];
-      for (int d = _cachedGenerators.length; d <= degree; d++) {
-        GenericGFPoly nextGenerator = lastGenerator.multiply(GenericGFPoly(
+      for (var d = _cachedGenerators.length; d <= degree; d++) {
+        var nextGenerator = lastGenerator.multiply(GenericGFPoly(
             _field,
             Int32List.fromList([1, _field.exp(d - 1 + _field.generatorBase)])));
         _cachedGenerators.add(nextGenerator);
@@ -32,21 +32,21 @@ class ReedSolomonEncoder {
 
   void encode(List<int> toEncode, int ecBytes) {
     if (ecBytes == 0) {
-      throw ArgumentError("No error correction bytes");
+      throw ArgumentError('No error correction bytes');
     }
-    int dataBytes = toEncode.length - ecBytes;
+    var dataBytes = toEncode.length - ecBytes;
     if (dataBytes <= 0) {
-      throw ArgumentError("No data bytes provided");
+      throw ArgumentError('No data bytes provided');
     }
-    GenericGFPoly generator = buildGenerator(ecBytes);
+    var generator = buildGenerator(ecBytes);
     var infoCoefficients = Int32List(dataBytes);
     system.arraycopy(toEncode, 0, infoCoefficients, 0, dataBytes);
-    GenericGFPoly info = GenericGFPoly(_field, infoCoefficients);
+    var info = GenericGFPoly(_field, infoCoefficients);
     info = info.multiplyByMonomial(ecBytes, 1);
-    GenericGFPoly remainder = info.divide(generator)[1];
+    var remainder = info.divide(generator)[1];
     var coefficients = remainder.coefficients;
-    int numZeroCoefficients = ecBytes - coefficients.length;
-    for (int i = 0; i < numZeroCoefficients; i++) {
+    var numZeroCoefficients = ecBytes - coefficients.length;
+    for (var i = 0; i < numZeroCoefficients; i++) {
       toEncode[dataBytes + i] = 0;
     }
     system.arraycopy(coefficients, 0, toEncode, dataBytes + numZeroCoefficients,

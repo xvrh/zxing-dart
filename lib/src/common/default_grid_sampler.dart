@@ -25,7 +25,7 @@ class DefaultGridSampler extends GridSampler {
       double p3FromY,
       double p4FromX,
       double p4FromY) {
-    PerspectiveTransform transform =
+    var transform =
         PerspectiveTransform.quadrilateralToQuadrilateral(
             p1ToX,
             p1ToY,
@@ -53,12 +53,12 @@ class DefaultGridSampler extends GridSampler {
     if (dimensionX <= 0 || dimensionY <= 0) {
       throw NotFoundException();
     }
-    BitMatrix bits = BitMatrix(dimensionX, dimensionY);
-    List<double> points = List<double>.filled(2 * dimensionX, 0);
-    for (int y = 0; y < dimensionY; y++) {
-      int max = points.length;
-      double iValue = y + 0.5;
-      for (int x = 0; x < max; x += 2) {
+    var bits = BitMatrix(dimensionX, dimensionY);
+    var points = List<double>.filled(2 * dimensionX, 0);
+    for (var y = 0; y < dimensionY; y++) {
+      var max = points.length;
+      var iValue = y + 0.5;
+      for (var x = 0; x < max; x += 2) {
         points[x] = (x / 2) + 0.5;
         points[x + 1] = iValue;
       }
@@ -67,7 +67,7 @@ class DefaultGridSampler extends GridSampler {
       // sufficient to check the endpoints
       GridSampler.checkAndNudgePoints(image, points);
       try {
-        for (int x = 0; x < max; x += 2) {
+        for (var x = 0; x < max; x += 2) {
           if (image.get(points[x].toInt(), points[x + 1].toInt())) {
             // Black(-ish) pixel
             bits.set(x ~/ 2, y);

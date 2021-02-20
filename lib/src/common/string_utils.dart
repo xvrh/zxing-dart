@@ -21,31 +21,31 @@ class StringUtils {
     }
     // For now, merely tries to distinguish ISO-8859-1, UTF-8 and Shift_JIS,
     // which should be by far the most common encodings.
-    int length = bytes.length;
-    bool canBeISO88591 = true;
-    bool canBeShiftJIS = true;
-    bool canBeUTF8 = true;
-    int utf8BytesLeft = 0;
-    int utf2BytesChars = 0;
-    int utf3BytesChars = 0;
-    int utf4BytesChars = 0;
-    int sjisBytesLeft = 0;
-    int sjisKatakanaChars = 0;
-    int sjisCurKatakanaWordLength = 0;
-    int sjisCurDoubleBytesWordLength = 0;
-    int sjisMaxKatakanaWordLength = 0;
-    int sjisMaxDoubleBytesWordLength = 0;
-    int isoHighOther = 0;
+    var length = bytes.length;
+    var canBeISO88591 = true;
+    var canBeShiftJIS = true;
+    var canBeUTF8 = true;
+    var utf8BytesLeft = 0;
+    var utf2BytesChars = 0;
+    var utf3BytesChars = 0;
+    var utf4BytesChars = 0;
+    var sjisBytesLeft = 0;
+    var sjisKatakanaChars = 0;
+    var sjisCurKatakanaWordLength = 0;
+    var sjisCurDoubleBytesWordLength = 0;
+    var sjisMaxKatakanaWordLength = 0;
+    var sjisMaxDoubleBytesWordLength = 0;
+    var isoHighOther = 0;
 
-    bool utf8bom = bytes.length > 3 &&
+    var utf8bom = bytes.length > 3 &&
         bytes[0] == 0xEF &&
         bytes[1] == 0xBB &&
         bytes[2] == 0xBF;
 
-    for (int i = 0;
+    for (var i = 0;
         i < length && (canBeISO88591 || canBeShiftJIS || canBeUTF8);
         i++) {
-      int value = bytes[i] & 0xFF;
+      var value = bytes[i] & 0xFF;
 
       // UTF-8 stuff
       if (canBeUTF8) {

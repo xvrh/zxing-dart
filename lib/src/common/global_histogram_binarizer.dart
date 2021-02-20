@@ -28,8 +28,8 @@ class GlobalHistogramBinarizer extends Binarizer {
   // Applies simple sharpening to the row data to improve performance of the 1D Readers.
   @override
   BitArray getBlackRow(int y, BitArray? row) {
-    LuminanceSource source = this.luminanceSource;
-    int width = source.width;
+    var source = luminanceSource;
+    var width = source.width;
     if (row == null || row.size < width) {
       row = BitArray(width);
     } else {
@@ -37,25 +37,25 @@ class GlobalHistogramBinarizer extends Binarizer {
     }
 
     _initArrays(width);
-    Int8List localLuminances = source.getRow(y, _luminances);
-    Int32List localBuckets = _buckets;
-    for (int x = 0; x < width; x++) {
+    var localLuminances = source.getRow(y, _luminances);
+    var localBuckets = _buckets;
+    for (var x = 0; x < width; x++) {
       localBuckets[(localLuminances[x] & 0xff) >> _LUMINANCE_SHIFT]++;
     }
-    int blackPoint = _estimateBlackPoint(localBuckets);
+    var blackPoint = _estimateBlackPoint(localBuckets);
 
     if (width < 3) {
       // Special case for very small images
-      for (int x = 0; x < width; x++) {
+      for (var x = 0; x < width; x++) {
         if ((localLuminances[x] & 0xff) < blackPoint) {
           row.set(x);
         }
       }
     } else {
-      int left = localLuminances[0] & 0xff;
-      int center = localLuminances[1] & 0xff;
-      for (int x = 1; x < width - 1; x++) {
-        int right = localLuminances[x + 1] & 0xff;
+      var left = localLuminances[0] & 0xff;
+      var center = localLuminances[1] & 0xff;
+      for (var x = 1; x < width - 1; x++) {
+        var right = localLuminances[x + 1] & 0xff;
         // A simple -1 4 -1 box filter with a weight of 2.
         if (((center * 4) - left - right) / 2 < blackPoint) {
           row.set(x);
@@ -70,34 +70,34 @@ class GlobalHistogramBinarizer extends Binarizer {
   // Does not sharpen the data, as this call is intended to only be used by 2D Readers.
   @override
   BitMatrix getBlackMatrix() {
-    LuminanceSource source = this.luminanceSource;
-    int width = source.width;
-    int height = source.height;
-    BitMatrix matrix = BitMatrix(width, height);
+    var source = luminanceSource;
+    var width = source.width;
+    var height = source.height;
+    var matrix = BitMatrix(width, height);
 
     // Quickly calculates the histogram by sampling four rows from the image. This proved to be
     // more robust on the blackbox tests than sampling a diagonal as we used to do.
     _initArrays(width);
-    Int32List localBuckets = _buckets;
-    for (int y = 1; y < 5; y++) {
-      int row = height * y ~/ 5;
-      Int8List localLuminances = source.getRow(row, _luminances);
-      int right = (width * 4) ~/ 5;
-      for (int x = width ~/ 5; x < right; x++) {
-        int pixel = localLuminances[x] & 0xff;
+    var localBuckets = _buckets;
+    for (var y = 1; y < 5; y++) {
+      var row = height * y ~/ 5;
+      var localLuminances = source.getRow(row, _luminances);
+      var right = (width * 4) ~/ 5;
+      for (var x = width ~/ 5; x < right; x++) {
+        var pixel = localLuminances[x] & 0xff;
         localBuckets[pixel >> _LUMINANCE_SHIFT]++;
       }
     }
-    int blackPoint = _estimateBlackPoint(localBuckets);
+    var blackPoint = _estimateBlackPoint(localBuckets);
 
     // We delay reading the entire image luminance until the black point estimation succeeds.
     // Although we end up reading four rows twice, it is consistent with our motto of
     // "fail quickly" which is necessary for continuous scanning.
-    Int8List localLuminances = source.getMatrix();
-    for (int y = 0; y < height; y++) {
-      int offset = y * width;
-      for (int x = 0; x < width; x++) {
-        int pixel = localLuminances[offset + x] & 0xff;
+    var localLuminances = source.getMatrix();
+    for (var y = 0; y < height; y++) {
+      var offset = y * width;
+      for (var x = 0; x < width; x++) {
+        var pixel = localLuminances[offset + x] & 0xff;
         if (pixel < blackPoint) {
           matrix.set(x, y);
         }
@@ -116,18 +116,18 @@ class GlobalHistogramBinarizer extends Binarizer {
     if (_luminances.length < luminanceSize) {
       _luminances = Int8List(luminanceSize);
     }
-    for (int x = 0; x < _LUMINANCE_BUCKETS; x++) {
+    for (var x = 0; x < _LUMINANCE_BUCKETS; x++) {
       _buckets[x] = 0;
     }
   }
 
   static int _estimateBlackPoint(Int32List buckets) {
     // Find the tallest peak in the histogram.
-    int numBuckets = buckets.length;
-    int maxBucketCount = 0;
-    int firstPeak = 0;
-    int firstPeakSize = 0;
-    for (int x = 0; x < numBuckets; x++) {
+    var numBuckets = buckets.length;
+    var maxBucketCount = 0;
+    var firstPeak = 0;
+    var firstPeakSize = 0;
+    for (var x = 0; x < numBuckets; x++) {
       if (buckets[x] > firstPeakSize) {
         firstPeak = x;
         firstPeakSize = buckets[x];
@@ -138,12 +138,12 @@ class GlobalHistogramBinarizer extends Binarizer {
     }
 
     // Find the second-tallest peak which is somewhat far from the tallest peak.
-    int secondPeak = 0;
-    int secondPeakScore = 0;
-    for (int x = 0; x < numBuckets; x++) {
-      int distanceToBiggest = x - firstPeak;
+    var secondPeak = 0;
+    var secondPeakScore = 0;
+    for (var x = 0; x < numBuckets; x++) {
+      var distanceToBiggest = x - firstPeak;
       // Encourage more distant second peaks by multiplying by square of distance.
-      int score = buckets[x] * distanceToBiggest * distanceToBiggest;
+      var score = buckets[x] * distanceToBiggest * distanceToBiggest;
       if (score > secondPeakScore) {
         secondPeak = x;
         secondPeakScore = score;
@@ -152,7 +152,7 @@ class GlobalHistogramBinarizer extends Binarizer {
 
     // Make sure firstPeak corresponds to the black peak.
     if (firstPeak > secondPeak) {
-      int temp = firstPeak;
+      var temp = firstPeak;
       firstPeak = secondPeak;
       secondPeak = temp;
     }
@@ -164,11 +164,11 @@ class GlobalHistogramBinarizer extends Binarizer {
     }
 
     // Find a valley between them that is low and closer to the white peak.
-    int bestValley = secondPeak - 1;
-    int bestValleyScore = -1;
-    for (int x = secondPeak - 1; x > firstPeak; x--) {
-      int fromFirst = x - firstPeak;
-      int score = fromFirst *
+    var bestValley = secondPeak - 1;
+    var bestValleyScore = -1;
+    for (var x = secondPeak - 1; x > firstPeak; x--) {
+      var fromFirst = x - firstPeak;
+      var score = fromFirst *
           fromFirst *
           (secondPeak - x) *
           (maxBucketCount - buckets[x]);

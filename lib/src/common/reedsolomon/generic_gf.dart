@@ -45,8 +45,8 @@ class GenericGF {
   GenericGF(this.primitive, this.size, this.generatorBase)
       : _expTable = Int32List(size),
         _logTable = Int32List(size) {
-    int x = 1;
-    for (int i = 0; i < size; i++) {
+    var x = 1;
+    for (var i = 0; i < size; i++) {
       _expTable[i] = x;
       x *= 2; // we're assuming the generator alpha is 2
       if (x >= size) {
@@ -54,7 +54,7 @@ class GenericGF {
         x &= size - 1;
       }
     }
-    for (int i = 0; i < size - 1; i++) {
+    for (var i = 0; i < size - 1; i++) {
       _logTable[_expTable[i]] = i;
     }
     // logTable[0] == 0 but this should never be used
@@ -121,6 +121,6 @@ class GenericGF {
 
   @override
   String toString() {
-    return "GF(0x${primitive.toRadixString(16)},$size)";
+    return 'GF(0x${primitive.toRadixString(16)},$size)';
   }
 }

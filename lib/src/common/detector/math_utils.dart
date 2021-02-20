@@ -19,16 +19,16 @@ class MathUtils {
   /// @param bY point B y coordinate
   /// @return Euclidean distance between points A and B
   static double distance(num aX, num aY, num bX, num bY) {
-    num xDiff = aX - bX;
-    num yDiff = aY - bY;
+    var xDiff = aX - bX;
+    var yDiff = aY - bY;
     return math.sqrt(xDiff * xDiff + yDiff * yDiff);
   }
 
   /// @param array values to sum
   /// @return sum of values in array
   static int sum(List<int> array) {
-    int count = 0;
-    for (int a in array) {
+    var count = 0;
+    for (var a in array) {
       count += a;
     }
     return count;

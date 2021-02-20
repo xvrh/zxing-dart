@@ -34,39 +34,39 @@ class PerspectiveTransform {
       double y2p,
       double x3p,
       double y3p) {
-    PerspectiveTransform qToS =
+    var qToS =
         quadrilateralToSquare(x0, y0, x1, y1, x2, y2, x3, y3);
-    PerspectiveTransform sToQ =
+    var sToQ =
         squareToQuadrilateral(x0p, y0p, x1p, y1p, x2p, y2p, x3p, y3p);
     return sToQ.times(qToS);
   }
 
   void transformPoints(List<double> points) {
-    double a11 = this.a11;
-    double a12 = this.a12;
-    double a13 = this.a13;
-    double a21 = this.a21;
-    double a22 = this.a22;
-    double a23 = this.a23;
-    double a31 = this.a31;
-    double a32 = this.a32;
-    double a33 = this.a33;
-    int maxI = points.length - 1; // points.length must be even
-    for (int i = 0; i < maxI; i += 2) {
-      double x = points[i];
-      double y = points[i + 1];
-      double denominator = a13 * x + a23 * y + a33;
+    var a11 = this.a11;
+    var a12 = this.a12;
+    var a13 = this.a13;
+    var a21 = this.a21;
+    var a22 = this.a22;
+    var a23 = this.a23;
+    var a31 = this.a31;
+    var a32 = this.a32;
+    var a33 = this.a33;
+    var maxI = points.length - 1; // points.length must be even
+    for (var i = 0; i < maxI; i += 2) {
+      var x = points[i];
+      var y = points[i + 1];
+      var denominator = a13 * x + a23 * y + a33;
       points[i] = (a11 * x + a21 * y + a31) / denominator;
       points[i + 1] = (a12 * x + a22 * y + a32) / denominator;
     }
   }
 
   void transformXYPoints(List<double> xValues, List<double> yValues) {
-    int n = xValues.length;
-    for (int i = 0; i < n; i++) {
-      double x = xValues[i];
-      double y = yValues[i];
-      double denominator = a13 * x + a23 * y + a33;
+    var n = xValues.length;
+    for (var i = 0; i < n; i++) {
+      var x = xValues[i];
+      var y = yValues[i];
+      var denominator = a13 * x + a23 * y + a33;
       xValues[i] = (a11 * x + a21 * y + a31) / denominator;
       yValues[i] = (a12 * x + a22 * y + a32) / denominator;
     }
@@ -74,20 +74,20 @@ class PerspectiveTransform {
 
   static PerspectiveTransform squareToQuadrilateral(double x0, double y0,
       double x1, double y1, double x2, double y2, double x3, double y3) {
-    double dx3 = x0 - x1 + x2 - x3;
-    double dy3 = y0 - y1 + y2 - y3;
+    var dx3 = x0 - x1 + x2 - x3;
+    var dy3 = y0 - y1 + y2 - y3;
     if (dx3 == 0.0 && dy3 == 0.0) {
       // Affine
       return PerspectiveTransform._(
           x1 - x0, x2 - x1, x0, y1 - y0, y2 - y1, y0, 0.0, 0.0, 1.0);
     } else {
-      double dx1 = x1 - x2;
-      double dx2 = x3 - x2;
-      double dy1 = y1 - y2;
-      double dy2 = y3 - y2;
-      double denominator = dx1 * dy2 - dx2 * dy1;
-      double a13 = (dx3 * dy2 - dx2 * dy3) / denominator;
-      double a23 = (dx1 * dy3 - dx3 * dy1) / denominator;
+      var dx1 = x1 - x2;
+      var dx2 = x3 - x2;
+      var dy1 = y1 - y2;
+      var dy2 = y3 - y2;
+      var denominator = dx1 * dy2 - dx2 * dy1;
+      var a13 = (dx3 * dy2 - dx2 * dy3) / denominator;
+      var a23 = (dx1 * dy3 - dx3 * dy1) / denominator;
       return PerspectiveTransform._(x1 - x0 + a13 * x1, x3 - x0 + a23 * x3, x0,
           y1 - y0 + a13 * y1, y3 - y0 + a23 * y3, y0, a13, a23, 1.0);
     }

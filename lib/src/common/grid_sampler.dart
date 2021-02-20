@@ -89,14 +89,14 @@ abstract class GridSampler {
   /// @param points actual points in x1,y1,...,xn,yn form
   /// @throws NotFoundException if an endpoint is lies outside the image boundaries
   static void checkAndNudgePoints(BitMatrix image, List<double> points) {
-    int width = image.width;
-    int height = image.height;
+    var width = image.width;
+    var height = image.height;
     // Check and nudge points from start until we see some that are OK:
-    bool nudged = true;
-    int maxOffset = points.length - 1; // points.length must be even
-    for (int offset = 0; offset < maxOffset && nudged; offset += 2) {
-      int x = points[offset].toInt();
-      int y = points[offset + 1].toInt();
+    var nudged = true;
+    var maxOffset = points.length - 1; // points.length must be even
+    for (var offset = 0; offset < maxOffset && nudged; offset += 2) {
+      var x = points[offset].toInt();
+      var y = points[offset + 1].toInt();
       if (x < -1 || x > width || y < -1 || y > height) {
         throw NotFoundException();
       }
@@ -118,9 +118,9 @@ abstract class GridSampler {
     }
     // Check and nudge points from end:
     nudged = true;
-    for (int offset = points.length - 2; offset >= 0 && nudged; offset -= 2) {
-      int x = points[offset].toInt();
-      int y = points[offset + 1].toInt();
+    for (var offset = points.length - 2; offset >= 0 && nudged; offset -= 2) {
+      var x = points[offset].toInt();
+      var y = points[offset + 1].toInt();
       if (x < -1 || x > width || y < -1 || y > height) {
         throw NotFoundException();
       }
