@@ -274,14 +274,14 @@ void main() {
     try {
       emptyMatrix.clone().xor(badMatrix);
       fail('Should have throw');
-    } on ArgumentError catch (ex) {
+    } on ArgumentError catch (_) {
       // good
     }
 
     try {
       badMatrix.clone().xor(emptyMatrix);
       fail('Should have thrown');
-    } on ArgumentError catch (ex) {
+    } on ArgumentError catch (_) {
       // good
     }
   });

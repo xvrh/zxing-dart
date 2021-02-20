@@ -46,7 +46,7 @@ void testGolden(
           expect(result.rawBytes, expected.buffer.asInt8List());
         }
         ++passCount;
-      } on ReaderException catch (e) {
+      } on ReaderException catch (_) {
         //print('Failed to decode $folder/${pngFile.path} ($e)');
       }
     }

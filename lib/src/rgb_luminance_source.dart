@@ -15,7 +15,6 @@
  */
 
 import 'dart:typed_data';
-import 'package:fixnum/fixnum.dart';
 
 import 'common/system.dart' as system;
 import 'luminance_source.dart';
