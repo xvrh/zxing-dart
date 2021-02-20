@@ -79,8 +79,7 @@ class AlignmentPatternFinder {
               // A winner?
               if (_foundPatternCross(stateCount)) {
                 // Yes
-                var confirmed =
-                    _handlePossibleCenter(stateCount, i, j);
+                var confirmed = _handlePossibleCenter(stateCount, i, j);
                 if (confirmed != null) {
                   return confirmed;
                 }
@@ -104,8 +103,7 @@ class AlignmentPatternFinder {
         j++;
       }
       if (_foundPatternCross(stateCount)) {
-        var confirmed =
-            _handlePossibleCenter(stateCount, i, maxJ);
+        var confirmed = _handlePossibleCenter(stateCount, i, maxJ);
         if (confirmed != null) {
           return confirmed;
         }
@@ -230,8 +228,7 @@ class AlignmentPatternFinder {
         }
       }
       // Hadn't found this before; save it
-      var point =
-          AlignmentPattern(centerJ, centerI, estimatedModuleSize);
+      var point = AlignmentPattern(centerJ, centerI, estimatedModuleSize);
       possibleCenters.add(point);
       if (resultPointCallback != null) {
         resultPointCallback!(point);

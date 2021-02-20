@@ -205,8 +205,8 @@ void main() {
     var centerMatrix = BitMatrix(3, 3);
     centerMatrix.setRegion(1, 1, 1, 1);
 
-    var matrix =
-        List<List<bool>>.generate(3, (index) => List.generate(3, (index) => false));
+    var matrix = List<List<bool>>.generate(
+        3, (index) => List.generate(3, (index) => false));
     expect(BitMatrix.parse(matrix), emptyMatrix);
     matrix[1][1] = true;
     expect(BitMatrix.parse(matrix), centerMatrix);

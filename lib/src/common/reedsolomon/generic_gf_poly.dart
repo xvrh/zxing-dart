@@ -187,8 +187,7 @@ class GenericGFPoly {
           remainder.getCoefficient(remainder.getDegree()),
           inverseDenominatorLeadingTerm);
       var term = other.multiplyByMonomial(degreeDifference, scale);
-      var iterationQuotient =
-          _field.buildMonomial(degreeDifference, scale);
+      var iterationQuotient = _field.buildMonomial(degreeDifference, scale);
       quotient = quotient.addOrSubtract(iterationQuotient);
       remainder = remainder.addOrSubtract(term);
     }

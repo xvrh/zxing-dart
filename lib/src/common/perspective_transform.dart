@@ -34,10 +34,8 @@ class PerspectiveTransform {
       double y2p,
       double x3p,
       double y3p) {
-    var qToS =
-        quadrilateralToSquare(x0, y0, x1, y1, x2, y2, x3, y3);
-    var sToQ =
-        squareToQuadrilateral(x0p, y0p, x1p, y1p, x2p, y2p, x3p, y3p);
+    var qToS = quadrilateralToSquare(x0, y0, x1, y1, x2, y2, x3, y3);
+    var sToQ = squareToQuadrilateral(x0p, y0p, x1p, y1p, x2p, y2p, x3p, y3p);
     return sToQ.times(qToS);
   }
 

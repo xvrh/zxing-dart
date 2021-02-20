@@ -25,24 +25,23 @@ class DefaultGridSampler extends GridSampler {
       double p3FromY,
       double p4FromX,
       double p4FromY) {
-    var transform =
-        PerspectiveTransform.quadrilateralToQuadrilateral(
-            p1ToX,
-            p1ToY,
-            p2ToX,
-            p2ToY,
-            p3ToX,
-            p3ToY,
-            p4ToX,
-            p4ToY,
-            p1FromX,
-            p1FromY,
-            p2FromX,
-            p2FromY,
-            p3FromX,
-            p3FromY,
-            p4FromX,
-            p4FromY);
+    var transform = PerspectiveTransform.quadrilateralToQuadrilateral(
+        p1ToX,
+        p1ToY,
+        p2ToX,
+        p2ToY,
+        p3ToX,
+        p3ToY,
+        p4ToX,
+        p4ToY,
+        p1FromX,
+        p1FromY,
+        p2FromX,
+        p2FromY,
+        p3FromX,
+        p3FromY,
+        p4FromX,
+        p4FromY);
 
     return sampleGridTransform(image, dimensionX, dimensionY, transform);
   }

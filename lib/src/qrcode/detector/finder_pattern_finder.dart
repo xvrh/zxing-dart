@@ -479,8 +479,7 @@ class FinderPatternFinder {
           }
         }
         if (!found) {
-          var point =
-              FinderPattern(centerJ, centerI, estimatedModuleSize);
+          var point = FinderPattern(centerJ, centerI, estimatedModuleSize);
           possibleCenters.add(point);
           if (resultPointCallback != null) {
             resultPointCallback!(point);

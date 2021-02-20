@@ -168,8 +168,7 @@ void main() {
     var oldBits = <int>[128, 256, 512, 6453324, 50934953];
     for (var size = 1; size < 160; size++) {
       var newBitsOriginal = _reverseOriginal(Int32List.fromList(oldBits), size);
-      var newBitArray =
-          BitArray.fromBits(Int32List.fromList(oldBits), size);
+      var newBitArray = BitArray.fromBits(Int32List.fromList(oldBits), size);
       newBitArray.reverse();
       var newBitsNew = newBitArray.bitArray;
       expect(
