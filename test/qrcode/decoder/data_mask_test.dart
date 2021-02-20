@@ -1,19 +1,3 @@
-/*
- * Copyright 2007 ZXing authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import 'package:test/test.dart';
 import 'package:zxing/src/common/bit_matrix.dart';
 import 'package:zxing/src/qrcode/decoder/data_mask.dart';
@@ -55,20 +39,20 @@ void main() {
 }
 
 void testMaskAcrossDimensions(int reference, MaskCondition isMasked) {
-  DataMask mask = DataMask.values[reference];
-  for (int version = 1; version <= 40; version++) {
-    int dimension = 17 + 4 * version;
+  var mask = DataMask.values[reference];
+  for (var version = 1; version <= 40; version++) {
+    var dimension = 17 + 4 * version;
     testMask(mask, dimension, isMasked);
   }
 }
 
 void testMask(DataMask mask, int dimension, MaskCondition isMasked) {
-  BitMatrix bits = new BitMatrix(dimension);
+  var bits = BitMatrix(dimension);
   mask.unmaskBitMatrix(bits, dimension);
-  for (int i = 0; i < dimension; i++) {
-    for (int j = 0; j < dimension; j++) {
+  for (var i = 0; i < dimension; i++) {
+    for (var j = 0; j < dimension; j++) {
       expect(bits.get(j, i), isMasked(i, j),
-          reason: "($i,$j) Got ${bits.get(j, i)} expected ${isMasked(i, j)}");
+          reason: '($i,$j) Got ${bits.get(j, i)} expected ${isMasked(i, j)}');
     }
   }
 }

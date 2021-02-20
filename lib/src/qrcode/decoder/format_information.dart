@@ -1,39 +1,18 @@
-/*
- * Copyright 2007 ZXing authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import 'package:fixnum/fixnum.dart';
-import 'package:zxing/src/common/bits.dart';
-
+import '../../common/bits.dart';
 import 'error_correction_level.dart';
 
-/**
- * <p>Encapsulates a QR Code's format information, including the data mask used and
- * error correction level.</p>
- *
- * @author Sean Owen
- * @see DataMask
- * @see ErrorCorrectionLevel
- */
+/// <p>Encapsulates a QR Code's format information, including the data mask used and
+/// error correction level.</p>
+///
+/// @author Sean Owen
+/// @see DataMask
+/// @see ErrorCorrectionLevel
 class FormatInformation {
   static final _formatInfoMaskQR = 0x5412;
 
-  /**
-   * See ISO 18004:2006, Annex C, Table C.1
-   */
-  static final _FORMAT_INFO_DECODE_LOOKUP = <List<int>>[
+  /// See ISO 18004:2006, Annex C, Table C.1
+  static final _formatInfoDecodeLookup = <List<int>>[
     [0x5412, 0x00],
     [0x5125, 0x01],
     [0x5E7C, 0x02],
@@ -83,13 +62,11 @@ class FormatInformation {
     return bitCount(a ^ b);
   }
 
-  /**
-   * @param maskedFormatInfo1 format info indicator, with mask still applied
-   * @param maskedFormatInfo2 second copy of same info; both are checked at the same time
-   *  to establish best match
-   * @return information about the format it specifies, or {@code null}
-   *  if doesn't seem to match any known pattern
-   */
+  /// @param maskedFormatInfo1 format info indicator, with mask still applied
+  /// @param maskedFormatInfo2 second copy of same info; both are checked at the same time
+  ///  to establish best match
+  /// @return information about the format it specifies, or {@code null}
+  ///  if doesn't seem to match any known pattern
   static FormatInformation? decodeFormatInformation(
       int maskedFormatInfo1, int maskedFormatInfo2) {
     var formatInfo =
@@ -107,15 +84,15 @@ class FormatInformation {
   static FormatInformation? _doDecodeFormatInformation(
       int maskedFormatInfo1, int maskedFormatInfo2) {
     // Find the int in FORMAT_INFO_DECODE_LOOKUP with fewest bits differing
-    int bestDifference = Int32.MAX_VALUE.toInt();
-    int bestFormatInfo = 0;
-    for (List<int> decodeInfo in _FORMAT_INFO_DECODE_LOOKUP) {
-      int targetInfo = decodeInfo[0];
+    var bestDifference = Int32.MAX_VALUE.toInt();
+    var bestFormatInfo = 0;
+    for (var decodeInfo in _formatInfoDecodeLookup) {
+      var targetInfo = decodeInfo[0];
       if (targetInfo == maskedFormatInfo1 || targetInfo == maskedFormatInfo2) {
         // Found an exact match
-        return new FormatInformation._(decodeInfo[1]);
+        return FormatInformation._(decodeInfo[1]);
       }
-      int bitsDifference = numBitsDiffering(maskedFormatInfo1, targetInfo);
+      var bitsDifference = numBitsDiffering(maskedFormatInfo1, targetInfo);
       if (bitsDifference < bestDifference) {
         bestFormatInfo = decodeInfo[1];
         bestDifference = bitsDifference;
@@ -132,7 +109,7 @@ class FormatInformation {
     // Hamming distance of the 32 masked codes is 7, by construction, so <= 3 bits
     // differing means we found a match
     if (bestDifference <= 3) {
-      return new FormatInformation._(bestFormatInfo);
+      return FormatInformation._(bestFormatInfo);
     }
     return null;
   }
@@ -147,7 +124,7 @@ class FormatInformation {
     if (other is! FormatInformation) {
       return false;
     }
-    return this.errorCorrectionLevel == other.errorCorrectionLevel &&
-        this.dataMask == other.dataMask;
+    return errorCorrectionLevel == other.errorCorrectionLevel &&
+        dataMask == other.dataMask;
   }
 }

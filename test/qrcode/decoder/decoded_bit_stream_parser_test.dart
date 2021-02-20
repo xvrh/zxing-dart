@@ -1,35 +1,19 @@
-/*
- * Copyright 2008 ZXing authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import 'package:test/test.dart';
+import 'package:zxing/src/decode_hint.dart';
 import 'package:zxing/src/qrcode/decoder/decoded_bit_stream_parser.dart';
 import 'package:zxing/src/qrcode/decoder/version.dart';
-
 import '../../common/bit_source_builder.dart';
 
 void main() {
   test('Simple Byte mode', () {
-    BitSourceBuilder builder = new BitSourceBuilder();
+    var builder = BitSourceBuilder();
     builder.write(0x04, 4); // Byte mode
     builder.write(0x03, 8); // 3 bytes
     builder.write(0xF1, 8);
     builder.write(0xF2, 8);
     builder.write(0xF3, 8);
-    String result = DecodedBitStreamParser.decode(
-            builder.toByteArray(), Version.getVersionForNumber(1), null, null)
+    var result = DecodedBitStreamParser.decode(builder.toByteArray(),
+            Version.getVersionForNumber(1), null, DecodeHints())
         .text;
     //expect(result, "\u00f1\u00f2\u00f3");
     expect(result, hasLength(3));

@@ -1,22 +1,5 @@
-/*
- * Copyright 2013 ZXing authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import 'dart:math';
 import 'dart:typed_data';
-
 import 'package:test/test.dart';
 import 'package:zxing/src/common/bit_set.dart';
 import 'package:zxing/src/common/reedsolomon/generic_gf.dart';
@@ -25,15 +8,15 @@ import 'package:zxing/src/common/reedsolomon/reed_solomon_encoder.dart';
 import 'package:zxing/src/common/reedsolomon/reed_solomon_exception.dart';
 import 'package:zxing/src/common/system.dart' as system;
 
-final int _DECODER_RANDOM_TEST_ITERATIONS = 3;
-final int _DECODER_TEST_ITERATIONS = 10;
+final int _decoderRandomTestIterations = 3;
+final int _decoderTestIterations = 10;
 
 void main() {
   test('Data matrix', () {
     // real life test cases
-    _testEncodeDecode(GenericGF.DATA_MATRIX_FIELD_256, [142, 164, 186],
-        [114, 25, 5, 88, 102]);
-    _testEncodeDecode(GenericGF.DATA_MATRIX_FIELD_256, [
+    _testEncodeDecode(
+        GenericGF.dataMatrixField256, [142, 164, 186], [114, 25, 5, 88, 102]);
+    _testEncodeDecode(GenericGF.dataMatrixField256, [
       0x69, 0x75, 0x75, 0x71, 0x3B, 0x30, 0x30, 0x64, //
       0x70, 0x65, 0x66, 0x2F, 0x68, 0x70, 0x70, 0x68,
       0x6D, 0x66, 0x2F, 0x64, 0x70, 0x6E, 0x30, 0x71,
@@ -45,21 +28,21 @@ void main() {
       0x80, 0x88, 0xBE, 0xFF, 0xB7, 0xFA, 0xA9, 0x95,
     ]);
     // synthetic test cases
-    _testEncodeDecodeRandom(GenericGF.DATA_MATRIX_FIELD_256, 10, 240);
-    _testEncodeDecodeRandom(GenericGF.DATA_MATRIX_FIELD_256, 128, 127);
-    _testEncodeDecodeRandom(GenericGF.DATA_MATRIX_FIELD_256, 220, 35);
+    _testEncodeDecodeRandom(GenericGF.dataMatrixField256, 10, 240);
+    _testEncodeDecodeRandom(GenericGF.dataMatrixField256, 128, 127);
+    _testEncodeDecodeRandom(GenericGF.dataMatrixField256, 220, 35);
   });
 
   test('QR Code', () {
     // Test case from example given in ISO 18004, Annex I
-    _testEncodeDecode(GenericGF.QR_CODE_FIELD_256, [
+    _testEncodeDecode(GenericGF.qrCodeField256, [
       0x10, 0x20, 0x0C, 0x56, 0x61, 0x80, 0xEC, 0x11, //
       0xEC, 0x11, 0xEC, 0x11, 0xEC, 0x11, 0xEC, 0x11,
     ], [
       0xA5, 0x24, 0xD4, 0xC1, 0xED, 0x36, 0xC7, 0x87, //
       0x2C, 0x55,
     ]);
-    _testEncodeDecode(GenericGF.QR_CODE_FIELD_256, [
+    _testEncodeDecode(GenericGF.qrCodeField256, [
       0x72, 0x67, 0x2F, 0x77, 0x69, 0x6B, 0x69, 0x2F, //
       0x4D, 0x61, 0x69, 0x6E, 0x5F, 0x50, 0x61, 0x67,
       0x65, 0x3B, 0x3B, 0x00, 0xEC, 0x11, 0xEC, 0x11,
@@ -71,24 +54,24 @@ void main() {
     ]);
     // real life test cases
     // synthetic test cases
-    _testEncodeDecodeRandom(GenericGF.QR_CODE_FIELD_256, 10, 240);
-    _testEncodeDecodeRandom(GenericGF.QR_CODE_FIELD_256, 128, 127);
-    _testEncodeDecodeRandom(GenericGF.QR_CODE_FIELD_256, 220, 35);
+    _testEncodeDecodeRandom(GenericGF.qrCodeField256, 10, 240);
+    _testEncodeDecodeRandom(GenericGF.qrCodeField256, 128, 127);
+    _testEncodeDecodeRandom(GenericGF.qrCodeField256, 220, 35);
   });
 
   test('Aztec', () {
     // real life test cases
     _testEncodeDecode(
-        GenericGF.AZTEC_PARAM, [0x5, 0x6], [0x3, 0x2, 0xB, 0xB, 0x7]);
-    _testEncodeDecode(GenericGF.AZTEC_PARAM, [0x0, 0x0, 0x0, 0x9],
+        GenericGF.aztecParam, [0x5, 0x6], [0x3, 0x2, 0xB, 0xB, 0x7]);
+    _testEncodeDecode(GenericGF.aztecParam, [0x0, 0x0, 0x0, 0x9],
         [0xA, 0xD, 0x8, 0x6, 0x5, 0x6]);
-    _testEncodeDecode(GenericGF.AZTEC_PARAM, [0x2, 0x8, 0x8, 0x7],
+    _testEncodeDecode(GenericGF.aztecParam, [0x2, 0x8, 0x8, 0x7],
         [0xE, 0xC, 0xA, 0x9, 0x6, 0x8]);
     _testEncodeDecode(
-        GenericGF.AZTEC_DATA_6,
+        GenericGF.aztecData6,
         [0x9, 0x32, 0x1, 0x29, 0x2F, 0x2, 0x27, 0x25, 0x1, 0x1B],
         [0x2C, 0x2, 0xD, 0xD, 0xA, 0x16, 0x28, 0x9, 0x22, 0xA, 0x14]);
-    _testEncodeDecode(GenericGF.AZTEC_DATA_8, [
+    _testEncodeDecode(GenericGF.aztecData8, [
       0xE0, 0x86, 0x42, 0x98, 0xE8, 0x4A, 0x96, 0xC6, //
       0xB9, 0xF0, 0x8C, 0xA7, 0x4A, 0xDA, 0xF8, 0xCE,
       0xB7, 0xDE, 0x88, 0x64, 0x29, 0x8E, 0x84, 0xA9,
@@ -107,7 +90,7 @@ void main() {
       0x53, 0x7D, 0x29, 0xFE, 0x06, 0x49, 0xF3, 0x73,
       0x9F, 0xC1, 0x75,
     ]);
-    _testEncodeDecode(GenericGF.AZTEC_DATA_10, [
+    _testEncodeDecode(GenericGF.aztecData10, [
       0x15C, 0x1E1, 0x2D5, 0x02E, 0x048, 0x1E2, 0x037, 0x0CD, //
       0x02E, 0x056, 0x26A, 0x281, 0x1C2, 0x1A6, 0x296, 0x045,
       0x041, 0x0AA, 0x095, 0x2CE, 0x003, 0x38F, 0x2CD, 0x1A2,
@@ -170,7 +153,7 @@ void main() {
       0x0BF, 0x05D, 0x253, 0x1BE, 0x02E, 0x35A, 0x0E4, 0x2E9,
       0x17A, 0x166, 0x03C, 0x007,
     ]);
-    _testEncodeDecode(GenericGF.AZTEC_DATA_12, [
+    _testEncodeDecode(GenericGF.aztecData12, [
       0x571, 0xE1B, 0x542, 0xE12, 0x1E2, 0x0DC, 0xCD0, 0xB85, //
       0x69A, 0xA81, 0x709, 0xA6A, 0x584, 0x510, 0x4AA, 0x256,
       0xCE0, 0x0F8, 0xFB3, 0x5A2, 0x0D9, 0xAD1, 0x389, 0x09C,
@@ -383,24 +366,23 @@ void main() {
       0x6B9, 0x947, 0x9B0,
     ]);
     // synthetic test cases
-    _testEncodeDecodeRandom(
-        GenericGF.AZTEC_PARAM, 2, 5); // compact mode message
-    _testEncodeDecodeRandom(GenericGF.AZTEC_PARAM, 4, 6); // full mode message
-    _testEncodeDecodeRandom(GenericGF.AZTEC_DATA_6, 10, 7);
-    _testEncodeDecodeRandom(GenericGF.AZTEC_DATA_6, 20, 12);
-    _testEncodeDecodeRandom(GenericGF.AZTEC_DATA_8, 20, 11);
-    _testEncodeDecodeRandom(GenericGF.AZTEC_DATA_8, 128, 127);
-    _testEncodeDecodeRandom(GenericGF.AZTEC_DATA_10, 128, 128);
-    _testEncodeDecodeRandom(GenericGF.AZTEC_DATA_10, 768, 255);
-    _testEncodeDecodeRandom(GenericGF.AZTEC_DATA_12, 3072, 1023);
+    _testEncodeDecodeRandom(GenericGF.aztecParam, 2, 5); // compact mode message
+    _testEncodeDecodeRandom(GenericGF.aztecParam, 4, 6); // full mode message
+    _testEncodeDecodeRandom(GenericGF.aztecData6, 10, 7);
+    _testEncodeDecodeRandom(GenericGF.aztecData6, 20, 12);
+    _testEncodeDecodeRandom(GenericGF.aztecData8, 20, 11);
+    _testEncodeDecodeRandom(GenericGF.aztecData8, 128, 127);
+    _testEncodeDecodeRandom(GenericGF.aztecData10, 128, 128);
+    _testEncodeDecodeRandom(GenericGF.aztecData10, 768, 255);
+    _testEncodeDecodeRandom(GenericGF.aztecData12, 3072, 1023);
   });
 }
 
 void corrupt(List<int> received, int howMany, Random random, int max) {
-  var corrupted = new BitArray(received.length);
-  for (int j = 0; j < howMany; j++) {
-    int location = random.nextInt(received.length);
-    int value = random.nextInt(max);
+  var corrupted = BitSetArray(received.length);
+  for (var j = 0; j < howMany; j++) {
+    var location = random.nextInt(received.length);
+    var value = random.nextInt(max);
     if (corrupted[location] || received[location] == value) {
       j--;
     } else {
@@ -412,18 +394,18 @@ void corrupt(List<int> received, int howMany, Random random, int max) {
 
 void _testEncodeDecodeRandom(GenericGF field, int dataSize, int ecSize) {
   expect(dataSize > 0 && dataSize <= field.size - 3, isTrue,
-      reason: "Invalid data size for $field");
+      reason: 'Invalid data size for $field');
   expect(ecSize > 0 && ecSize + dataSize <= field.size, isTrue,
-      reason: "Invalid ECC size for $field");
-  ReedSolomonEncoder encoder = new ReedSolomonEncoder(field);
-  Int32List message = Int32List(dataSize + ecSize);
-  Int32List dataWords = Int32List(dataSize);
-  Int32List ecWords = Int32List(ecSize);
-  Random random = _getPseudoRandom();
-  int iterations = field.size > 256 ? 1 : _DECODER_RANDOM_TEST_ITERATIONS;
-  for (int i = 0; i < iterations; i++) {
+      reason: 'Invalid ECC size for $field');
+  var encoder = ReedSolomonEncoder(field);
+  var message = Int32List(dataSize + ecSize);
+  var dataWords = Int32List(dataSize);
+  var ecWords = Int32List(ecSize);
+  var random = _getPseudoRandom();
+  var iterations = field.size > 256 ? 1 : _decoderRandomTestIterations;
+  for (var i = 0; i < iterations; i++) {
     // generate random data
-    for (int k = 0; k < dataSize; k++) {
+    for (var k = 0; k < dataSize; k++) {
       dataWords[k] = random.nextInt(field.size);
     }
     // generate ECC words
@@ -442,7 +424,7 @@ void _testEncodeDecode(
 }
 
 void _testEncoder(GenericGF field, List<int> dataWords, List<int> ecWords) {
-  ReedSolomonEncoder encoder = new ReedSolomonEncoder(field);
+  var encoder = ReedSolomonEncoder(field);
   var messageExpected = Int32List(dataWords.length + ecWords.length);
   var message = Int32List(dataWords.length + ecWords.length);
   system.arraycopy(dataWords, 0, messageExpected, 0, dataWords.length);
@@ -456,13 +438,13 @@ void _testEncoder(GenericGF field, List<int> dataWords, List<int> ecWords) {
 }
 
 void _testDecoder(GenericGF field, List<int> dataWords, List<int> ecWords) {
-  ReedSolomonDecoder decoder = new ReedSolomonDecoder(field);
+  var decoder = ReedSolomonDecoder(field);
   var message = Int32List(dataWords.length + ecWords.length);
-  int maxErrors = ecWords.length ~/ 2;
-  Random random = _getPseudoRandom();
-  int iterations = field.size > 256 ? 1 : _DECODER_TEST_ITERATIONS;
-  for (int j = 0; j < iterations; j++) {
-    for (int i = 0; i < ecWords.length; i++) {
+  var maxErrors = ecWords.length ~/ 2;
+  var random = _getPseudoRandom();
+  var iterations = field.size > 256 ? 1 : _decoderTestIterations;
+  for (var j = 0; j < iterations; j++) {
+    for (var i = 0; i < ecWords.length; i++) {
       if (i > 10 && i < ecWords.length / 2 - 10) {
         // performance improvement - skip intermediate cases in long-running tests
         i += ecWords.length ~/ 10;
@@ -476,14 +458,14 @@ void _testDecoder(GenericGF field, List<int> dataWords, List<int> ecWords) {
         // fail only if maxErrors exceeded
         expect(i > maxErrors, isTrue,
             reason:
-                "Decode in $field (${dataWords.length},${ecWords.length}) failed at $i errors: $e");
+                'Decode in $field (${dataWords.length},${ecWords.length}) failed at $i errors: $e');
         // else stop
         break;
       }
       if (i < maxErrors) {
         _expectDataEquals(message, dataWords,
             reason:
-                "Decode in $field (${dataWords.length},${ecWords.length}) failed at $i errors");
+                'Decode in $field (${dataWords.length},${ecWords.length}) failed at $i errors');
       }
     }
   }
@@ -491,24 +473,24 @@ void _testDecoder(GenericGF field, List<int> dataWords, List<int> ecWords) {
 
 void _expectDataEquals(List<int> received, List<int> expected,
     {required String reason}) {
-  for (int i = 0; i < expected.length; i++) {
+  for (var i = 0; i < expected.length; i++) {
     if (expected[i] != received[i]) {
-      fail(reason +
-          ". Mismatch at $i. Expected ${_arrayToString(expected)}, got ${_arrayToString(received)}");
+      fail(
+          '$reason. Mismatch at $i. Expected ${_arrayToString(expected)}, got ${_arrayToString(received)}');
     }
   }
 }
 
 String _arrayToString(List<int> data) {
-  var sb = new StringBuffer("{");
-  for (int i = 0; i < data.length; i++) {
+  var sb = StringBuffer('{');
+  for (var i = 0; i < data.length; i++) {
     var d = data[i].toRadixString(16);
-    sb.write(i > 0 ? ",$d" : "$d");
+    sb.write(i > 0 ? ',$d' : '$d');
   }
   sb.write('}');
   return sb.toString();
 }
 
 Random _getPseudoRandom() {
-  return new Random(0xDEADBEEF);
+  return Random(0xDEADBEEF);
 }

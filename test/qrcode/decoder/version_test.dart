@@ -1,19 +1,3 @@
-/*
- * Copyright 2008 ZXing authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import 'package:test/test.dart';
 import 'package:zxing/src/qrcode/decoder/error_correction_level.dart';
 import 'package:zxing/src/qrcode/decoder/version.dart';
@@ -24,7 +8,7 @@ void main() {
   });
 
   test('Version for number', () {
-    for (int i = 1; i <= 40; i++) {
+    for (var i = 1; i <= 40; i++) {
       checkVersion(Version.getVersionForNumber(i), i, 4 * i + 17);
     }
   });
@@ -34,13 +18,13 @@ void checkVersion(Version version, int number, int dimension) {
   expect(version, isNotNull);
   expect(version.versionNumber, number);
   if (number > 1) {
-    expect(version.alignmentPatternCenters.length > 0, isTrue);
+    expect(version.alignmentPatternCenters.isNotEmpty, isTrue);
   }
   expect(version.dimensionForVersion, dimension);
-  expect(version.getECBlocksForLevel(ErrorCorrectionLevel.H), isNotNull);
-  expect(version.getECBlocksForLevel(ErrorCorrectionLevel.L), isNotNull);
-  expect(version.getECBlocksForLevel(ErrorCorrectionLevel.M), isNotNull);
-  expect(version.getECBlocksForLevel(ErrorCorrectionLevel.Q), isNotNull);
+  expect(version.getECBlocksForLevel(ErrorCorrectionLevel.h), isNotNull);
+  expect(version.getECBlocksForLevel(ErrorCorrectionLevel.l), isNotNull);
+  expect(version.getECBlocksForLevel(ErrorCorrectionLevel.m), isNotNull);
+  expect(version.getECBlocksForLevel(ErrorCorrectionLevel.q), isNotNull);
   expect(version.buildFunctionPattern(), isNotNull);
 }
 

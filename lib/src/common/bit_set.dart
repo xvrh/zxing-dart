@@ -1,6 +1,6 @@
 import 'dart:collection';
-import 'dart:typed_data';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 /// An integer-indexed collection to test membership status.
 abstract class BitSet {
@@ -93,8 +93,8 @@ class ListSet extends BitSet {
 
   @override
   bool operator [](int index) {
-    int left = 0;
-    int right = _list.length - 1;
+    var left = 0;
+    var right = _list.length - 1;
     while (left <= right) {
       final mid = (left + right) >> 1;
       final value = _list[mid];
@@ -142,8 +142,8 @@ class RangeSet extends BitSet {
 
   @override
   bool operator [](int index) {
-    int left = 0;
-    int right = (_list.length >> 1) - 1;
+    var left = 0;
+    var right = (_list.length >> 1) - 1;
     while (left <= right) {
       final mid = (left + right) >> 1;
       final midIndex = mid << 1;
@@ -169,8 +169,8 @@ class RangeSet extends BitSet {
 
   @override
   int get cardinality {
-    int value = _list.length >> 1;
-    for (int i = 1; i < _list.length; i += 2) {
+    var value = _list.length >> 1;
+    for (var i = 1; i < _list.length; i += 2) {
       value += _list[i];
     }
     return value;
@@ -186,9 +186,9 @@ class RangeSet extends BitSet {
 
   @override
   Iterable<int> asIntIterable() sync* {
-    for (int i = 0; i < _list.length; i += 2) {
-      int value = _list[i];
-      for (int j = _list[i + 1]; j >= 0; j--) {
+    for (var i = 0; i < _list.length; i += 2) {
+      var value = _list[i];
+      for (var j = _list[i + 1]; j >= 0; j--) {
         yield value;
         value++;
       }
@@ -198,10 +198,10 @@ class RangeSet extends BitSet {
 
 Iterable<int> _toUint32Iterable(Iterable<int> values) sync* {
   final iter = values.iterator;
-  int blockOffset = 0;
-  int blockLast = 31;
-  int block = 0;
-  bool hasCurrent = iter.moveNext();
+  var blockOffset = 0;
+  var blockLast = 31;
+  var block = 0;
+  var hasCurrent = iter.moveNext();
   while (hasCurrent) {
     if (block == 0 && iter.current > blockLast) {
       yield 0;
@@ -244,31 +244,31 @@ List<int> _cloneList(List<int> list) {
 }
 
 /// Bit array to store bits.
-class BitArray extends BitSet {
+class BitSetArray extends BitSet {
   Uint32List _data;
   int _length;
 
-  BitArray._(this._data) : _length = _data.length << 5;
+  BitSetArray._(this._data) : _length = _data.length << 5;
 
   /// Creates a bit array with maximum [length] items.
   ///
   /// [length] will be rounded up to match the 32-bit boundary.
-  factory BitArray(int length) =>
-      BitArray._(Uint32List(_bufferLength32(length)));
+  factory BitSetArray(int length) =>
+      BitSetArray._(Uint32List(_bufferLength32(length)));
 
   /// Creates a bit array using a byte buffer.
-  factory BitArray.fromByteBuffer(ByteBuffer buffer) {
+  factory BitSetArray.fromByteBuffer(ByteBuffer buffer) {
     final data = buffer.asUint32List();
-    return BitArray._(data);
+    return BitSetArray._(data);
   }
 
   /// Creates a bit array using a generic bit set.
-  factory BitArray.fromBitSet(BitSet set, {int? length}) {
+  factory BitSetArray.fromBitSet(BitSet set, {int? length}) {
     length ??= set.length;
     final setDataLength = _bufferLength32(set.length);
     final data = Uint32List(_bufferLength32(length));
     data.setRange(0, setDataLength, set.asUint32Iterable());
-    return BitArray._(data);
+    return BitSetArray._(data);
   }
 
   /// The value of the bit with the specified [index].
@@ -286,7 +286,7 @@ class BitArray extends BitSet {
     }
   }
 
-  /// The number of bit in this [BitArray].
+  /// The number of bit in this [BitSetArray].
   ///
   /// [length] will be rounded up to match the 32-bit boundary.
   ///
@@ -309,12 +309,12 @@ class BitArray extends BitSet {
       .asUint8List()
       .fold(0, (sum, value) => sum + _cardinalityBitCounts[value]);
 
-  /// Whether the [BitArray] is empty == has only zero values.
+  /// Whether the [BitSetArray] is empty == has only zero values.
   bool get isEmpty {
     return _data.every((i) => i == 0);
   }
 
-  /// Whether the [BitArray] is not empty == has set values.
+  /// Whether the [BitSetArray] is not empty == has set values.
   bool get isNotEmpty {
     return _data.any((i) => i != 0);
   }
@@ -329,9 +329,9 @@ class BitArray extends BitSet {
     indexes.forEach(clearBit);
   }
 
-  /// Sets all of the bits in the current [BitArray] to false.
+  /// Sets all of the bits in the current [BitSetArray] to false.
   void clearAll() {
-    for (int i = 0; i < _data.length; i++) {
+    for (var i = 0; i < _data.length; i++) {
       _data[i] = 0;
     }
   }
@@ -346,9 +346,9 @@ class BitArray extends BitSet {
     indexes.forEach(setBit);
   }
 
-  /// Sets all the bit values in the current [BitArray] to true.
+  /// Sets all the bit values in the current [BitSetArray] to true.
   void setAll() {
-    for (int i = 0; i < _data.length; i++) {
+    for (var i = 0; i < _data.length; i++) {
       _data[i] = -1;
     }
   }
@@ -363,19 +363,19 @@ class BitArray extends BitSet {
     indexes.forEach(invertBit);
   }
 
-  /// Inverts all the bit values in the current [BitArray].
+  /// Inverts all the bit values in the current [BitSetArray].
   void invertAll() {
-    for (int i = 0; i < _data.length; i++) {
-      _data[i] = ~(_data[i]);
+    for (var i = 0; i < _data.length; i++) {
+      _data[i] = ~_data[i];
     }
   }
 
-  /// Update the current [BitArray] using a logical AND operation with the
+  /// Update the current [BitSetArray] using a logical AND operation with the
   /// corresponding elements in the specified [set].
   /// Excess size of the [set] is ignored.
   void and(BitSet set) {
     final iter = set.asUint32Iterable().iterator;
-    int i = 0;
+    var i = 0;
     for (; i < _data.length && iter.moveNext(); i++) {
       _data[i] &= iter.current;
     }
@@ -384,74 +384,74 @@ class BitArray extends BitSet {
     }
   }
 
-  /// Update the current [BitArray] using a logical AND NOT operation with the
+  /// Update the current [BitSetArray] using a logical AND NOT operation with the
   /// corresponding elements in the specified [set].
   /// Excess size of the [set] is ignored.
   void andNot(BitSet set) {
     final iter = set.asUint32Iterable().iterator;
-    for (int i = 0; i < _data.length && iter.moveNext(); i++) {
+    for (var i = 0; i < _data.length && iter.moveNext(); i++) {
       _data[i] &= ~iter.current;
     }
   }
 
-  /// Update the current [BitArray] using a logical OR operation with the
+  /// Update the current [BitSetArray] using a logical OR operation with the
   /// corresponding elements in the specified [set].
   /// Excess size of the [set] is ignored.
   void or(BitSet set) {
     final iter = set.asUint32Iterable().iterator;
-    for (int i = 0; i < _data.length && iter.moveNext(); i++) {
+    for (var i = 0; i < _data.length && iter.moveNext(); i++) {
       _data[i] |= iter.current;
     }
   }
 
-  /// Update the current [BitArray] using a logical XOR operation with the
+  /// Update the current [BitSetArray] using a logical XOR operation with the
   /// corresponding elements in the specified [set].
   /// Excess size of the [set] is ignored.
   void xor(BitSet set) {
     final iter = set.asUint32Iterable().iterator;
-    for (int i = 0; i < _data.length && iter.moveNext(); i++) {
+    for (var i = 0; i < _data.length && iter.moveNext(); i++) {
       _data[i] = _data[i] ^ iter.current;
     }
   }
 
-  /// Creates a copy of the current [BitArray].
+  /// Creates a copy of the current [BitSetArray].
   @override
-  BitArray clone() {
+  BitSetArray clone() {
     final newData = Uint32List(_data.length);
     newData.setRange(0, _data.length, _data);
-    return BitArray._(newData);
+    return BitSetArray._(newData);
   }
 
-  /// Creates a [BitArray] using a logical AND operation with the
+  /// Creates a [BitSetArray] using a logical AND operation with the
   /// corresponding elements in the specified [set].
   /// Excess size of the [set] is ignored.
-  BitArray operator &(BitSet set) => clone()..and(set);
+  BitSetArray operator &(BitSet set) => clone()..and(set);
 
-  /// Creates a [BitArray] using a logical AND NOT operation with the
+  /// Creates a [BitSetArray] using a logical AND NOT operation with the
   /// corresponding elements in the specified [set].
   /// Excess size of the [set] is ignored.
-  BitArray operator %(BitSet set) => clone()..andNot(set);
+  BitSetArray operator %(BitSet set) => clone()..andNot(set);
 
-  /// Creates a [BitArray] using a logical OR operation with the
+  /// Creates a [BitSetArray] using a logical OR operation with the
   /// corresponding elements in the specified [set].
   /// Excess size of the [set] is ignored.
-  BitArray operator |(BitSet set) => clone()..or(set);
+  BitSetArray operator |(BitSet set) => clone()..or(set);
 
-  /// Creates a [BitArray] using a logical XOR operation with the
+  /// Creates a [BitSetArray] using a logical XOR operation with the
   /// corresponding elements in the specified [set].
   /// Excess size of the [set] is ignored.
-  BitArray operator ^(BitSet set) => clone()..xor(set);
+  BitSetArray operator ^(BitSet set) => clone()..xor(set);
 
   /// Creates a string of 0s and 1s of the content of the array.
   String toBinaryString() {
     final sb = StringBuffer();
-    for (int i = 0; i < length; i++) {
+    for (var i = 0; i < length; i++) {
       sb.write(this[i] ? '1' : '0');
     }
     return sb.toString();
   }
 
-  /// The backing, mutable byte buffer of the [BitArray].
+  /// The backing, mutable byte buffer of the [BitSetArray].
   /// Use with caution.
   ByteBuffer get byteBuffer => _data.buffer;
 
@@ -473,7 +473,7 @@ final _clearMask = List<int>.generate(32, (i) => ~(1 << i));
 final _cardinalityBitCounts = List<int>.generate(256, _cardinalityOfByte);
 
 int _cardinalityOfByte(int value) {
-  int result = 0;
+  var result = 0;
   while (value > 0) {
     if (value & 0x01 != 0) {
       result++;
@@ -484,7 +484,7 @@ int _cardinalityOfByte(int value) {
 }
 
 class _IntIterable extends IterableBase<int> {
-  final BitArray _array;
+  final BitSetArray _array;
   final bool _value;
   _IntIterable(this._array, this._value);
 
@@ -498,7 +498,7 @@ class _IntIterator implements Iterator<int> {
   final int _length;
   final bool _matchValue;
   final int _skipMatch;
-  final int _cursorMax = (1 << 31);
+  final int _cursorMax = 1 << 31;
   int _current = -1;
   int _cursor = 0;
   int _cursorByte = 0;

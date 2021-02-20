@@ -1,36 +1,16 @@
-/*
- * Copyright 2007 ZXing authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import 'package:fixnum/fixnum.dart';
-import 'package:zxing/src/common/bit_matrix.dart';
-
+import '../../common/bit_matrix.dart';
+import '../../format_reader_exception.dart';
 import 'error_correction_level.dart';
 import 'format_information.dart';
 
-/**
- * See ISO 18004:2006 Annex D
- *
- * @author Sean Owen
- */
+/// See ISO 18004:2006 Annex D
+///
+/// @author Sean Owen
 class Version {
-  /**
-   * See ISO 18004:2006 Annex D.
-   * Element i represents the raw version bits that specify version i + 7
-   */
-  static final _VERSION_DECODE_INFO = [
+  /// See ISO 18004:2006 Annex D.
+  /// Element i represents the raw version bits that specify version i + 7
+  static final _versionDecodeInfo = [
     0x07C94, 0x085BC, 0x09A99, 0x0A4D3, 0x0BBF6, //
     0x0C762, 0x0D847, 0x0E60D, 0x0F928, 0x10B78,
     0x1145D, 0x12A17, 0x13532, 0x149A6, 0x15683,
@@ -40,7 +20,7 @@ class Version {
     0x2542E, 0x26A64, 0x27541, 0x28C69, //
   ];
 
-  static final VERSIONS = buildVersions();
+  static final _versions = buildVersions();
 
   final int versionNumber;
   final List<int> alignmentPatternCenters;
@@ -48,10 +28,10 @@ class Version {
   late int _totalCodewords;
 
   Version._(this.versionNumber, this.alignmentPatternCenters, this._ecBlocks) {
-    int total = 0;
-    int ecCodewords = _ecBlocks[0].ecCodewordsPerBlock;
-    List<ECB> ecbArray = _ecBlocks[0].ecBlocks;
-    for (ECB ecBlock in ecbArray) {
+    var total = 0;
+    var ecCodewords = _ecBlocks[0].ecCodewordsPerBlock;
+    var ecbArray = _ecBlocks[0].ecBlocks;
+    for (var ecBlock in ecbArray) {
       total += ecBlock.count * (ecBlock.dataCodewords + ecCodewords);
     }
     _totalCodewords = total;
@@ -67,21 +47,19 @@ class Version {
     return _ecBlocks[ecLevel.ordinal];
   }
 
-  /**
-   * <p>Deduces version information purely from QR Code dimensions.</p>
-   *
-   * @param dimension dimension in modules
-   * @return Version for a QR Code of that dimension
-   * @throws FormatException if dimension is not 1 mod 4
-   */
+  /// <p>Deduces version information purely from QR Code dimensions.</p>
+  ///
+  /// @param dimension dimension in modules
+  /// @return Version for a QR Code of that dimension
+  /// @throws FormatReaderException if dimension is not 1 mod 4
   static Version getProvisionalVersionForDimension(int dimension) {
     if (dimension % 4 != 1) {
-      throw FormatException();
+      throw FormatReaderException();
     }
     try {
       return getVersionForNumber((dimension - 17) ~/ 4);
     } on ArgumentError catch (_) {
-      throw FormatException();
+      throw FormatReaderException();
     }
   }
 
@@ -89,21 +67,21 @@ class Version {
     if (versionNumber < 1 || versionNumber > 40) {
       throw ArgumentError();
     }
-    return VERSIONS[versionNumber - 1];
+    return _versions[versionNumber - 1];
   }
 
   static Version? decodeVersionInformation(int versionBits) {
-    int bestDifference = Int32.MAX_VALUE.toInt();
-    int bestVersion = 0;
-    for (int i = 0; i < _VERSION_DECODE_INFO.length; i++) {
-      int targetVersion = _VERSION_DECODE_INFO[i];
+    var bestDifference = Int32.MAX_VALUE.toInt();
+    var bestVersion = 0;
+    for (var i = 0; i < _versionDecodeInfo.length; i++) {
+      var targetVersion = _versionDecodeInfo[i];
       // Do the version info bits match exactly? done.
       if (targetVersion == versionBits) {
         return getVersionForNumber(i + 7);
       }
       // Otherwise see if this is the closest to a real version info bit string
       // we have seen so far
-      int bitsDifference =
+      var bitsDifference =
           FormatInformation.numBitsDiffering(versionBits, targetVersion);
       if (bitsDifference < bestDifference) {
         bestVersion = i + 7;
@@ -119,12 +97,10 @@ class Version {
     return null;
   }
 
-  /**
-   * See ISO 18004:2006 Annex E
-   */
+  /// See ISO 18004:2006 Annex E
   BitMatrix buildFunctionPattern() {
-    int dimension = dimensionForVersion;
-    BitMatrix bitMatrix = BitMatrix(dimension);
+    var dimension = dimensionForVersion;
+    var bitMatrix = BitMatrix(dimension);
 
     // Top left finder pattern + separator + format
     bitMatrix.setRegion(0, 0, 9, 9);
@@ -134,10 +110,10 @@ class Version {
     bitMatrix.setRegion(0, dimension - 8, 9, 8);
 
     // Alignment patterns
-    int max = alignmentPatternCenters.length;
-    for (int x = 0; x < max; x++) {
-      int i = alignmentPatternCenters[x] - 2;
-      for (int y = 0; y < max; y++) {
+    var max = alignmentPatternCenters.length;
+    for (var x = 0; x < max; x++) {
+      var i = alignmentPatternCenters[x] - 2;
+      for (var y = 0; y < max; y++) {
         if ((x != 0 || (y != 0 && y != max - 1)) && (x != max - 1 || y != 0)) {
           bitMatrix.setRegion(alignmentPatternCenters[y] - 2, i, 5, 5);
         }
@@ -165,9 +141,7 @@ class Version {
     return '$versionNumber';
   }
 
-  /**
-   * See ISO 18004:2006 6.5.1 Table 9
-   */
+  /// See ISO 18004:2006 6.5.1 Table 9
   static List<Version> buildVersions() {
     return [
       Version._(1, [], [
@@ -631,12 +605,10 @@ class Version {
   }
 }
 
-/**
- * <p>Encapsulates a set of error-correction blocks in one symbol version. Most versions will
- * use blocks of differing sizes within one version, so, this encapsulates the parameters for
- * each set of blocks. It also holds the number of error-correction codewords per block since it
- * will be the same across all blocks within one version.</p>
- */
+/// <p>Encapsulates a set of error-correction blocks in one symbol version. Most versions will
+/// use blocks of differing sizes within one version, so, this encapsulates the parameters for
+/// each set of blocks. It also holds the number of error-correction codewords per block since it
+/// will be the same across all blocks within one version.</p>
 class ECBlocks {
   final int ecCodewordsPerBlock;
   final List<ECB> ecBlocks;
@@ -644,8 +616,8 @@ class ECBlocks {
   ECBlocks(this.ecCodewordsPerBlock, this.ecBlocks);
 
   int get numBlocks {
-    int total = 0;
-    for (ECB ecBlock in ecBlocks) {
+    var total = 0;
+    for (var ecBlock in ecBlocks) {
       total += ecBlock.count;
     }
     return total;
@@ -654,16 +626,20 @@ class ECBlocks {
   int getTotalECCodewords() {
     return ecCodewordsPerBlock * numBlocks;
   }
+
+  @override
+  String toString() => 'ECBlocks($ecBlocks, $ecCodewordsPerBlock)';
 }
 
-/**
- * <p>Encapsulates the parameters for one error-correction block in one symbol version.
- * This includes the number of data codewords, and the number of times a block with these
- * parameters is used consecutively in the QR code version's format.</p>
- */
+/// <p>Encapsulates the parameters for one error-correction block in one symbol version.
+/// This includes the number of data codewords, and the number of times a block with these
+/// parameters is used consecutively in the QR code version's format.</p>
 class ECB {
   final int count;
   final int dataCodewords;
 
   ECB(this.count, this.dataCodewords);
+
+  @override
+  String toString() => 'ECB($count, $dataCodewords)';
 }
