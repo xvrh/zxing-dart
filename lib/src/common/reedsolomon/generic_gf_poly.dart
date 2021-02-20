@@ -19,31 +19,27 @@ import '../system.dart' as system;
 
 import 'generic_gf.dart';
 
-/**
- * <p>Represents a polynomial whose coefficients are elements of a GF.
- * Instances of this class are immutable.</p>
- *
- * <p>Much credit is due to William Rucklidge since portions of this code are an indirect
- * port of his C++ Reed-Solomon implementation.</p>
- *
- * @author Sean Owen
- */
+/// <p>Represents a polynomial whose coefficients are elements of a GF.
+/// Instances of this class are immutable.</p>
+///
+/// <p>Much credit is due to William Rucklidge since portions of this code are an indirect
+/// port of his C++ Reed-Solomon implementation.</p>
+///
+/// @author Sean Owen
 class GenericGFPoly {
   final GenericGF _field;
   late final Int32List _coefficients;
 
-  /**
-   * @param field the {@link GenericGF} instance representing the field to use
-   * to perform computations
-   * @param coefficients coefficients as ints representing elements of GF(size), arranged
-   * from most significant (highest-power term) coefficient to least significant
-   * @throws ArgumentError if argument is null or empty,
-   * or if leading coefficient is 0 and this is not a
-   * constant polynomial (that is, it is not the monomial "0")
-   */
+  /// @param field the {@link GenericGF} instance representing the field to use
+  /// to perform computations
+  /// @param coefficients coefficients as ints representing elements of GF(size), arranged
+  /// from most significant (highest-power term) coefficient to least significant
+  /// @throws ArgumentError if argument is null or empty,
+  /// or if leading coefficient is 0 and this is not a
+  /// constant polynomial (that is, it is not the monomial "0")
   GenericGFPoly(this._field, Int32List coefficients) {
     if (coefficients.length == 0) {
-      throw new ArgumentError();
+      throw ArgumentError();
     }
     int coefficientsLength = coefficients.length;
     if (coefficientsLength > 1 && coefficients[0] == 0) {
@@ -67,30 +63,22 @@ class GenericGFPoly {
 
   Int32List get coefficients => _coefficients;
 
-  /**
-   * @return degree of this polynomial
-   */
+  /// @return degree of this polynomial
   int getDegree() {
     return coefficients.length - 1;
   }
 
-  /**
-   * @return true iff this polynomial is the monomial "0"
-   */
+  /// @return true iff this polynomial is the monomial "0"
   bool get isZero {
     return coefficients[0] == 0;
   }
 
-  /**
-   * @return coefficient of x^degree term in this polynomial
-   */
+  /// @return coefficient of x^degree term in this polynomial
   int getCoefficient(int degree) {
     return coefficients[coefficients.length - 1 - degree];
   }
 
-  /**
-   * @return evaluation of this polynomial at a given point
-   */
+  /// @return evaluation of this polynomial at a given point
   int evaluateAt(int a) {
     if (a == 0) {
       // Just return the x^0 coefficient
@@ -115,8 +103,7 @@ class GenericGFPoly {
 
   GenericGFPoly addOrSubtract(GenericGFPoly other) {
     if (_field != other._field) {
-      throw new ArgumentError(
-          "GenericGFPolys do not have same GenericGF field");
+      throw ArgumentError("GenericGFPolys do not have same GenericGF field");
     }
     if (isZero) {
       return other;
@@ -142,13 +129,12 @@ class GenericGFPoly {
           smallerCoefficients[i - lengthDiff], largerCoefficients[i]);
     }
 
-    return new GenericGFPoly(_field, sumDiff);
+    return GenericGFPoly(_field, sumDiff);
   }
 
   GenericGFPoly multiply(GenericGFPoly other) {
     if (_field != other._field) {
-      throw new ArgumentError(
-          "GenericGFPolys do not have same GenericGF field");
+      throw ArgumentError("GenericGFPolys do not have same GenericGF field");
     }
     if (isZero || other.isZero) {
       return _field.zero;
@@ -165,7 +151,7 @@ class GenericGFPoly {
             product[i + j], _field.multiply(aCoeff, bCoefficients[j]));
       }
     }
-    return new GenericGFPoly(_field, product);
+    return GenericGFPoly(_field, product);
   }
 
   GenericGFPoly multiplyScalar(int scalar) {
@@ -180,12 +166,12 @@ class GenericGFPoly {
     for (int i = 0; i < size; i++) {
       product[i] = _field.multiply(coefficients[i], scalar);
     }
-    return new GenericGFPoly(_field, product);
+    return GenericGFPoly(_field, product);
   }
 
   GenericGFPoly multiplyByMonomial(int degree, int coefficient) {
     if (degree < 0) {
-      throw new ArgumentError();
+      throw ArgumentError();
     }
     if (coefficient == 0) {
       return _field.zero;
@@ -195,16 +181,15 @@ class GenericGFPoly {
     for (int i = 0; i < size; i++) {
       product[i] = _field.multiply(coefficients[i], coefficient);
     }
-    return new GenericGFPoly(_field, product);
+    return GenericGFPoly(_field, product);
   }
 
   List<GenericGFPoly> divide(GenericGFPoly other) {
     if (_field != other._field) {
-      throw new ArgumentError(
-          "GenericGFPolys do not have same GenericGF field");
+      throw ArgumentError("GenericGFPolys do not have same GenericGF field");
     }
     if (other.isZero) {
-      throw new ArgumentError("Divide by 0");
+      throw ArgumentError("Divide by 0");
     }
 
     GenericGFPoly quotient = _field.zero;
@@ -233,7 +218,7 @@ class GenericGFPoly {
     if (isZero) {
       return "0";
     }
-    var result = new StringBuffer();
+    var result = StringBuffer();
     for (int degree = this.getDegree(); degree >= 0; degree--) {
       int coefficient = getCoefficient(degree);
       if (coefficient != 0) {

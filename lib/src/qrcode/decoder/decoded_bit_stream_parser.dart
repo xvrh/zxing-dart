@@ -20,6 +20,7 @@ import 'dart:typed_data';
 import 'package:zxing/src/common/bit_source.dart';
 import 'package:zxing/src/common/character_set_eci.dart';
 import 'package:zxing/src/common/decoder_result.dart';
+import 'package:zxing/src/common/string_utils.dart';
 
 import '../../decode_hint.dart';
 import '../../format_reader_exception.dart';
@@ -27,18 +28,14 @@ import 'error_correction_level.dart';
 import 'mode.dart';
 import 'version.dart';
 
-/**
- * <p>QR Codes can encode text as bits in one of several modes, and can use multiple modes
- * in one QR Code. This class decodes the bits back into text.</p>
- *
- * <p>See ISO 18004:2006, 6.4.3 - 6.4.7</p>
- *
- * @author Sean Owen
- */
+/// <p>QR Codes can encode text as bits in one of several modes, and can use multiple modes
+/// in one QR Code. This class decodes the bits back into text.</p>
+///
+/// <p>See ISO 18004:2006, 6.4.3 - 6.4.7</p>
+///
+/// @author Sean Owen
 class DecodedBitStreamParser {
-  /**
-   * See ISO 18004:2006, 6.4.4 Table 5
-   */
+  /// See ISO 18004:2006, 6.4.4 Table 5
   static final List<String> _ALPHANUMERIC_CHARS =
       r"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:".split('');
   static final int _GB2312_SUBSET = 1;
@@ -47,8 +44,8 @@ class DecodedBitStreamParser {
 
   static DecoderResult decode(Int8List bytes, Version version,
       ErrorCorrectionLevel? ecLevel, DecodeHints hints) {
-    BitSource bits = new BitSource(bytes);
-    var result = new StringBuffer();
+    BitSource bits = BitSource(bytes);
+    var result = StringBuffer();
     var byteSegments = <Int8List>[];
     int symbolSequence = -1;
     int parityData = -1;
@@ -129,7 +126,7 @@ class DecodedBitStreamParser {
       throw FormatReaderException();
     }
 
-    return new DecoderResult(
+    return DecoderResult(
         rawBytes: bytes,
         text: result.toString(),
         byteSegments: byteSegments.isEmpty ? null : byteSegments,
@@ -138,9 +135,7 @@ class DecodedBitStreamParser {
         structuredAppendSequenceNumber: parityData);
   }
 
-  /**
-   * See specification GBT 18284-2000
-   */
+  /// See specification GBT 18284-2000
   static void _decodeHanziSegment(
       BitSource bits, StringBuffer result, int count) {
     // Don't crash trying to read more bits than we have available.
@@ -169,8 +164,7 @@ class DecodedBitStreamParser {
       count--;
     }
 
-    //TODO(xha): StringUtils.GB2312_CHARSET
-    result.write(const AsciiCodec(allowInvalid: true).decode(buffer));
+    result.write(CharacterSetECI.GB18030.encoding.decode(buffer));
   }
 
   static void _decodeKanjiSegment(
@@ -200,8 +194,7 @@ class DecodedBitStreamParser {
       offset += 2;
       count--;
     }
-    //TODO(xha): StringUtils.SHIFT_JIS_CHARSET
-    result.write(const AsciiCodec(allowInvalid: true).decode(buffer));
+    result.write(CharacterSetECI.SJIS.encoding.decode(buffer));
   }
 
   static void _decodeByteSegment(
@@ -227,9 +220,7 @@ class DecodedBitStreamParser {
       // upon decoding. I have seen ISO-8859-1 used as well as
       // Shift_JIS -- without anything like an ECI designator to
       // give a hint.
-      //TODO(xha): copy guessCharset
-      //encoding = StringUtils.guessCharset(readBytes, hints);
-      encoding = const AsciiCodec(allowInvalid: true);
+      encoding = StringUtils.guessCharset(readBytes, hints).encoding;
     } else {
       encoding = currentCharacterSetECI.encoding;
     }
@@ -266,6 +257,7 @@ class DecodedBitStreamParser {
     }
     // See section 6.4.8.1, 6.4.8.2
     if (fc1InEffect) {
+      assert(false);
       //TODO(xha): this need to use a custom implementation of StringBuffer to
       // support changing a previous character
       // We need to massage the result a bit if in an FNC1 mode:

@@ -22,17 +22,15 @@ import '../not_found_exception.dart';
 import 'bit_array.dart';
 import 'bit_matrix.dart';
 
-/**
- * This Binarizer implementation uses the old ZXing global histogram approach. It is suitable
- * for low-end mobile devices which don't have enough CPU or memory to use a local thresholding
- * algorithm. However, because it picks a global black point, it cannot handle difficult shadows
- * and gradients.
- *
- * Faster mobile devices and all desktop applications should probably use HybridBinarizer instead.
- *
- * @author dswitkin@google.com (Daniel Switkin)
- * @author Sean Owen
- */
+/// This Binarizer implementation uses the old ZXing global histogram approach. It is suitable
+/// for low-end mobile devices which don't have enough CPU or memory to use a local thresholding
+/// algorithm. However, because it picks a global black point, it cannot handle difficult shadows
+/// and gradients.
+///
+/// Faster mobile devices and all desktop applications should probably use HybridBinarizer instead.
+///
+/// @author dswitkin@google.com (Daniel Switkin)
+/// @author Sean Owen
 class GlobalHistogramBinarizer extends Binarizer {
   static final int _LUMINANCE_BITS = 5;
   static final int _LUMINANCE_SHIFT = 8 - _LUMINANCE_BITS;
@@ -50,7 +48,7 @@ class GlobalHistogramBinarizer extends Binarizer {
     LuminanceSource source = this.luminanceSource;
     int width = source.width;
     if (row == null || row.size < width) {
-      row = new BitArray(width);
+      row = BitArray(width);
     } else {
       row.clear();
     }
@@ -92,7 +90,7 @@ class GlobalHistogramBinarizer extends Binarizer {
     LuminanceSource source = this.luminanceSource;
     int width = source.width;
     int height = source.height;
-    BitMatrix matrix = new BitMatrix(width, height);
+    BitMatrix matrix = BitMatrix(width, height);
 
     // Quickly calculates the histogram by sampling four rows from the image. This proved to be
     // more robust on the blackbox tests than sampling a diagonal as we used to do.
@@ -128,7 +126,7 @@ class GlobalHistogramBinarizer extends Binarizer {
 
   @override
   Binarizer createBinarizer(LuminanceSource source) {
-    return new GlobalHistogramBinarizer(source);
+    return GlobalHistogramBinarizer(source);
   }
 
   void _initArrays(int luminanceSize) {

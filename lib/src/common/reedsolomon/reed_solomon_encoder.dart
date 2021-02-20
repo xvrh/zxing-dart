@@ -20,18 +20,16 @@ import 'generic_gf.dart';
 import 'generic_gf_poly.dart';
 import '../system.dart' as system;
 
-/**
- * <p>Implements Reed-Solomon encoding, as the name implies.</p>
- *
- * @author Sean Owen
- * @author William Rucklidge
- */
+/// <p>Implements Reed-Solomon encoding, as the name implies.</p>
+///
+/// @author Sean Owen
+/// @author William Rucklidge
 class ReedSolomonEncoder {
   final GenericGF _field;
   final _cachedGenerators = <GenericGFPoly>[];
 
   ReedSolomonEncoder(this._field) {
-    _cachedGenerators.add(new GenericGFPoly(_field, Int32List.fromList([1])));
+    _cachedGenerators.add(GenericGFPoly(_field, Int32List.fromList([1])));
   }
 
   GenericGFPoly buildGenerator(int degree) {
@@ -39,7 +37,7 @@ class ReedSolomonEncoder {
       GenericGFPoly lastGenerator =
           _cachedGenerators[_cachedGenerators.length - 1];
       for (int d = _cachedGenerators.length; d <= degree; d++) {
-        GenericGFPoly nextGenerator = lastGenerator.multiply(new GenericGFPoly(
+        GenericGFPoly nextGenerator = lastGenerator.multiply(GenericGFPoly(
             _field,
             Int32List.fromList([1, _field.exp(d - 1 + _field.generatorBase)])));
         _cachedGenerators.add(nextGenerator);
@@ -51,16 +49,16 @@ class ReedSolomonEncoder {
 
   void encode(List<int> toEncode, int ecBytes) {
     if (ecBytes == 0) {
-      throw new ArgumentError("No error correction bytes");
+      throw ArgumentError("No error correction bytes");
     }
     int dataBytes = toEncode.length - ecBytes;
     if (dataBytes <= 0) {
-      throw new ArgumentError("No data bytes provided");
+      throw ArgumentError("No data bytes provided");
     }
     GenericGFPoly generator = buildGenerator(ecBytes);
     var infoCoefficients = Int32List(dataBytes);
     system.arraycopy(toEncode, 0, infoCoefficients, 0, dataBytes);
-    GenericGFPoly info = new GenericGFPoly(_field, infoCoefficients);
+    GenericGFPoly info = GenericGFPoly(_field, infoCoefficients);
     info = info.multiplyByMonomial(ecBytes, 1);
     GenericGFPoly remainder = info.divide(generator)[1];
     var coefficients = remainder.coefficients;

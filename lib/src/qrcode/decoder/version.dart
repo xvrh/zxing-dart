@@ -21,16 +21,12 @@ import '../../format_reader_exception.dart';
 import 'error_correction_level.dart';
 import 'format_information.dart';
 
-/**
- * See ISO 18004:2006 Annex D
- *
- * @author Sean Owen
- */
+/// See ISO 18004:2006 Annex D
+///
+/// @author Sean Owen
 class Version {
-  /**
-   * See ISO 18004:2006 Annex D.
-   * Element i represents the raw version bits that specify version i + 7
-   */
+  /// See ISO 18004:2006 Annex D.
+  /// Element i represents the raw version bits that specify version i + 7
   static final _VERSION_DECODE_INFO = [
     0x07C94, 0x085BC, 0x09A99, 0x0A4D3, 0x0BBF6, //
     0x0C762, 0x0D847, 0x0E60D, 0x0F928, 0x10B78,
@@ -68,13 +64,11 @@ class Version {
     return _ecBlocks[ecLevel.ordinal];
   }
 
-  /**
-   * <p>Deduces version information purely from QR Code dimensions.</p>
-   *
-   * @param dimension dimension in modules
-   * @return Version for a QR Code of that dimension
-   * @throws FormatReaderException if dimension is not 1 mod 4
-   */
+  /// <p>Deduces version information purely from QR Code dimensions.</p>
+  ///
+  /// @param dimension dimension in modules
+  /// @return Version for a QR Code of that dimension
+  /// @throws FormatReaderException if dimension is not 1 mod 4
   static Version getProvisionalVersionForDimension(int dimension) {
     if (dimension % 4 != 1) {
       throw FormatReaderException();
@@ -120,9 +114,7 @@ class Version {
     return null;
   }
 
-  /**
-   * See ISO 18004:2006 Annex E
-   */
+  /// See ISO 18004:2006 Annex E
   BitMatrix buildFunctionPattern() {
     int dimension = dimensionForVersion;
     BitMatrix bitMatrix = BitMatrix(dimension);
@@ -166,9 +158,7 @@ class Version {
     return '$versionNumber';
   }
 
-  /**
-   * See ISO 18004:2006 6.5.1 Table 9
-   */
+  /// See ISO 18004:2006 6.5.1 Table 9
   static List<Version> buildVersions() {
     return [
       Version._(1, [], [
@@ -632,12 +622,10 @@ class Version {
   }
 }
 
-/**
- * <p>Encapsulates a set of error-correction blocks in one symbol version. Most versions will
- * use blocks of differing sizes within one version, so, this encapsulates the parameters for
- * each set of blocks. It also holds the number of error-correction codewords per block since it
- * will be the same across all blocks within one version.</p>
- */
+/// <p>Encapsulates a set of error-correction blocks in one symbol version. Most versions will
+/// use blocks of differing sizes within one version, so, this encapsulates the parameters for
+/// each set of blocks. It also holds the number of error-correction codewords per block since it
+/// will be the same across all blocks within one version.</p>
 class ECBlocks {
   final int ecCodewordsPerBlock;
   final List<ECB> ecBlocks;
@@ -659,11 +647,9 @@ class ECBlocks {
   String toString() => 'ECBlocks($ecBlocks, $ecCodewordsPerBlock)';
 }
 
-/**
- * <p>Encapsulates the parameters for one error-correction block in one symbol version.
- * This includes the number of data codewords, and the number of times a block with these
- * parameters is used consecutively in the QR code version's format.</p>
- */
+/// <p>Encapsulates the parameters for one error-correction block in one symbol version.
+/// This includes the number of data codewords, and the number of times a block with these
+/// parameters is used consecutively in the QR code version's format.</p>
 class ECB {
   final int count;
   final int dataCodewords;

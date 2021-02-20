@@ -23,7 +23,7 @@ import '../../common/bit_source_builder.dart';
 
 void main() {
   test('Simple Byte mode', () {
-    BitSourceBuilder builder = new BitSourceBuilder();
+    BitSourceBuilder builder = BitSourceBuilder();
     builder.write(0x04, 4); // Byte mode
     builder.write(0x03, 8); // 3 bytes
     builder.write(0xF1, 8);

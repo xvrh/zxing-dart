@@ -12,6 +12,7 @@ void testGolden(
   Reader reader, {
   required int mustPassCount,
   int rotation = 0,
+  List<String> skips = const [],
 }) {
   test('Golden $folder', () {
     var passCount = 0;
@@ -19,13 +20,18 @@ void testGolden(
         .listSync()
         .whereType<File>()
         .where((f) => p.extension(f.path) == '.png')) {
+      if (skips.contains(p.basename(pngFile.path))) {
+        ++passCount;
+        continue;
+      }
+
       var image = img.decodePng(pngFile.readAsBytesSync())!;
       if (rotation != 0) {
         image = img.copyRotate(image, rotation);
       }
 
-      LuminanceSource source = new ImageLuminanceSource(image);
-      BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+      LuminanceSource source = ImageLuminanceSource(image);
+      BinaryBitmap bitmap = BinaryBitmap(HybridBinarizer(source));
 
       try {
         var result = reader.decode(bitmap);

@@ -397,7 +397,7 @@ void main() {
 }
 
 void corrupt(List<int> received, int howMany, Random random, int max) {
-  var corrupted = new BitSetArray(received.length);
+  var corrupted = BitSetArray(received.length);
   for (int j = 0; j < howMany; j++) {
     int location = random.nextInt(received.length);
     int value = random.nextInt(max);
@@ -415,7 +415,7 @@ void _testEncodeDecodeRandom(GenericGF field, int dataSize, int ecSize) {
       reason: "Invalid data size for $field");
   expect(ecSize > 0 && ecSize + dataSize <= field.size, isTrue,
       reason: "Invalid ECC size for $field");
-  ReedSolomonEncoder encoder = new ReedSolomonEncoder(field);
+  ReedSolomonEncoder encoder = ReedSolomonEncoder(field);
   Int32List message = Int32List(dataSize + ecSize);
   Int32List dataWords = Int32List(dataSize);
   Int32List ecWords = Int32List(ecSize);
@@ -442,7 +442,7 @@ void _testEncodeDecode(
 }
 
 void _testEncoder(GenericGF field, List<int> dataWords, List<int> ecWords) {
-  ReedSolomonEncoder encoder = new ReedSolomonEncoder(field);
+  ReedSolomonEncoder encoder = ReedSolomonEncoder(field);
   var messageExpected = Int32List(dataWords.length + ecWords.length);
   var message = Int32List(dataWords.length + ecWords.length);
   system.arraycopy(dataWords, 0, messageExpected, 0, dataWords.length);
@@ -456,7 +456,7 @@ void _testEncoder(GenericGF field, List<int> dataWords, List<int> ecWords) {
 }
 
 void _testDecoder(GenericGF field, List<int> dataWords, List<int> ecWords) {
-  ReedSolomonDecoder decoder = new ReedSolomonDecoder(field);
+  ReedSolomonDecoder decoder = ReedSolomonDecoder(field);
   var message = Int32List(dataWords.length + ecWords.length);
   int maxErrors = ecWords.length ~/ 2;
   Random random = _getPseudoRandom();
@@ -500,7 +500,7 @@ void _expectDataEquals(List<int> received, List<int> expected,
 }
 
 String _arrayToString(List<int> data) {
-  var sb = new StringBuffer("{");
+  var sb = StringBuffer("{");
   for (int i = 0; i < data.length; i++) {
     var d = data[i].toRadixString(16);
     sb.write(i > 0 ? ",$d" : "$d");
@@ -510,5 +510,5 @@ String _arrayToString(List<int> data) {
 }
 
 Random _getPseudoRandom() {
-  return new Random(0xDEADBEEF);
+  return Random(0xDEADBEEF);
 }

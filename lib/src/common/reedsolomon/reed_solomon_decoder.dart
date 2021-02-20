@@ -53,7 +53,7 @@ class ReedSolomonDecoder {
   /// @param twoS number of error-correction codewords available
   /// @throws ReedSolomonException if decoding fails for any reason
   void decode(Int32List received, int twoS) {
-    GenericGFPoly poly = new GenericGFPoly(field, received);
+    GenericGFPoly poly = GenericGFPoly(field, received);
     Int32List syndromeCoefficients = Int32List(twoS);
     bool noError = true;
     for (int i = 0; i < twoS; i++) {
@@ -66,7 +66,7 @@ class ReedSolomonDecoder {
     if (noError) {
       return;
     }
-    GenericGFPoly syndrome = new GenericGFPoly(field, syndromeCoefficients);
+    GenericGFPoly syndrome = GenericGFPoly(field, syndromeCoefficients);
     List<GenericGFPoly> sigmaOmega =
         runEuclideanAlgorithm(field.buildMonomial(twoS, 1), syndrome, twoS);
     GenericGFPoly sigma = sigmaOmega[0];
@@ -76,7 +76,7 @@ class ReedSolomonDecoder {
     for (int i = 0; i < errorLocations.length; i++) {
       int position = received.length - 1 - field.log(errorLocations[i]);
       if (position < 0) {
-        throw new ReedSolomonException("Bad error location");
+        throw ReedSolomonException("Bad error location");
       }
       received[position] =
           GenericGF.addOrSubtract(received[position], errorMagnitudes[i]);
@@ -107,7 +107,7 @@ class ReedSolomonDecoder {
       // Divide rLastLast by rLast, with quotient in q and remainder in r
       if (rLast.isZero) {
         // Oops, Euclidean algorithm already terminated?
-        throw new ReedSolomonException("r_{i-1} was zero");
+        throw ReedSolomonException("r_{i-1} was zero");
       }
       r = rLastLast;
       GenericGFPoly q = field.zero;
@@ -123,13 +123,13 @@ class ReedSolomonDecoder {
       t = q.multiply(tLast).addOrSubtract(tLastLast);
 
       if (r.getDegree() >= rLast.getDegree()) {
-        throw new StateError("Division algorithm failed to reduce polynomial?");
+        throw StateError("Division algorithm failed to reduce polynomial?");
       }
     }
 
     int sigmaTildeAtZero = t.getCoefficient(0);
     if (sigmaTildeAtZero == 0) {
-      throw new ReedSolomonException("sigmaTilde(0) was zero");
+      throw ReedSolomonException("sigmaTilde(0) was zero");
     }
 
     int inverse = field.inverse(sigmaTildeAtZero);
@@ -154,7 +154,7 @@ class ReedSolomonDecoder {
       }
     }
     if (e != numErrors) {
-      throw new ReedSolomonException(
+      throw ReedSolomonException(
           "Error locator degree does not match number of roots ($e != $numErrors)");
     }
     return result;

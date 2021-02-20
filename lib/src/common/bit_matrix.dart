@@ -48,7 +48,7 @@ class BitMatrix {
     height ??= width;
 
     if (width < 1 || height < 1) {
-      throw new ArgumentError("Both dimensions must be greater than 0");
+      throw ArgumentError("Both dimensions must be greater than 0");
     }
 
     var rowSize = (width + 31) ~/ 32;
@@ -91,7 +91,7 @@ class BitMatrix {
           if (rowLength == -1) {
             rowLength = bitsPos - rowStartPos;
           } else if (bitsPos - rowStartPos != rowLength) {
-            throw new ArgumentError("row lengths do not match");
+            throw ArgumentError("row lengths do not match");
           }
           rowStartPos = bitsPos;
           nRows++;
@@ -106,7 +106,7 @@ class BitMatrix {
         bits[bitsPos] = false;
         bitsPos++;
       } else {
-        throw new ArgumentError("illegal character encountered: " +
+        throw ArgumentError("illegal character encountered: " +
             stringRepresentation.substring(pos));
       }
     }
@@ -116,7 +116,7 @@ class BitMatrix {
       if (rowLength == -1) {
         rowLength = bitsPos - rowStartPos;
       } else if (bitsPos - rowStartPos != rowLength) {
-        throw new ArgumentError("row lengths do not match");
+        throw ArgumentError("row lengths do not match");
       }
       nRows++;
     }
@@ -130,25 +130,21 @@ class BitMatrix {
     return matrix;
   }
 
-/**
- * <p>Gets the requested bit, where true means black.</p>
- *
- * @param x The horizontal component (i.e. which column)
- * @param y The vertical component (i.e. which row)
- * @return value of given bit in matrix
- */
+/// <p>Gets the requested bit, where true means black.</p>
+  ///
+  /// @param x The horizontal component (i.e. which column)
+  /// @param y The vertical component (i.e. which row)
+  /// @return value of given bit in matrix
   bool get(int x, int y) {
     int offset = y * _rowSize + (x ~/ 32);
     return offset < _bits.length &&
         ((Int32(_bits[offset]).shiftRightUnsigned(x & 0x1f)) & 1) != 0;
   }
 
-/**
- * <p>Sets the given bit to true.</p>
- *
- * @param x The horizontal component (i.e. which column)
- * @param y The vertical component (i.e. which row)
- */
+/// <p>Sets the given bit to true.</p>
+  ///
+  /// @param x The horizontal component (i.e. which column)
+  /// @param y The vertical component (i.e. which row)
   void set(int x, int y) {
     int offset = y * _rowSize + (x ~/ 32);
     if (offset < _bits.length) {
@@ -163,12 +159,10 @@ class BitMatrix {
     }
   }
 
-/**
- * <p>Flips the given bit.</p>
- *
- * @param x The horizontal component (i.e. which column)
- * @param y The vertical component (i.e. which row)
- */
+/// <p>Flips the given bit.</p>
+  ///
+  /// @param x The horizontal component (i.e. which column)
+  /// @param y The vertical component (i.e. which row)
   void flip(int x, int y) {
     int offset = y * _rowSize + (x ~/ 32);
     if (offset < _bits.length) {
@@ -176,17 +170,15 @@ class BitMatrix {
     }
   }
 
-/**
- * Exclusive-or (XOR): Flip the bit in this {@code BitMatrix} if the corresponding
- * mask bit is set.
- *
- * @param mask XOR mask
- */
+/// Exclusive-or (XOR): Flip the bit in this {@code BitMatrix} if the corresponding
+  /// mask bit is set.
+  ///
+  /// @param mask XOR mask
   void xor(BitMatrix mask) {
     if (_width != mask.width ||
         _height != mask.height ||
         _rowSize != mask.rowSize) {
-      throw new ArgumentError("input matrix dimensions do not match");
+      throw ArgumentError("input matrix dimensions do not match");
     }
     var rowArray = BitArray(width);
     for (int y = 0; y < height; y++) {
@@ -198,9 +190,7 @@ class BitMatrix {
     }
   }
 
-/**
- * Clears all bits (sets to false).
- */
+/// Clears all bits (sets to false).
   void clear() {
     int max = _bits.length;
     for (int i = 0; i < max; i++) {
@@ -208,25 +198,23 @@ class BitMatrix {
     }
   }
 
-/**
- * <p>Sets a square region of the bit matrix to true.</p>
- *
- * @param left The horizontal position to begin at (inclusive)
- * @param top The vertical position to begin at (inclusive)
- * @param width The width of the region
- * @param height The height of the region
- */
+/// <p>Sets a square region of the bit matrix to true.</p>
+  ///
+  /// @param left The horizontal position to begin at (inclusive)
+  /// @param top The vertical position to begin at (inclusive)
+  /// @param width The width of the region
+  /// @param height The height of the region
   void setRegion(int left, int top, int width, int height) {
     if (top < 0 || left < 0) {
-      throw new ArgumentError("Left and top must be nonnegative");
+      throw ArgumentError("Left and top must be nonnegative");
     }
     if (height < 1 || width < 1) {
-      throw new ArgumentError("Height and width must be at least 1");
+      throw ArgumentError("Height and width must be at least 1");
     }
     int right = left + width;
     int bottom = top + height;
     if (bottom > _height || right > _width) {
-      throw new ArgumentError("The region must fit inside the matrix");
+      throw ArgumentError("The region must fit inside the matrix");
     }
     for (int y = top; y < bottom; y++) {
       int offset = y * _rowSize;
@@ -236,14 +224,12 @@ class BitMatrix {
     }
   }
 
-/**
- * A fast method to retrieve one row of data from the matrix as a BitArray.
- *
- * @param y The row to retrieve
- * @param row An optional caller-allocated BitArray, will be allocated if null or too small
- * @return The resulting BitArray - this reference should always be used even when passing
- *         your own row
- */
+/// A fast method to retrieve one row of data from the matrix as a BitArray.
+  ///
+  /// @param y The row to retrieve
+  /// @param row An optional caller-allocated BitArray, will be allocated if null or too small
+  /// @return The resulting BitArray - this reference should always be used even when passing
+  ///         your own row
   BitArray getRow(int y, BitArray? row) {
     if (row == null || row.size < width) {
       row = BitArray(width);
@@ -257,20 +243,16 @@ class BitMatrix {
     return row;
   }
 
-/**
- * @param y row to set
- * @param row {@link BitArray} to copy from
- */
+/// @param y row to set
+  /// @param row {@link BitArray} to copy from
   void setRow(int y, BitArray row) {
     _bits.setRange(y * rowSize, y * rowSize + rowSize, row.bitArray);
   }
 
-/**
- * Modifies this {@code BitMatrix} to represent the same but rotated 180 degrees
- */
+/// Modifies this {@code BitMatrix} to represent the same but rotated 180 degrees
   void rotate180() {
-    var topRow = new BitArray(width);
-    var bottomRow = new BitArray(width);
+    var topRow = BitArray(width);
+    var bottomRow = BitArray(width);
     int maxHeight = (height + 1) ~/ 2;
     for (int i = 0; i < maxHeight; i++) {
       topRow = getRow(i, topRow);
@@ -283,9 +265,7 @@ class BitMatrix {
     }
   }
 
-/**
- * Modifies this {@code BitMatrix} to represent the same but rotated 90 degrees counterclockwise
- */
+/// Modifies this {@code BitMatrix} to represent the same but rotated 90 degrees counterclockwise
   void rotate90() {
     int newWidth = height;
     int newHeight = width;
@@ -307,11 +287,9 @@ class BitMatrix {
     _bits = newBits;
   }
 
-/**
- * This is useful in detecting the enclosing rectangle of a 'pure' barcode.
- *
- * @return {@code left,top,width,height} enclosing rectangle of all 1 bits, or null if it is all white
- */
+/// This is useful in detecting the enclosing rectangle of a 'pure' barcode.
+  ///
+  /// @return {@code left,top,width,height} enclosing rectangle of all 1 bits, or null if it is all white
   List<int>? getEnclosingRectangle() {
     int left = _width;
     int top = _height;
@@ -402,9 +380,7 @@ class BitMatrix {
     return [x, y];
   }
 
-/**
- * @return The width of the matrix
- */
+/// @return The width of the matrix
   int get width {
     return _width;
   }
@@ -440,26 +416,22 @@ class BitMatrix {
     return hash;
   }
 
-/**
- * @return string representation using "X" for set and " " for unset bits
- */
+/// @return string representation using "X" for set and " " for unset bits
   @override
   String toString() {
     return toStringRepresentation("X ", "  ");
   }
 
-/**
- * @param setString representation of a set bit
- * @param unsetString representation of an unset bit
- * @return string representation of entire matrix utilizing given strings
- */
+/// @param setString representation of a set bit
+  /// @param unsetString representation of an unset bit
+  /// @return string representation of entire matrix utilizing given strings
   String toStringRepresentation(String setString, String unsetString) {
     return _buildToString(setString, unsetString, "\n");
   }
 
   String _buildToString(
       String setString, String unsetString, String lineSeparator) {
-    var result = new StringBuffer();
+    var result = StringBuffer();
     for (int y = 0; y < height; y++) {
       for (int x = 0; x < width; x++) {
         result.write(get(x, y) ? setString : unsetString);

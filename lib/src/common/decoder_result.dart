@@ -16,49 +16,33 @@
 
 import 'dart:typed_data';
 
-/**
- * <p>Encapsulates the result of decoding a matrix of bits. This typically
- * applies to 2D barcode formats. For now it contains the raw bytes obtained,
- * as well as a String interpretation of those bytes, if applicable.</p>
- *
- * @author Sean Owen
- */
+/// <p>Encapsulates the result of decoding a matrix of bits. This typically
+/// applies to 2D barcode formats. For now it contains the raw bytes obtained,
+/// as well as a String interpretation of those bytes, if applicable.</p>
+///
+/// @author Sean Owen
 class DecoderResult {
   /// @return raw bytes representing the result, or {@code null} if not applicable
   final Int8List? rawBytes;
-  /**
-    * @return how many bits of {@link #getRawBytes()} are valid; typically 8 times its length
-    */
+  /// @return how many bits of {@link #getRawBytes()} are valid; typically 8 times its length
   int numBits;
 
-  /**
-    * @return text representation of the result
-    */
+  /// @return text representation of the result
   final String text;
 
-  /**
-    * @return list of byte segments in the result, or {@code null} if not applicable
-    */
+  /// @return list of byte segments in the result, or {@code null} if not applicable
   final List<Int8List>? byteSegments;
 
-  /**
-    * @return name of error correction level used, or {@code null} if not applicable
-    */
+  /// @return name of error correction level used, or {@code null} if not applicable
   final String? ecLevel;
 
-  /**
-    * @return number of errors corrected, or {@code null} if not applicable
-    */
+  /// @return number of errors corrected, or {@code null} if not applicable
   int? errorsCorrected;
 
-  /**
-    * @return number of erasures corrected, or {@code null} if not applicable
-    */
+  /// @return number of erasures corrected, or {@code null} if not applicable
   int? erasures;
 
-  /**
-    * @return arbitrary additional metadata
-    */
+  /// @return arbitrary additional metadata
   Object? other;
 
   final int structuredAppendParity;

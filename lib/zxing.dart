@@ -8,3 +8,4 @@ export 'src/luminance_source.dart' show LuminanceSource;
 export 'src/common/hybrid_binarizer.dart' show HybridBinarizer;
 export 'src/reader_exception.dart' show ReaderException;
 export 'src/not_found_exception.dart' show NotFoundException;
+export 'src/common/character_set_eci.dart' show CharacterSetECI;

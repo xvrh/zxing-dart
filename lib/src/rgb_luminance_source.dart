@@ -20,13 +20,11 @@ import 'package:fixnum/fixnum.dart';
 import 'common/system.dart' as system;
 import 'luminance_source.dart';
 
-/**
- * This class is used to help decode images from files which arrive as RGB data from
- * an ARGB pixel array. It does not support rotation.
- *
- * @author dswitkin@google.com (Daniel Switkin)
- * @author Betaminos
- */
+/// This class is used to help decode images from files which arrive as RGB data from
+/// an ARGB pixel array. It does not support rotation.
+///
+/// @author dswitkin@google.com (Daniel Switkin)
+/// @author Betaminos
 class RGBLuminanceSource extends LuminanceSource {
   late final Int8List _luminances;
   final int _dataWidth;
@@ -59,14 +57,14 @@ class RGBLuminanceSource extends LuminanceSource {
       : _luminances = pixels,
         super(width, height) {
     if (_left + width > _dataWidth || _top + height > _dataHeight) {
-      throw new ArgumentError("Crop rectangle does not fit within image data.");
+      throw ArgumentError("Crop rectangle does not fit within image data.");
     }
   }
 
   @override
   Int8List getRow(int y, Int8List? row) {
     if (y < 0 || y >= height) {
-      throw new ArgumentError("Requested row is outside the image: $y");
+      throw ArgumentError("Requested row is outside the image: $y");
     }
     int width = this.width;
     if (row == null || row.length < width) {
@@ -114,7 +112,7 @@ class RGBLuminanceSource extends LuminanceSource {
 
   @override
   LuminanceSource crop(int left, int top, int width, int height) {
-    return new RGBLuminanceSource.crop(_luminances, _dataWidth, _dataHeight,
+    return RGBLuminanceSource.crop(_luminances, _dataWidth, _dataHeight,
         this._left + left, this._top + top, width, height);
   }
 }

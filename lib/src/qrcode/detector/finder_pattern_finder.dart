@@ -25,14 +25,12 @@ import '../../result_point_callback.dart';
 import 'finder_pattern.dart';
 import 'finder_pattern_info.dart';
 
-/**
- * <p>This class attempts to find finder patterns in a QR Code. Finder patterns are the square
- * markers at three corners of a QR Code.</p>
- *
- * <p>This class is thread-safe but not reentrant. Each thread must allocate its own object.
- *
- * @author Sean Owen
- */
+/// <p>This class attempts to find finder patterns in a QR Code. Finder patterns are the square
+/// markers at three corners of a QR Code.</p>
+///
+/// <p>This class is thread-safe but not reentrant. Each thread must allocate its own object.
+///
+/// @author Sean Owen
 class FinderPatternFinder {
   static final int CENTER_QUORUM = 2;
   static final int MIN_SKIP = 3; // 1 pixel/module times 3 modules/center
@@ -45,11 +43,9 @@ class FinderPatternFinder {
   final Int32List _crossCheckStateCount = Int32List(5);
   final ResultPointCallback? resultPointCallback;
 
-  /**
-   * <p>Creates a finder that will search the image for three finder patterns.</p>
-   *
-   * @param image image to search
-   */
+  /// <p>Creates a finder that will search the image for three finder patterns.</p>
+  ///
+  /// @param image image to search
   FinderPatternFinder(this.image, {this.resultPointCallback});
 
   FinderPatternInfo find(DecodeHints hints) {
@@ -149,22 +145,18 @@ class FinderPatternFinder {
     List<FinderPattern> patternInfo = _selectBestPatterns();
     ResultPoint.orderBestPatterns(patternInfo);
 
-    return new FinderPatternInfo(patternInfo);
+    return FinderPatternInfo(patternInfo);
   }
 
-  /**
-   * Given a count of black/white/black/white/black pixels just seen and an end position,
-   * figures the location of the center of this run.
-   */
+  /// Given a count of black/white/black/white/black pixels just seen and an end position,
+  /// figures the location of the center of this run.
   static double _centerFromEnd(Int32List stateCount, int end) {
     return (end - stateCount[4] - stateCount[3]) - stateCount[2] / 2.0;
   }
 
-  /**
-   * @param stateCount count of black/white/black/white/black pixels just read
-   * @return true iff the proportions of the counts is close enough to the 1/1/3/1/1 ratios
-   *         used by finder patterns to be considered a match
-   */
+  /// @param stateCount count of black/white/black/white/black pixels just read
+  /// @return true iff the proportions of the counts is close enough to the 1/1/3/1/1 ratios
+  ///         used by finder patterns to be considered a match
   static bool foundPatternCross(Int32List stateCount) {
     int totalModuleSize = 0;
     for (int i = 0; i < 5; i++) {
@@ -187,11 +179,9 @@ class FinderPatternFinder {
         (moduleSize - stateCount[4]).abs() < maxVariance;
   }
 
-  /**
-   * @param stateCount count of black/white/black/white/black pixels just read
-   * @return true iff the proportions of the counts is close enough to the 1/1/3/1/1 ratios
-   *         used by finder patterns to be considered a match
-   */
+  /// @param stateCount count of black/white/black/white/black pixels just read
+  /// @return true iff the proportions of the counts is close enough to the 1/1/3/1/1 ratios
+  ///         used by finder patterns to be considered a match
   static bool foundPatternDiagonal(Int32List stateCount) {
     int totalModuleSize = 0;
     for (int i = 0; i < 5; i++) {
@@ -233,15 +223,13 @@ class FinderPatternFinder {
     stateCount[4] = 0;
   }
 
-  /**
-   * After a vertical and horizontal scan finds a potential finder pattern, this method
-   * "cross-cross-cross-checks" by scanning down diagonally through the center of the possible
-   * finder pattern to see if the same proportion is detected.
-   *
-   * @param centerI row where a finder pattern was detected
-   * @param centerJ center of the section that appears to cross a finder pattern
-   * @return true if proportions are withing expected limits
-   */
+  /// After a vertical and horizontal scan finds a potential finder pattern, this method
+  /// "cross-cross-cross-checks" by scanning down diagonally through the center of the possible
+  /// finder pattern to see if the same proportion is detected.
+  ///
+  /// @param centerI row where a finder pattern was detected
+  /// @param centerJ center of the section that appears to cross a finder pattern
+  /// @return true if proportions are withing expected limits
   bool _crossCheckDiagonal(int centerI, int centerJ) {
     Int32List stateCount = _getCrossCheckStateCount();
 
@@ -311,17 +299,15 @@ class FinderPatternFinder {
     return foundPatternDiagonal(stateCount);
   }
 
-  /**
-   * <p>After a horizontal scan finds a potential finder pattern, this method
-   * "cross-checks" by scanning down vertically through the center of the possible
-   * finder pattern to see if the same proportion is detected.</p>
-   *
-   * @param startI row where a finder pattern was detected
-   * @param centerJ center of the section that appears to cross a finder pattern
-   * @param maxCount maximum reasonable number of modules that should be
-   * observed in any reading state, based on the results of the horizontal scan
-   * @return vertical center of finder pattern, or {@link Float#NaN} if not found
-   */
+  /// <p>After a horizontal scan finds a potential finder pattern, this method
+  /// "cross-checks" by scanning down vertically through the center of the possible
+  /// finder pattern to see if the same proportion is detected.</p>
+  ///
+  /// @param startI row where a finder pattern was detected
+  /// @param centerJ center of the section that appears to cross a finder pattern
+  /// @param maxCount maximum reasonable number of modules that should be
+  /// observed in any reading state, based on the results of the horizontal scan
+  /// @return vertical center of finder pattern, or {@link Float#NaN} if not found
   double _crossCheckVertical(
       int startI, int centerJ, int maxCount, int originalStateCountTotal) {
     BitMatrix image = this.image;
@@ -395,11 +381,9 @@ class FinderPatternFinder {
         : double.nan;
   }
 
-  /**
-   * <p>Like {@link #crossCheckVertical(int, int, int, int)}, and in fact is basically identical,
-   * except it reads horizontally instead of vertically. This is used to cross-cross
-   * check a vertical cross check and locate the real center of the alignment pattern.</p>
-   */
+  /// <p>Like {@link #crossCheckVertical(int, int, int, int)}, and in fact is basically identical,
+  /// except it reads horizontally instead of vertically. This is used to cross-cross
+  /// check a vertical cross check and locate the real center of the alignment pattern.</p>
   double _crossCheckHorizontal(
       int startJ, int centerI, int maxCount, int originalStateCountTotal) {
     BitMatrix image = this.image;
@@ -470,23 +454,21 @@ class FinderPatternFinder {
         : double.nan;
   }
 
-  /**
-   * <p>This is called when a horizontal scan finds a possible alignment pattern. It will
-   * cross check with a vertical scan, and if successful, will, ah, cross-cross-check
-   * with another horizontal scan. This is needed primarily to locate the real horizontal
-   * center of the pattern in cases of extreme skew.
-   * And then we cross-cross-cross check with another diagonal scan.</p>
-   *
-   * <p>If that succeeds the finder pattern location is added to a list that tracks
-   * the number of times each location has been nearly-matched as a finder pattern.
-   * Each additional find is more evidence that the location is in fact a finder
-   * pattern center
-   *
-   * @param stateCount reading state module counts from horizontal scan
-   * @param i row where finder pattern may be found
-   * @param j end of possible finder pattern in row
-   * @return true if a finder pattern candidate was found this time
-   */
+  /// <p>This is called when a horizontal scan finds a possible alignment pattern. It will
+  /// cross check with a vertical scan, and if successful, will, ah, cross-cross-check
+  /// with another horizontal scan. This is needed primarily to locate the real horizontal
+  /// center of the pattern in cases of extreme skew.
+  /// And then we cross-cross-cross check with another diagonal scan.</p>
+  ///
+  /// <p>If that succeeds the finder pattern location is added to a list that tracks
+  /// the number of times each location has been nearly-matched as a finder pattern.
+  /// Each additional find is more evidence that the location is in fact a finder
+  /// pattern center
+  ///
+  /// @param stateCount reading state module counts from horizontal scan
+  /// @param i row where finder pattern may be found
+  /// @param j end of possible finder pattern in row
+  /// @return true if a finder pattern candidate was found this time
   bool _handlePossibleCenter(Int32List stateCount, int i, int j) {
     int stateCountTotal = stateCount[0] +
         stateCount[1] +
@@ -516,7 +498,7 @@ class FinderPatternFinder {
         }
         if (!found) {
           FinderPattern point =
-              new FinderPattern(centerJ, centerI, estimatedModuleSize);
+              FinderPattern(centerJ, centerI, estimatedModuleSize);
           possibleCenters.add(point);
           if (resultPointCallback != null) {
             resultPointCallback!(point);
@@ -528,12 +510,10 @@ class FinderPatternFinder {
     return false;
   }
 
-  /**
-   * @return number of rows we could safely skip during scanning, based on the first
-   *         two finder patterns that have been located. In some cases their position will
-   *         allow us to infer that the third pattern must lie below a certain point farther
-   *         down in the image.
-   */
+  /// @return number of rows we could safely skip during scanning, based on the first
+  ///         two finder patterns that have been located. In some cases their position will
+  ///         allow us to infer that the third pattern must lie below a certain point farther
+  ///         down in the image.
   int _findRowSkip() {
     int max = possibleCenters.length;
     if (max <= 1) {
@@ -560,11 +540,9 @@ class FinderPatternFinder {
     return 0;
   }
 
-  /**
-   * @return true iff we have found at least 3 finder patterns that have been detected
-   *         at least {@link #CENTER_QUORUM} times each, and, the estimated module size of the
-   *         candidates is "pretty similar"
-   */
+  /// @return true iff we have found at least 3 finder patterns that have been detected
+  ///         at least {@link #CENTER_QUORUM} times each, and, the estimated module size of the
+  ///         candidates is "pretty similar"
   bool _haveMultiplyConfirmedCenters() {
     int confirmedCount = 0;
     double totalModuleSize = 0.0;
@@ -590,20 +568,16 @@ class FinderPatternFinder {
     return totalDeviation <= 0.05 * totalModuleSize;
   }
 
-  /**
-   * Get square of distance between a and b.
-   */
+  /// Get square of distance between a and b.
   static double squaredDistance(FinderPattern a, FinderPattern b) {
     double x = a.x - b.x;
     double y = a.y - b.y;
     return x * x + y * y;
   }
 
-  /**
-   * @return the 3 best {@link FinderPattern}s from our list of candidates. The "best" are
-   *         those have similar module size and form a shape closer to a isosceles right triangle.
-   * @throws NotFoundException if 3 such finder patterns do not exist
-   */
+  /// @return the 3 best {@link FinderPattern}s from our list of candidates. The "best" are
+  ///         those have similar module size and form a shape closer to a isosceles right triangle.
+  /// @throws NotFoundException if 3 such finder patterns do not exist
   List<FinderPattern> _selectBestPatterns() {
     int startSize = possibleCenters.length;
     if (startSize < 3) {

@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-/**
- * <p>This class implements a perspective transform in two dimensions. Given four source and four
- * destination points, it will compute the transformation implied between them. The code is based
- * directly upon section 3.4.2 of George Wolberg's "Digital Image Warping"; see pages 54-56.</p>
- *
- * @author Sean Owen
- */
+/// <p>This class implements a perspective transform in two dimensions. Given four source and four
+/// destination points, it will compute the transformation implied between them. The code is based
+/// directly upon section 3.4.2 of George Wolberg's "Digital Image Warping"; see pages 54-56.</p>
+///
+/// @author Sean Owen
 class PerspectiveTransform {
   final double a11;
   final double a12;
@@ -96,7 +94,7 @@ class PerspectiveTransform {
     double dy3 = y0 - y1 + y2 - y3;
     if (dx3 == 0.0 && dy3 == 0.0) {
       // Affine
-      return new PerspectiveTransform._(
+      return PerspectiveTransform._(
           x1 - x0, x2 - x1, x0, y1 - y0, y2 - y1, y0, 0.0, 0.0, 1.0);
     } else {
       double dx1 = x1 - x2;
@@ -106,8 +104,8 @@ class PerspectiveTransform {
       double denominator = dx1 * dy2 - dx2 * dy1;
       double a13 = (dx3 * dy2 - dx2 * dy3) / denominator;
       double a23 = (dx1 * dy3 - dx3 * dy1) / denominator;
-      return new PerspectiveTransform._(x1 - x0 + a13 * x1, x3 - x0 + a23 * x3,
-          x0, y1 - y0 + a13 * y1, y3 - y0 + a23 * y3, y0, a13, a23, 1.0);
+      return PerspectiveTransform._(x1 - x0 + a13 * x1, x3 - x0 + a23 * x3, x0,
+          y1 - y0 + a13 * y1, y3 - y0 + a23 * y3, y0, a13, a23, 1.0);
     }
   }
 
@@ -119,7 +117,7 @@ class PerspectiveTransform {
 
   PerspectiveTransform buildAdjoint() {
     // Adjoint is the transpose of the cofactor matrix:
-    return new PerspectiveTransform._(
+    return PerspectiveTransform._(
         a22 * a33 - a23 * a32,
         a23 * a31 - a21 * a33,
         a21 * a32 - a22 * a31,
@@ -132,7 +130,7 @@ class PerspectiveTransform {
   }
 
   PerspectiveTransform times(PerspectiveTransform other) {
-    return new PerspectiveTransform._(
+    return PerspectiveTransform._(
         a11 * other.a11 + a21 * other.a12 + a31 * other.a13,
         a11 * other.a21 + a21 * other.a22 + a31 * other.a23,
         a11 * other.a31 + a21 * other.a32 + a31 * other.a33,

@@ -19,13 +19,11 @@ import 'dart:math' as math;
 import 'package:image/image.dart' as img;
 import 'package:zxing/src/luminance_source.dart';
 
-/**
- * This LuminanceSource implementation is meant for J2SE clients and our blackbox unit tests.
- *
- * @author dswitkin@google.com (Daniel Switkin)
- * @author Sean Owen
- * @author code@elektrowolle.de (Wolfgang Jung)
- */
+/// This LuminanceSource implementation is meant for J2SE clients and our blackbox unit tests.
+///
+/// @author dswitkin@google.com (Daniel Switkin)
+/// @author Sean Owen
+/// @author code@elektrowolle.de (Wolfgang Jung)
 class ImageLuminanceSource extends LuminanceSource {
   final double _MINUS_45_IN_RADIANS =
       -0.7853981633974483; // Math.toRadians(-45.0)
@@ -92,7 +90,7 @@ class ImageLuminanceSource extends LuminanceSource {
   @override
   Int8List getRow(int y, Int8List? row) {
     if (y < 0 || y >= height) {
-      throw new ArgumentError("Requested row is outside the image: $y");
+      throw ArgumentError("Requested row is outside the image: $y");
     }
     int width = this.height;
     if (row == null || row.length < width) {
@@ -127,11 +125,9 @@ class ImageLuminanceSource extends LuminanceSource {
     //    image, this.left + left, this.top + top, width, height);
   }
 
-  /**
-   * This is always true, since the image is a gray-scale image.
-   *
-   * @return true
-   */
+  /// This is always true, since the image is a gray-scale image.
+  ///
+  /// @return true
   @override
   bool get isRotateSupported {
     "";

@@ -20,11 +20,9 @@ import 'barcode_format.dart';
 import 'result_metadata_type.dart';
 import 'result_point.dart';
 
-/**
- * <p>Encapsulates the result of decoding a barcode within an image.</p>
- *
- * @author Sean Owen
- */
+/// <p>Encapsulates the result of decoding a barcode within an image.</p>
+///
+/// @author Sean Owen
 class Result {
   /// @return raw text encoded by the barcode
   final String text;

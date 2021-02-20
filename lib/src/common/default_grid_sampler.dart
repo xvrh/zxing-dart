@@ -20,9 +20,7 @@ import '../not_found_exception.dart';
 import 'bit_matrix.dart';
 import 'grid_sampler.dart';
 
-/**
- * @author Sean Owen
- */
+/// @author Sean Owen
 class DefaultGridSampler extends GridSampler {
   @override
   BitMatrix sampleGrid(
@@ -73,7 +71,7 @@ class DefaultGridSampler extends GridSampler {
     if (dimensionX <= 0 || dimensionY <= 0) {
       throw NotFoundException();
     }
-    BitMatrix bits = new BitMatrix(dimensionX, dimensionY);
+    BitMatrix bits = BitMatrix(dimensionX, dimensionY);
     List<double> points = List<double>.filled(2 * dimensionX, 0);
     for (int y = 0; y < dimensionY; y++) {
       int max = points.length;

@@ -63,7 +63,7 @@ void testMaskAcrossDimensions(int reference, MaskCondition isMasked) {
 }
 
 void testMask(DataMask mask, int dimension, MaskCondition isMasked) {
-  BitMatrix bits = new BitMatrix(dimension);
+  BitMatrix bits = BitMatrix(dimension);
   mask.unmaskBitMatrix(bits, dimension);
   for (int i = 0; i < dimension; i++) {
     for (int j = 0; j < dimension; j++) {

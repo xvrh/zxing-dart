@@ -30,24 +30,20 @@ import '../not_found_exception.dart';
 import 'decoder/qr_code_decoder_meta_data.dart';
 import 'detector/detector.dart';
 
-/**
- * This implementation can detect and decode QR Codes in an image.
- *
- * @author Sean Owen
- */
+/// This implementation can detect and decode QR Codes in an image.
+///
+/// @author Sean Owen
 class QRCodeReader implements Reader {
   static const NO_POINTS = <ResultPoint>[];
 
-  final Decoder decoder = new Decoder();
+  final Decoder decoder = Decoder();
 
-  /**
-   * Locates and decodes a QR code in an image.
-   *
-   * @return a String representing the content encoded by the QR code
-   * @throws NotFoundException if a QR code cannot be found
-   * @throws FormatReaderException if a QR code cannot be decoded
-   * @throws ChecksumException if error correction fails
-   */
+  /// Locates and decodes a QR code in an image.
+  ///
+  /// @return a String representing the content encoded by the QR code
+  /// @throws NotFoundException if a QR code cannot be found
+  /// @throws FormatReaderException if a QR code cannot be decoded
+  /// @throws ChecksumException if error correction fails
   @override
   Result decode(BinaryBitmap image, {DecodeHints? hints}) {
     hints ??= DecodeHints();
@@ -59,7 +55,7 @@ class QRCodeReader implements Reader {
       points = NO_POINTS;
     } else {
       DetectorResult detectorResult =
-          new Detector(image.getBlackMatrix()).detect(hints: hints);
+          Detector(image.getBlackMatrix()).detect(hints: hints);
       decoderResult = decoder.decode(detectorResult.bits, hints: hints);
       points = detectorResult.points;
     }
@@ -70,7 +66,7 @@ class QRCodeReader implements Reader {
       other.applyMirroredCorrection(points);
     }
 
-    Result result = new Result(
+    Result result = Result(
         decoderResult.text, decoderResult.rawBytes, BarcodeFormat.QR_CODE,
         points: points);
     var byteSegments = decoderResult.byteSegments;
@@ -95,12 +91,10 @@ class QRCodeReader implements Reader {
     // do nothing
   }
 
-  /**
-   * This method detects a code in a "pure" image -- that is, pure monochrome image
-   * which contains only an unrotated, unskewed, image of a code, with some white border
-   * around it. This is a specialized method that works exceptionally fast in this special
-   * case.
-   */
+  /// This method detects a code in a "pure" image -- that is, pure monochrome image
+  /// which contains only an unrotated, unskewed, image of a code, with some white border
+  /// around it. This is a specialized method that works exceptionally fast in this special
+  /// case.
   static BitMatrix _extractPureBits(BitMatrix image) {
     var leftTopBlack = image.getTopLeftOnBit();
     var rightBottomBlack = image.getBottomRightOnBit();
@@ -171,7 +165,7 @@ class QRCodeReader implements Reader {
     }
 
     // Now just read off the bits
-    BitMatrix bits = new BitMatrix(matrixWidth, matrixHeight);
+    BitMatrix bits = BitMatrix(matrixWidth, matrixHeight);
     for (int y = 0; y < matrixHeight; y++) {
       int iOffset = top + (y * moduleSize).toInt();
       for (int x = 0; x < matrixWidth; x++) {

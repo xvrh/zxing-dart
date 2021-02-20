@@ -32,12 +32,10 @@ import 'finder_pattern.dart';
 import 'finder_pattern_finder.dart';
 import 'finder_pattern_info.dart';
 
-/**
- * <p>Encapsulates logic that can detect a QR Code in an image, even if the QR Code
- * is rotated or skewed, or partially obscured.</p>
- *
- * @author Sean Owen
- */
+/// <p>Encapsulates logic that can detect a QR Code in an image, even if the QR Code
+/// is rotated or skewed, or partially obscured.</p>
+///
+/// @author Sean Owen
 class Detector {
   final BitMatrix image;
   ResultPointCallback? _resultPointCallback;
@@ -48,19 +46,17 @@ class Detector {
     return _resultPointCallback;
   }
 
-  /**
-   * <p>Detects a QR Code in an image.</p>
-   *
-   * @param hints optional hints to detector
-   * @return {@link DetectorResult} encapsulating results of detecting a QR Code
-   * @throws NotFoundException if QR Code cannot be found
-   * @throws FormatReaderException if a QR Code cannot be decoded
-   */
+  /// <p>Detects a QR Code in an image.</p>
+  ///
+  /// @param hints optional hints to detector
+  /// @return {@link DetectorResult} encapsulating results of detecting a QR Code
+  /// @throws NotFoundException if QR Code cannot be found
+  /// @throws FormatReaderException if a QR Code cannot be decoded
   DetectorResult detect({required DecodeHints hints}) {
     _resultPointCallback = hints.get(DecodeHintType.NEED_RESULT_POINT_CALLBACK);
 
-    FinderPatternFinder finder = new FinderPatternFinder(image,
-        resultPointCallback: _resultPointCallback);
+    FinderPatternFinder finder =
+        FinderPatternFinder(image, resultPointCallback: _resultPointCallback);
     FinderPatternInfo info = finder.find(hints);
 
     return processFinderPatternInfo(info);
@@ -122,7 +118,7 @@ class Detector {
     } else {
       points = [bottomLeft, topLeft, topRight, alignmentPattern];
     }
-    return new DetectorResult(bits, points);
+    return DetectorResult(bits, points);
   }
 
   static PerspectiveTransform _createTransform(
@@ -174,10 +170,8 @@ class Detector {
     return sampler.sampleGridTransform(image, dimension, dimension, transform);
   }
 
-  /**
-   * <p>Computes the dimension (number of modules on a size) of the QR Code based on the position
-   * of the finder patterns and estimated module size.</p>
-   */
+  /// <p>Computes the dimension (number of modules on a size) of the QR Code based on the position
+  /// of the finder patterns and estimated module size.</p>
   static int _computeDimension(ResultPoint topLeft, ResultPoint topRight,
       ResultPoint bottomLeft, double moduleSize) {
     int tltrCentersDimension =
@@ -200,15 +194,13 @@ class Detector {
     return dimension;
   }
 
-  /**
-   * <p>Computes an average estimated module size based on estimated derived from the positions
-   * of the three finder patterns.</p>
-   *
-   * @param topLeft detected top-left finder pattern center
-   * @param topRight detected top-right finder pattern center
-   * @param bottomLeft detected bottom-left finder pattern center
-   * @return estimated module size
-   */
+  /// <p>Computes an average estimated module size based on estimated derived from the positions
+  /// of the three finder patterns.</p>
+  ///
+  /// @param topLeft detected top-left finder pattern center
+  /// @param topRight detected top-right finder pattern center
+  /// @param bottomLeft detected bottom-left finder pattern center
+  /// @return estimated module size
   double calculateModuleSize(
       ResultPoint topLeft, ResultPoint topRight, ResultPoint bottomLeft) {
     // Take the average
@@ -217,11 +209,9 @@ class Detector {
         2.0;
   }
 
-  /**
-   * <p>Estimates module size based on two finder patterns -- it uses
-   * {@link #sizeOfBlackWhiteBlackRunBothWays(int, int, int, int)} to figure the
-   * width of each, measuring along the axis between their centers.</p>
-   */
+  /// <p>Estimates module size based on two finder patterns -- it uses
+  /// {@link #sizeOfBlackWhiteBlackRunBothWays(int, int, int, int)} to figure the
+  /// width of each, measuring along the axis between their centers.</p>
   double _calculateModuleSizeOneWay(
       ResultPoint pattern, ResultPoint otherPattern) {
     double moduleSizeEst1 = _sizeOfBlackWhiteBlackRunBothWays(pattern.x.toInt(),
@@ -242,11 +232,9 @@ class Detector {
     return (moduleSizeEst1 + moduleSizeEst2) / 14.0;
   }
 
-  /**
-   * See {@link #sizeOfBlackWhiteBlackRun(int, int, int, int)}; computes the total width of
-   * a finder pattern by looking for a black-white-black run from the center in the direction
-   * of another point (another finder pattern center), and in the opposite direction too.
-   */
+  /// See {@link #sizeOfBlackWhiteBlackRun(int, int, int, int)}; computes the total width of
+  /// a finder pattern by looking for a black-white-black run from the center in the direction
+  /// of another point (another finder pattern center), and in the opposite direction too.
   double _sizeOfBlackWhiteBlackRunBothWays(
       int fromX, int fromY, int toX, int toY) {
     double result = _sizeOfBlackWhiteBlackRun(fromX, fromY, toX, toY);
@@ -279,14 +267,12 @@ class Detector {
     return result - 1.0;
   }
 
-  /**
-   * <p>This method traces a line from a point in the image, in the direction towards another point.
-   * It begins in a black region, and keeps going until it finds white, then black, then white again.
-   * It reports the distance from the start to this point.</p>
-   *
-   * <p>This is used when figuring out how wide a finder pattern is, when the finder pattern
-   * may be skewed or rotated.</p>
-   */
+  /// <p>This method traces a line from a point in the image, in the direction towards another point.
+  /// It begins in a black region, and keeps going until it finds white, then black, then white again.
+  /// It reports the distance from the start to this point.</p>
+  ///
+  /// <p>This is used when figuring out how wide a finder pattern is, when the finder pattern
+  /// may be skewed or rotated.</p>
   double _sizeOfBlackWhiteBlackRun(int fromX, int fromY, int toX, int toY) {
     // Mild variant of Bresenham's algorithm;
     // see http://en.wikipedia.org/wiki/Bresenham's_line_algorithm
@@ -343,17 +329,15 @@ class Detector {
     return double.nan;
   }
 
-  /**
-   * <p>Attempts to locate an alignment pattern in a limited region of the image, which is
-   * guessed to contain it. This method uses {@link AlignmentPattern}.</p>
-   *
-   * @param overallEstModuleSize estimated module size so far
-   * @param estAlignmentX x coordinate of center of area probably containing alignment pattern
-   * @param estAlignmentY y coordinate of above
-   * @param allowanceFactor number of pixels in all directions to search from the center
-   * @return {@link AlignmentPattern} if found, or null otherwise
-   * @throws NotFoundException if an unexpected error occurs during detection
-   */
+  /// <p>Attempts to locate an alignment pattern in a limited region of the image, which is
+  /// guessed to contain it. This method uses {@link AlignmentPattern}.</p>
+  ///
+  /// @param overallEstModuleSize estimated module size so far
+  /// @param estAlignmentX x coordinate of center of area probably containing alignment pattern
+  /// @param estAlignmentY y coordinate of above
+  /// @param allowanceFactor number of pixels in all directions to search from the center
+  /// @return {@link AlignmentPattern} if found, or null otherwise
+  /// @throws NotFoundException if an unexpected error occurs during detection
   AlignmentPattern findAlignmentInRegion(double overallEstModuleSize,
       int estAlignmentX, int estAlignmentY, double allowanceFactor) {
     // Look for an alignment pattern (3 modules in size) around where it
@@ -373,7 +357,7 @@ class Detector {
       throw NotFoundException();
     }
 
-    AlignmentPatternFinder alignmentFinder = new AlignmentPatternFinder(
+    AlignmentPatternFinder alignmentFinder = AlignmentPatternFinder(
         image,
         alignmentAreaLeftX,
         alignmentAreaTopY,
