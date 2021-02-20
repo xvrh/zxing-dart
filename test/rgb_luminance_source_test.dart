@@ -44,6 +44,6 @@ void main() {
   });
 
   test('ToString', () {
-    expect(source.toString(), "#+ \n#+#\n#+#\n");
+    expect(source.toString(), '#+ \n#+#\n#+#\n');
   });
 }

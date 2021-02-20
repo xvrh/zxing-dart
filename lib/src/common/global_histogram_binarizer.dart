@@ -15,13 +15,13 @@ import 'bit_matrix.dart';
 /// @author dswitkin@google.com (Daniel Switkin)
 /// @author Sean Owen
 class GlobalHistogramBinarizer extends Binarizer {
-  static final int _LUMINANCE_BITS = 5;
-  static final int _LUMINANCE_SHIFT = 8 - _LUMINANCE_BITS;
-  static final int _LUMINANCE_BUCKETS = 1 << _LUMINANCE_BITS;
-  static final Int8List _EMPTY = Int8List(0);
+  static final int _luminanceBits = 5;
+  static final int _luminanceShift = 8 - _luminanceBits;
+  static final int _luminanceBuckets = 1 << _luminanceBits;
+  static final Int8List _empty = Int8List(0);
 
-  Int8List _luminances = _EMPTY;
-  final Int32List _buckets = Int32List(_LUMINANCE_BUCKETS);
+  Int8List _luminances = _empty;
+  final Int32List _buckets = Int32List(_luminanceBuckets);
 
   GlobalHistogramBinarizer(LuminanceSource source) : super(source);
 
@@ -40,7 +40,7 @@ class GlobalHistogramBinarizer extends Binarizer {
     var localLuminances = source.getRow(y, _luminances);
     var localBuckets = _buckets;
     for (var x = 0; x < width; x++) {
-      localBuckets[(localLuminances[x] & 0xff) >> _LUMINANCE_SHIFT]++;
+      localBuckets[(localLuminances[x] & 0xff) >> _luminanceShift]++;
     }
     var blackPoint = _estimateBlackPoint(localBuckets);
 
@@ -85,7 +85,7 @@ class GlobalHistogramBinarizer extends Binarizer {
       var right = (width * 4) ~/ 5;
       for (var x = width ~/ 5; x < right; x++) {
         var pixel = localLuminances[x] & 0xff;
-        localBuckets[pixel >> _LUMINANCE_SHIFT]++;
+        localBuckets[pixel >> _luminanceShift]++;
       }
     }
     var blackPoint = _estimateBlackPoint(localBuckets);
@@ -116,7 +116,7 @@ class GlobalHistogramBinarizer extends Binarizer {
     if (_luminances.length < luminanceSize) {
       _luminances = Int8List(luminanceSize);
     }
-    for (var x = 0; x < _LUMINANCE_BUCKETS; x++) {
+    for (var x = 0; x < _luminanceBuckets; x++) {
       _buckets[x] = 0;
     }
   }
@@ -178,6 +178,6 @@ class GlobalHistogramBinarizer extends Binarizer {
       }
     }
 
-    return bestValley << _LUMINANCE_SHIFT;
+    return bestValley << _luminanceShift;
   }
 }

@@ -50,7 +50,7 @@ abstract class LuminanceSource {
   /// @param height The height of the rectangle to crop.
   /// @return A cropped version of this object.
   LuminanceSource crop(int left, int top, int width, int height) {
-    throw UnsupportedError("This luminance source does not support cropping.");
+    throw UnsupportedError('This luminance source does not support cropping.');
   }
 
   /// @return Whether this subclass supports counter-clockwise rotation.
@@ -70,7 +70,7 @@ abstract class LuminanceSource {
   /// @return A rotated version of this object.
   LuminanceSource rotateCounterClockwise() {
     throw UnsupportedError(
-        "This luminance source does not support rotation by 90 degrees.");
+        'This luminance source does not support rotation by 90 degrees.');
   }
 
   /// Returns a new object with rotated image data by 45 degrees counterclockwise.
@@ -79,17 +79,17 @@ abstract class LuminanceSource {
   /// @return A rotated version of this object.
   LuminanceSource rotateCounterClockwise45() {
     throw UnsupportedError(
-        "This luminance source does not support rotation by 45 degrees.");
+        'This luminance source does not support rotation by 45 degrees.');
   }
 
   @override
   String toString() {
-    Int8List row = Int8List(width);
+    var row = Int8List(width);
     var result = StringBuffer();
-    for (int y = 0; y < height; y++) {
+    for (var y = 0; y < height; y++) {
       row = getRow(y, row);
-      for (int x = 0; x < width; x++) {
-        int luminance = row[x] & 0xFF;
+      for (var x = 0; x < width; x++) {
+        var luminance = row[x] & 0xFF;
         String c;
         if (luminance < 0x40) {
           c = '#';

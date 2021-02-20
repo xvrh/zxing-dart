@@ -45,28 +45,28 @@ class AlignmentPatternFinder {
   /// @return {@link AlignmentPattern} if found
   /// @throws NotFoundException if not found
   AlignmentPattern find() {
-    int startX = this.startX;
-    int height = this.height;
-    int maxJ = startX + width;
-    int middleI = startY + (height ~/ 2);
+    var startX = this.startX;
+    var height = this.height;
+    var maxJ = startX + width;
+    var middleI = startY + (height ~/ 2);
     // We are looking for black/white/black modules in 1:1:1 ratio;
     // this tracks the number of black/white/black modules seen so far
-    Int32List stateCount = Int32List(3);
-    for (int iGen = 0; iGen < height; iGen++) {
+    var stateCount = Int32List(3);
+    for (var iGen = 0; iGen < height; iGen++) {
       // Search from middle outwards
-      int i =
+      var i =
           middleI + ((iGen & 0x01) == 0 ? (iGen + 1) ~/ 2 : -((iGen + 1) ~/ 2));
       stateCount[0] = 0;
       stateCount[1] = 0;
       stateCount[2] = 0;
-      int j = startX;
+      var j = startX;
       // Burn off leading white pixels before anything else; if we start in the middle of
       // a white run, it doesn't make sense to count its length, since we don't know if the
       // white run continued to the left of the start point
       while (j < maxJ && !image.get(j, i)) {
         j++;
       }
-      int currentState = 0;
+      var currentState = 0;
       while (j < maxJ) {
         if (image.get(j, i)) {
           // Black pixel
@@ -79,7 +79,7 @@ class AlignmentPatternFinder {
               // A winner?
               if (_foundPatternCross(stateCount)) {
                 // Yes
-                AlignmentPattern? confirmed =
+                var confirmed =
                     _handlePossibleCenter(stateCount, i, j);
                 if (confirmed != null) {
                   return confirmed;
@@ -104,7 +104,7 @@ class AlignmentPatternFinder {
         j++;
       }
       if (_foundPatternCross(stateCount)) {
-        AlignmentPattern? confirmed =
+        var confirmed =
             _handlePossibleCenter(stateCount, i, maxJ);
         if (confirmed != null) {
           return confirmed;
@@ -114,7 +114,7 @@ class AlignmentPatternFinder {
 
     // Hmm, nothing we saw was observed and confirmed twice. If we had
     // any guess at all, return it.
-    if (!possibleCenters.isEmpty) {
+    if (possibleCenters.isNotEmpty) {
       return possibleCenters[0];
     }
 
@@ -131,9 +131,9 @@ class AlignmentPatternFinder {
   /// @return true iff the proportions of the counts is close enough to the 1/1/1 ratios
   ///         used by alignment patterns to be considered a match
   bool _foundPatternCross(Int32List stateCount) {
-    double moduleSize = this.moduleSize;
-    double maxVariance = moduleSize / 2.0;
-    for (int i = 0; i < 3; i++) {
+    var moduleSize = this.moduleSize;
+    var maxVariance = moduleSize / 2.0;
+    for (var i = 0; i < 3; i++) {
       if ((moduleSize - stateCount[i]).abs() >= maxVariance) {
         return false;
       }
@@ -152,16 +152,16 @@ class AlignmentPatternFinder {
   /// @return vertical center of alignment pattern, or {@link double#NaN} if not found
   double _crossCheckVertical(
       int startI, int centerJ, int maxCount, int originalStateCountTotal) {
-    BitMatrix image = this.image;
+    var image = this.image;
 
-    int maxI = image.height;
-    Int32List stateCount = crossCheckStateCount;
+    var maxI = image.height;
+    var stateCount = crossCheckStateCount;
     stateCount[0] = 0;
     stateCount[1] = 0;
     stateCount[2] = 0;
 
     // Start counting up from center
-    int i = startI;
+    var i = startI;
     while (i >= 0 && image.get(centerJ, i) && stateCount[1] <= maxCount) {
       stateCount[1]++;
       i--;
@@ -195,7 +195,7 @@ class AlignmentPatternFinder {
       return double.nan;
     }
 
-    int stateCountTotal = stateCount[0] + stateCount[1] + stateCount[2];
+    var stateCountTotal = stateCount[0] + stateCount[1] + stateCount[2];
     if (5 * (stateCountTotal - originalStateCountTotal).abs() >=
         2 * originalStateCountTotal) {
       return double.nan;
@@ -216,21 +216,21 @@ class AlignmentPatternFinder {
   /// @param j end of possible alignment pattern in row
   /// @return {@link AlignmentPattern} if we have found the same pattern twice, or null if not
   AlignmentPattern? _handlePossibleCenter(Int32List stateCount, int i, int j) {
-    int stateCountTotal = stateCount[0] + stateCount[1] + stateCount[2];
-    double centerJ = _centerFromEnd(stateCount, j);
-    double centerI = _crossCheckVertical(
+    var stateCountTotal = stateCount[0] + stateCount[1] + stateCount[2];
+    var centerJ = _centerFromEnd(stateCount, j);
+    var centerI = _crossCheckVertical(
         i, centerJ.toInt(), 2 * stateCount[1], stateCountTotal);
     if (!centerI.isNaN) {
-      double estimatedModuleSize =
+      var estimatedModuleSize =
           (stateCount[0] + stateCount[1] + stateCount[2]) / 3.0;
-      for (AlignmentPattern center in possibleCenters) {
+      for (var center in possibleCenters) {
         // Look for about the same center and module size:
         if (center.aboutEquals(estimatedModuleSize, centerI, centerJ)) {
           return center.combineEstimate(centerI, centerJ, estimatedModuleSize);
         }
       }
       // Hadn't found this before; save it
-      AlignmentPattern point =
+      var point =
           AlignmentPattern(centerJ, centerI, estimatedModuleSize);
       possibleCenters.add(point);
       if (resultPointCallback != null) {

@@ -6,13 +6,13 @@ import '../../common/bit_source_builder.dart';
 
 void main() {
   test('Simple Byte mode', () {
-    BitSourceBuilder builder = BitSourceBuilder();
+    var builder = BitSourceBuilder();
     builder.write(0x04, 4); // Byte mode
     builder.write(0x03, 8); // 3 bytes
     builder.write(0xF1, 8);
     builder.write(0xF2, 8);
     builder.write(0xF3, 8);
-    String result = DecodedBitStreamParser.decode(builder.toByteArray(),
+    var result = DecodedBitStreamParser.decode(builder.toByteArray(),
             Version.getVersionForNumber(1), null, DecodeHints())
         .text;
     //expect(result, "\u00f1\u00f2\u00f3");

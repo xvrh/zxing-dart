@@ -5,7 +5,7 @@ import 'package:zxing/src/common/bit_source.dart';
 void main() {
   test('Source', () {
     var bytes = Int8List.fromList([1, 2, 3, 4, 5]);
-    BitSource source = BitSource(bytes);
+    var source = BitSource(bytes);
     expect(source.available(), 40);
     expect(source.readBits(1), 0);
     expect(source.available(), 39);

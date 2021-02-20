@@ -29,7 +29,7 @@ void testGolden(
       }
 
       LuminanceSource source = ImageLuminanceSource(image);
-      BinaryBitmap bitmap = BinaryBitmap(HybridBinarizer(source));
+      var bitmap = BinaryBitmap(HybridBinarizer(source));
 
       try {
         var result = reader.decode(bitmap);

@@ -15,9 +15,9 @@ class StringUtils {
   ///  {@link StandardCharsets#ISO_8859_1}, or the platform default encoding if
   ///  none of these can possibly be correct
   static CharacterSetECI guessCharset(Int8List bytes, DecodeHints hints) {
-    if (hints.contains(DecodeHintType.CHARACTER_SET)) {
+    if (hints.contains(DecodeHintType.characterSet)) {
       return CharacterSetECI.findByName(
-          hints.get(DecodeHintType.CHARACTER_SET).toString());
+          hints.get(DecodeHintType.characterSet).toString());
     }
     // For now, merely tries to distinguish ISO-8859-1, UTF-8 and Shift_JIS,
     // which should be by far the most common encodings.

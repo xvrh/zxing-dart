@@ -2,7 +2,6 @@ import '../barcode_format.dart';
 import '../binary_bitmap.dart';
 import '../common/bit_matrix.dart';
 import '../common/decoder_result.dart';
-import '../common/detector_result.dart';
 import '../decode_hint.dart';
 import '../not_found_exception.dart';
 import '../reader.dart';
@@ -17,7 +16,7 @@ import 'detector/detector.dart';
 ///
 /// @author Sean Owen
 class QRCodeReader implements Reader {
-  static const NO_POINTS = <ResultPoint>[];
+  static const _kNoPoints = <ResultPoint>[];
 
   final Decoder decoder = Decoder();
 
@@ -32,12 +31,12 @@ class QRCodeReader implements Reader {
     hints ??= DecodeHints();
     DecoderResult decoderResult;
     List<ResultPoint> points;
-    if (hints.contains(DecodeHintType.PURE_BARCODE)) {
-      BitMatrix bits = _extractPureBits(image.getBlackMatrix());
+    if (hints.contains(DecodeHintType.pureBarcode)) {
+      var bits = _extractPureBits(image.getBlackMatrix());
       decoderResult = decoder.decode(bits, hints: hints);
-      points = NO_POINTS;
+      points = _kNoPoints;
     } else {
-      DetectorResult detectorResult =
+      var detectorResult =
           Detector(image.getBlackMatrix()).detect(hints: hints);
       decoderResult = decoder.decode(detectorResult.bits, hints: hints);
       points = detectorResult.points;
@@ -49,21 +48,21 @@ class QRCodeReader implements Reader {
       other.applyMirroredCorrection(points);
     }
 
-    Result result = Result(
-        decoderResult.text, decoderResult.rawBytes, BarcodeFormat.QR_CODE,
+    var result = Result(
+        decoderResult.text, decoderResult.rawBytes, BarcodeFormat.qrCode,
         points: points);
     var byteSegments = decoderResult.byteSegments;
     if (byteSegments != null) {
-      result.putMetadata(ResultMetadataType.BYTE_SEGMENTS, byteSegments);
+      result.putMetadata(ResultMetadataType.byteSegments, byteSegments);
     }
     var ecLevel = decoderResult.ecLevel;
     if (ecLevel != null) {
-      result.putMetadata(ResultMetadataType.ERROR_CORRECTION_LEVEL, ecLevel);
+      result.putMetadata(ResultMetadataType.errorCorrectionLevel, ecLevel);
     }
     if (decoderResult.hasStructuredAppend) {
-      result.putMetadata(ResultMetadataType.STRUCTURED_APPEND_SEQUENCE,
+      result.putMetadata(ResultMetadataType.structuredAppendSequence,
           decoderResult.structuredAppendSequenceNumber);
-      result.putMetadata(ResultMetadataType.STRUCTURED_APPEND_PARITY,
+      result.putMetadata(ResultMetadataType.structuredAppendParity,
           decoderResult.structuredAppendParity);
     }
     return result;
@@ -85,12 +84,12 @@ class QRCodeReader implements Reader {
       throw NotFoundException();
     }
 
-    double moduleSize = _moduleSize(leftTopBlack, image);
+    var moduleSize = _moduleSize(leftTopBlack, image);
 
-    int top = leftTopBlack[1];
-    int bottom = rightBottomBlack[1];
-    int left = leftTopBlack[0];
-    int right = rightBottomBlack[0];
+    var top = leftTopBlack[1];
+    var bottom = rightBottomBlack[1];
+    var left = leftTopBlack[0];
+    var right = rightBottomBlack[0];
 
     // Sanity check!
     if (left >= right || top >= bottom) {
@@ -107,8 +106,8 @@ class QRCodeReader implements Reader {
       }
     }
 
-    int matrixWidth = ((right - left + 1) / moduleSize).round();
-    int matrixHeight = ((bottom - top + 1) / moduleSize).round();
+    var matrixWidth = ((right - left + 1) / moduleSize).round();
+    var matrixHeight = ((bottom - top + 1) / moduleSize).round();
     if (matrixWidth <= 0 || matrixHeight <= 0) {
       throw NotFoundException();
     }
@@ -120,14 +119,14 @@ class QRCodeReader implements Reader {
     // Push in the "border" by half the module width so that we start
     // sampling in the middle of the module. Just in case the image is a
     // little off, this will help recover.
-    int nudge = moduleSize ~/ 2.0;
+    var nudge = moduleSize ~/ 2.0;
     top += nudge;
     left += nudge;
 
     // But careful that this does not sample off the edge
     // "right" is the farthest-right valid pixel location -- right+1 is not necessarily
     // This is positive by how much the inner x loop below would be too large
-    int nudgedTooFarRight =
+    var nudgedTooFarRight =
         left + ((matrixWidth - 1) * moduleSize).toInt() - right;
     if (nudgedTooFarRight > 0) {
       if (nudgedTooFarRight > nudge) {
@@ -137,7 +136,7 @@ class QRCodeReader implements Reader {
       left -= nudgedTooFarRight;
     }
     // See logic above
-    int nudgedTooFarDown =
+    var nudgedTooFarDown =
         top + ((matrixHeight - 1) * moduleSize).toInt() - bottom;
     if (nudgedTooFarDown > 0) {
       if (nudgedTooFarDown > nudge) {
@@ -148,10 +147,10 @@ class QRCodeReader implements Reader {
     }
 
     // Now just read off the bits
-    BitMatrix bits = BitMatrix(matrixWidth, matrixHeight);
-    for (int y = 0; y < matrixHeight; y++) {
-      int iOffset = top + (y * moduleSize).toInt();
-      for (int x = 0; x < matrixWidth; x++) {
+    var bits = BitMatrix(matrixWidth, matrixHeight);
+    for (var y = 0; y < matrixHeight; y++) {
+      var iOffset = top + (y * moduleSize).toInt();
+      for (var x = 0; x < matrixWidth; x++) {
         if (image.get(left + (x * moduleSize).toInt(), iOffset)) {
           bits.set(x, y);
         }
@@ -161,12 +160,12 @@ class QRCodeReader implements Reader {
   }
 
   static double _moduleSize(List<int> leftTopBlack, BitMatrix image) {
-    int height = image.height;
-    int width = image.width;
-    int x = leftTopBlack[0];
-    int y = leftTopBlack[1];
-    bool inBlack = true;
-    int transitions = 0;
+    var height = image.height;
+    var width = image.width;
+    var x = leftTopBlack[0];
+    var y = leftTopBlack[1];
+    var inBlack = true;
+    var transitions = 0;
     while (x < width && y < height) {
       if (inBlack != image.get(x, y)) {
         if (++transitions == 5) {

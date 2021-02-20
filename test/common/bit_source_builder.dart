@@ -20,9 +20,9 @@ class BitSourceBuilder {
         _bitsLeftInNextByte = 8;
       }
     } else {
-      int bitsToWriteNow = _bitsLeftInNextByte;
-      int numRestOfBits = numBits - bitsToWriteNow;
-      int mask = 0xFF >> (8 - bitsToWriteNow);
+      var bitsToWriteNow = _bitsLeftInNextByte;
+      var numRestOfBits = numBits - bitsToWriteNow;
+      var mask = 0xFF >> (8 - bitsToWriteNow);
       var valueToWriteNow =
           (Int32(value).shiftRightUnsigned(numRestOfBits)) & mask;
       write(valueToWriteNow.toInt(), bitsToWriteNow);

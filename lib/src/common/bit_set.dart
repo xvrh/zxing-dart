@@ -366,7 +366,7 @@ class BitSetArray extends BitSet {
   /// Inverts all the bit values in the current [BitSetArray].
   void invertAll() {
     for (var i = 0; i < _data.length; i++) {
-      _data[i] = ~(_data[i]);
+      _data[i] = ~_data[i];
     }
   }
 
@@ -498,7 +498,7 @@ class _IntIterator implements Iterator<int> {
   final int _length;
   final bool _matchValue;
   final int _skipMatch;
-  final int _cursorMax = (1 << 31);
+  final int _cursorMax = 1 << 31;
   int _current = -1;
   int _cursor = 0;
   int _cursorByte = 0;

@@ -6,34 +6,34 @@ final bitMatrixPoints = <int>[1, 2, 2, 0, 3, 1];
 
 void main() {
   test('Get set', () {
-    BitMatrix matrix = BitMatrix(33);
+    var matrix = BitMatrix(33);
     expect(matrix.height, 33);
-    for (int y = 0; y < 33; y++) {
-      for (int x = 0; x < 33; x++) {
+    for (var y = 0; y < 33; y++) {
+      for (var x = 0; x < 33; x++) {
         if (y * x % 3 == 0) {
           matrix.set(x, y);
         }
       }
     }
-    for (int y = 0; y < 33; y++) {
-      for (int x = 0; x < 33; x++) {
+    for (var y = 0; y < 33; y++) {
+      for (var x = 0; x < 33; x++) {
         expect(matrix.get(x, y), y * x % 3 == 0);
       }
     }
   });
 
   test('Set region', () {
-    BitMatrix matrix = BitMatrix(5);
+    var matrix = BitMatrix(5);
     matrix.setRegion(1, 1, 3, 3);
-    for (int y = 0; y < 5; y++) {
-      for (int x = 0; x < 5; x++) {
+    for (var y = 0; y < 5; y++) {
+      for (var x = 0; x < 5; x++) {
         expect(matrix.get(x, y), y >= 1 && y <= 3 && x >= 1 && x <= 3);
       }
     }
   });
 
   test('Enclosing', () {
-    BitMatrix matrix = BitMatrix(5);
+    var matrix = BitMatrix(5);
     expect(matrix.getEnclosingRectangle(), isNull);
     matrix.setRegion(1, 1, 1, 1);
     expect(matrix.getEnclosingRectangle(), [1, 1, 1, 1]);
@@ -44,7 +44,7 @@ void main() {
   });
 
   test('On bit', () {
-    BitMatrix matrix = BitMatrix(5);
+    var matrix = BitMatrix(5);
     expect(matrix.getTopLeftOnBit(), isNull);
     expect(matrix.getBottomRightOnBit(), isNull);
     matrix.setRegion(1, 1, 1, 1);
@@ -59,7 +59,7 @@ void main() {
   });
 
   test('Rectangular matrix', () {
-    BitMatrix matrix = BitMatrix(75, 20);
+    var matrix = BitMatrix(75, 20);
     expect(matrix.width, 75);
     expect(matrix.height, 20);
     matrix.set(10, 0);
@@ -85,43 +85,43 @@ void main() {
   });
 
   test('Rectangular set region', () {
-    BitMatrix matrix = BitMatrix(320, 240);
+    var matrix = BitMatrix(320, 240);
     expect(matrix.width, 320);
     expect(matrix.height, 240);
     matrix.setRegion(105, 22, 80, 12);
 
     // Only bits in the region should be on
-    for (int y = 0; y < 240; y++) {
-      for (int x = 0; x < 320; x++) {
+    for (var y = 0; y < 240; y++) {
+      for (var x = 0; x < 320; x++) {
         expect(y >= 22 && y < 34 && x >= 105 && x < 185, matrix.get(x, y));
       }
     }
   });
 
   test('Get row', () {
-    BitMatrix matrix = BitMatrix(102, 5);
-    for (int x = 0; x < 102; x++) {
+    var matrix = BitMatrix(102, 5);
+    for (var x = 0; x < 102; x++) {
       if ((x & 0x03) == 0) {
         matrix.set(x, 2);
       }
     }
 
     // Should allocate
-    BitArray array = matrix.getRow(2, null);
+    var array = matrix.getRow(2, null);
     expect(array.size, 102);
 
     // Should reallocate
-    BitArray array2 = BitArray(60);
+    var array2 = BitArray(60);
     array2 = matrix.getRow(2, array2);
     expect(array2.size, 102);
 
     // Should use provided object, with original BitArray size
-    BitArray array3 = BitArray(200);
+    var array3 = BitArray(200);
     array3 = matrix.getRow(2, array3);
     expect(array3.size, 200);
 
-    for (int x = 0; x < 102; x++) {
-      bool on = (x & 0x03) == 0;
+    for (var x = 0; x < 102; x++) {
+      var on = (x & 0x03) == 0;
       expect(array.get(x), on);
       expect(array2.get(x), on);
       expect(array3.get(x), on);
@@ -129,7 +129,7 @@ void main() {
   });
 
   test('Rotate 90 simple', () {
-    BitMatrix matrix = BitMatrix(3, 3);
+    var matrix = BitMatrix(3, 3);
     matrix.set(0, 0);
     matrix.set(0, 1);
     matrix.set(1, 2);
@@ -144,7 +144,7 @@ void main() {
   });
 
   test('Rotate 180', () {
-    BitMatrix matrix = BitMatrix(3, 3);
+    var matrix = BitMatrix(3, 3);
     matrix.set(0, 0);
     matrix.set(0, 1);
     matrix.set(1, 2);
@@ -166,51 +166,51 @@ void main() {
   });
 
   test('Parse', () {
-    BitMatrix emptyMatrix = BitMatrix(3, 3);
-    BitMatrix fullMatrix = BitMatrix(3, 3);
+    var emptyMatrix = BitMatrix(3, 3);
+    var fullMatrix = BitMatrix(3, 3);
     fullMatrix.setRegion(0, 0, 3, 3);
-    BitMatrix centerMatrix = BitMatrix(3, 3);
+    var centerMatrix = BitMatrix(3, 3);
     centerMatrix.setRegion(1, 1, 1, 1);
-    BitMatrix emptyMatrix24 = BitMatrix(2, 4);
+    var emptyMatrix24 = BitMatrix(2, 4);
 
-    expect(BitMatrix.parseString("   \n   \n   \n", "x", " "), emptyMatrix);
+    expect(BitMatrix.parseString('   \n   \n   \n', 'x', ' '), emptyMatrix);
     expect(
-        BitMatrix.parseString("   \n   \r\r\n   \n\r", "x", " "), emptyMatrix);
-    expect(BitMatrix.parseString("   \n   \n   ", "x", " "), emptyMatrix);
+        BitMatrix.parseString('   \n   \r\r\n   \n\r', 'x', ' '), emptyMatrix);
+    expect(BitMatrix.parseString('   \n   \n   ', 'x', ' '), emptyMatrix);
 
-    expect(BitMatrix.parseString("xxx\nxxx\nxxx\n", "x", " "), fullMatrix);
+    expect(BitMatrix.parseString('xxx\nxxx\nxxx\n', 'x', ' '), fullMatrix);
 
-    expect(BitMatrix.parseString("   \n x \n   \n", "x", " "), centerMatrix);
-    expect(BitMatrix.parseString("      \n  x   \n      \n", "x ", "  "),
+    expect(BitMatrix.parseString('   \n x \n   \n', 'x', ' '), centerMatrix);
+    expect(BitMatrix.parseString('      \n  x   \n      \n', 'x ', '  '),
         centerMatrix);
     try {
-      expect(BitMatrix.parseString("   \n xy\n   \n", "x", " "), centerMatrix);
+      expect(BitMatrix.parseString('   \n xy\n   \n', 'x', ' '), centerMatrix);
       fail('Should have thrown');
     } on ArgumentError catch (_) {
       // good
     }
 
-    expect(BitMatrix.parseString("  \n  \n  \n  \n", "x", " "), emptyMatrix24);
+    expect(BitMatrix.parseString('  \n  \n  \n  \n', 'x', ' '), emptyMatrix24);
 
     expect(
         BitMatrix.parseString(
-            centerMatrix.toStringRepresentation("x", "."), "x", "."),
+            centerMatrix.toStringRepresentation('x', '.'), 'x', '.'),
         centerMatrix);
   });
 
   test('Parse boolean', () {
-    BitMatrix emptyMatrix = BitMatrix(3, 3);
-    BitMatrix fullMatrix = BitMatrix(3, 3);
+    var emptyMatrix = BitMatrix(3, 3);
+    var fullMatrix = BitMatrix(3, 3);
     fullMatrix.setRegion(0, 0, 3, 3);
-    BitMatrix centerMatrix = BitMatrix(3, 3);
+    var centerMatrix = BitMatrix(3, 3);
     centerMatrix.setRegion(1, 1, 1, 1);
 
-    List<List<bool>> matrix =
-        List.generate(3, (index) => List.generate(3, (index) => false));
+    var matrix =
+        List<List<bool>>.generate(3, (index) => List.generate(3, (index) => false));
     expect(BitMatrix.parse(matrix), emptyMatrix);
     matrix[1][1] = true;
     expect(BitMatrix.parse(matrix), centerMatrix);
-    for (List<bool> arr in matrix) {
+    for (var arr in matrix) {
       for (var i = 0; i < arr.length; i++) {
         arr[i] = true;
       }
@@ -219,8 +219,8 @@ void main() {
   });
 
   test('Unset', () {
-    BitMatrix emptyMatrix = BitMatrix(3, 3);
-    BitMatrix matrix = emptyMatrix.clone();
+    var emptyMatrix = BitMatrix(3, 3);
+    var matrix = emptyMatrix.clone();
     matrix.set(1, 1);
     expect(matrix, isNot(emptyMatrix));
     matrix.unset(1, 1);
@@ -230,14 +230,14 @@ void main() {
   });
 
   test('XOR', () {
-    BitMatrix emptyMatrix = BitMatrix(3, 3);
-    BitMatrix fullMatrix = BitMatrix(3, 3);
+    var emptyMatrix = BitMatrix(3, 3);
+    var fullMatrix = BitMatrix(3, 3);
     fullMatrix.setRegion(0, 0, 3, 3);
-    BitMatrix centerMatrix = BitMatrix(3, 3);
+    var centerMatrix = BitMatrix(3, 3);
     centerMatrix.setRegion(1, 1, 1, 1);
-    BitMatrix invertedCenterMatrix = fullMatrix.clone();
+    var invertedCenterMatrix = fullMatrix.clone();
     invertedCenterMatrix.unset(1, 1);
-    BitMatrix badMatrix = BitMatrix(4, 4);
+    var badMatrix = BitMatrix(4, 4);
 
     _testXOR(emptyMatrix, emptyMatrix, emptyMatrix);
     _testXOR(emptyMatrix, centerMatrix, centerMatrix);
@@ -274,7 +274,7 @@ void main() {
 String matrixToString(BitMatrix result) {
   expect(result.height, 1);
   var builder = StringBuffer();
-  for (int i = 0; i < result.width; i++) {
+  for (var i = 0; i < result.width; i++) {
     builder.write(result.get(i, 0) ? '1' : '0');
   }
   return builder.toString();
@@ -282,26 +282,26 @@ String matrixToString(BitMatrix result) {
 
 void _testXOR(
     BitMatrix dataMatrix, BitMatrix flipMatrix, BitMatrix expectedMatrix) {
-  BitMatrix matrix = dataMatrix.clone();
+  var matrix = dataMatrix.clone();
   matrix.xor(flipMatrix);
   expect(matrix, expectedMatrix);
 }
 
 void _testRotate180(int width, int height) {
-  BitMatrix input = _getInput(width, height);
+  var input = _getInput(width, height);
   input.rotate180();
-  BitMatrix expected = _getExpected(width, height);
+  var expected = _getExpected(width, height);
 
-  for (int y = 0; y < height; y++) {
-    for (int x = 0; x < width; x++) {
-      expect(input.get(x, y), expected.get(x, y), reason: "($x,$y)");
+  for (var y = 0; y < height; y++) {
+    for (var x = 0; x < width; x++) {
+      expect(input.get(x, y), expected.get(x, y), reason: '($x,$y)');
     }
   }
 }
 
 BitMatrix _getExpected(int width, int height) {
-  BitMatrix result = BitMatrix(width, height);
-  for (int i = 0; i < bitMatrixPoints.length; i += 2) {
+  var result = BitMatrix(width, height);
+  for (var i = 0; i < bitMatrixPoints.length; i += 2) {
     result.set(
         width - 1 - bitMatrixPoints[i], height - 1 - bitMatrixPoints[i + 1]);
   }
@@ -309,8 +309,8 @@ BitMatrix _getExpected(int width, int height) {
 }
 
 BitMatrix _getInput(int width, int height) {
-  BitMatrix result = BitMatrix(width, height);
-  for (int i = 0; i < bitMatrixPoints.length; i += 2) {
+  var result = BitMatrix(width, height);
+  for (var i = 0; i < bitMatrixPoints.length; i += 2) {
     result.set(bitMatrixPoints[i], bitMatrixPoints[i + 1]);
   }
   return result;

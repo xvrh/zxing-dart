@@ -1,6 +1,8 @@
 import 'dart:convert';
 import '../format_reader_exception.dart';
 
+// ignore_for_file: non_constant_identifier_names
+
 const _defaultAscii = AsciiCodec(allowInvalid: true);
 const _defaultLatin1 = Latin1Codec(allowInvalid: true);
 const _defaultUtf8 = Utf8Codec(allowMalformed: true);

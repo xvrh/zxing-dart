@@ -30,9 +30,9 @@ class ImageLuminanceSource extends LuminanceSource {
   @override
   Int8List getRow(int y, Int8List? row) {
     if (y < 0 || y >= height) {
-      throw ArgumentError("Requested row is outside the image: $y");
+      throw ArgumentError('Requested row is outside the image: $y');
     }
-    int width = this.height;
+    var width = height;
     if (row == null || row.length < width) {
       row = Int8List(width);
     }
@@ -44,10 +44,10 @@ class ImageLuminanceSource extends LuminanceSource {
 
   @override
   Int8List getMatrix() {
-    int width = this.width;
-    int height = this.height;
-    int area = width * height;
-    Int8List matrix = Int8List(area);
+    var width = this.width;
+    var height = this.height;
+    var area = width * height;
+    var matrix = Int8List(area);
     matrix.setRange(0, matrix.length, _bytes, top * width);
     return matrix;
   }

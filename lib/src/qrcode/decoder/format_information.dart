@@ -12,7 +12,7 @@ class FormatInformation {
   static final _formatInfoMaskQR = 0x5412;
 
   /// See ISO 18004:2006, Annex C, Table C.1
-  static final _FORMAT_INFO_DECODE_LOOKUP = <List<int>>[
+  static final _formatInfoDecodeLookup = <List<int>>[
     [0x5412, 0x00],
     [0x5125, 0x01],
     [0x5E7C, 0x02],
@@ -84,15 +84,15 @@ class FormatInformation {
   static FormatInformation? _doDecodeFormatInformation(
       int maskedFormatInfo1, int maskedFormatInfo2) {
     // Find the int in FORMAT_INFO_DECODE_LOOKUP with fewest bits differing
-    int bestDifference = Int32.MAX_VALUE.toInt();
-    int bestFormatInfo = 0;
-    for (List<int> decodeInfo in _FORMAT_INFO_DECODE_LOOKUP) {
-      int targetInfo = decodeInfo[0];
+    var bestDifference = Int32.MAX_VALUE.toInt();
+    var bestFormatInfo = 0;
+    for (var decodeInfo in _formatInfoDecodeLookup) {
+      var targetInfo = decodeInfo[0];
       if (targetInfo == maskedFormatInfo1 || targetInfo == maskedFormatInfo2) {
         // Found an exact match
         return FormatInformation._(decodeInfo[1]);
       }
-      int bitsDifference = numBitsDiffering(maskedFormatInfo1, targetInfo);
+      var bitsDifference = numBitsDiffering(maskedFormatInfo1, targetInfo);
       if (bitsDifference < bestDifference) {
         bestFormatInfo = decodeInfo[1];
         bestDifference = bitsDifference;
@@ -124,7 +124,7 @@ class FormatInformation {
     if (other is! FormatInformation) {
       return false;
     }
-    return this.errorCorrectionLevel == other.errorCorrectionLevel &&
-        this.dataMask == other.dataMask;
+    return errorCorrectionLevel == other.errorCorrectionLevel &&
+        dataMask == other.dataMask;
   }
 }

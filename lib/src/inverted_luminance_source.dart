@@ -14,20 +14,20 @@ class InvertedLuminanceSource extends LuminanceSource {
   @override
   Int8List getRow(int y, Int8List? row) {
     row = _delegate.getRow(y, row);
-    int width = this.width;
-    for (int i = 0; i < width; i++) {
-      row[i] = (255 - (row[i] & 0xFF));
+    var width = this.width;
+    for (var i = 0; i < width; i++) {
+      row[i] = 255 - (row[i] & 0xFF);
     }
     return row;
   }
 
   @override
   Int8List getMatrix() {
-    Int8List matrix = _delegate.getMatrix();
-    int length = width * height;
-    Int8List invertedMatrix = Int8List(length);
-    for (int i = 0; i < length; i++) {
-      invertedMatrix[i] = (255 - (matrix[i] & 0xFF));
+    var matrix = _delegate.getMatrix();
+    var length = width * height;
+    var invertedMatrix = Int8List(length);
+    for (var i = 0; i < length; i++) {
+      invertedMatrix[i] = 255 - (matrix[i] & 0xFF);
     }
     return invertedMatrix;
   }

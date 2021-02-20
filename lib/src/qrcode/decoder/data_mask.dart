@@ -13,46 +13,45 @@ class DataMask {
   // See ISO 18004:2006 6.8.1
 
   /// 000: mask bits for which (x + y) mod 2 == 0
-  static final DATA_MASK_000 =
+  static final dataMask000 =
       DataMask._(isMasked: (i, j) => ((i + j) & 0x01) == 0);
 
   /// 001: mask bits for which x mod 2 == 0
-  static final DATA_MASK_001 = DataMask._(isMasked: (i, j) => (i & 0x01) == 0);
+  static final dataMask001 = DataMask._(isMasked: (i, j) => (i & 0x01) == 0);
 
   /// 010: mask bits for which y mod 3 == 0
-  static final DATA_MASK_010 = DataMask._(isMasked: (i, j) => j % 3 == 0);
+  static final dataMask010 = DataMask._(isMasked: (i, j) => j % 3 == 0);
 
   /// 011: mask bits for which (x + y) mod 3 == 0
-  static final DATA_MASK_011 = DataMask._(isMasked: (i, j) => (i + j) % 3 == 0);
+  static final dataMask011 = DataMask._(isMasked: (i, j) => (i + j) % 3 == 0);
 
   /// 100: mask bits for which (x/2 + y/3) mod 2 == 0
-  static final DATA_MASK_100 = DataMask._(isMasked: (i, j) {
+  static final dataMask100 = DataMask._(isMasked: (i, j) {
     return ((i ~/ 2 + j ~/ 3) & 0x01) == 0;
   });
 
   /// 101: mask bits for which xy mod 2 + xy mod 3 == 0
   /// equivalently, such that xy mod 6 == 0
-  static final DATA_MASK_101 = DataMask._(isMasked: (i, j) => (i * j) % 6 == 0);
+  static final dataMask101 = DataMask._(isMasked: (i, j) => (i * j) % 6 == 0);
 
   /// 110: mask bits for which (xy mod 2 + xy mod 3) mod 2 == 0
   /// equivalently, such that xy mod 6 < 3
-  static final DATA_MASK_110 =
-      DataMask._(isMasked: (i, j) => ((i * j) % 6) < 3);
+  static final dataMask110 = DataMask._(isMasked: (i, j) => ((i * j) % 6) < 3);
 
   /// 111: mask bits for which ((x+y)mod 2 + xy mod 3) mod 2 == 0
   /// equivalently, such that (x + y + xy mod 3) mod 2 == 0
-  static final DATA_MASK_111 =
+  static final dataMask111 =
       DataMask._(isMasked: (i, j) => ((i + j + ((i * j) % 3)) & 0x01) == 0);
 
   static final values = <DataMask>[
-    DATA_MASK_000,
-    DATA_MASK_001,
-    DATA_MASK_010,
-    DATA_MASK_011,
-    DATA_MASK_100,
-    DATA_MASK_101,
-    DATA_MASK_110,
-    DATA_MASK_111,
+    dataMask000,
+    dataMask001,
+    dataMask010,
+    dataMask011,
+    dataMask100,
+    dataMask101,
+    dataMask110,
+    dataMask111,
   ];
 
   /// <p>Implementations of this method reverse the data masking process applied to a QR Code and
@@ -61,8 +60,8 @@ class DataMask {
   /// @param bits representation of QR Code bits
   /// @param dimension dimension of QR Code, represented by bits, being unmasked
   void unmaskBitMatrix(BitMatrix bits, int dimension) {
-    for (int i = 0; i < dimension; i++) {
-      for (int j = 0; j < dimension; j++) {
+    for (var i = 0; i < dimension; i++) {
+      for (var j = 0; j < dimension; j++) {
         if (isMasked(i, j)) {
           bits.flip(j, i);
         }

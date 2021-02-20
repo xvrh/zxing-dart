@@ -11,7 +11,6 @@ import '../../result_point_callback.dart';
 import '../decoder/version.dart';
 import 'alignment_pattern.dart';
 import 'alignment_pattern_finder.dart';
-import 'finder_pattern.dart';
 import 'finder_pattern_finder.dart';
 import 'finder_pattern_info.dart';
 
@@ -36,49 +35,49 @@ class Detector {
   /// @throws NotFoundException if QR Code cannot be found
   /// @throws FormatReaderException if a QR Code cannot be decoded
   DetectorResult detect({required DecodeHints hints}) {
-    _resultPointCallback = hints.get(DecodeHintType.NEED_RESULT_POINT_CALLBACK);
+    _resultPointCallback = hints.get(DecodeHintType.needResultPointCallback);
 
-    FinderPatternFinder finder =
+    var finder =
         FinderPatternFinder(image, resultPointCallback: _resultPointCallback);
-    FinderPatternInfo info = finder.find(hints);
+    var info = finder.find(hints);
 
     return processFinderPatternInfo(info);
   }
 
   DetectorResult processFinderPatternInfo(FinderPatternInfo info) {
-    FinderPattern topLeft = info.topLeft;
-    FinderPattern topRight = info.topRight;
-    FinderPattern bottomLeft = info.bottomLeft;
+    var topLeft = info.topLeft;
+    var topRight = info.topRight;
+    var bottomLeft = info.bottomLeft;
 
-    double moduleSize = calculateModuleSize(topLeft, topRight, bottomLeft);
+    var moduleSize = calculateModuleSize(topLeft, topRight, bottomLeft);
     if (moduleSize < 1.0) {
       throw NotFoundException();
     }
-    int dimension =
+    var dimension =
         _computeDimension(topLeft, topRight, bottomLeft, moduleSize);
-    Version provisionalVersion =
+    var provisionalVersion =
         Version.getProvisionalVersionForDimension(dimension);
-    int modulesBetweenFPCenters = provisionalVersion.dimensionForVersion - 7;
+    var modulesBetweenFPCenters = provisionalVersion.dimensionForVersion - 7;
 
     AlignmentPattern? alignmentPattern;
     // Anything above version 1 has an alignment pattern
-    if (provisionalVersion.alignmentPatternCenters.length > 0) {
+    if (provisionalVersion.alignmentPatternCenters.isNotEmpty) {
       // Guess where a "bottom right" finder pattern would have been
-      double bottomRightX = topRight.x - topLeft.x + bottomLeft.x;
-      double bottomRightY = topRight.y - topLeft.y + bottomLeft.y;
+      var bottomRightX = topRight.x - topLeft.x + bottomLeft.x;
+      var bottomRightY = topRight.y - topLeft.y + bottomLeft.y;
 
       // Estimate that alignment pattern is closer by 3 modules
       // from "bottom right" to known top left location
-      double correctionToTopLeft = 1.0 - 3.0 / modulesBetweenFPCenters;
-      int estAlignmentX =
+      var correctionToTopLeft = 1.0 - 3.0 / modulesBetweenFPCenters;
+      var estAlignmentX =
           (topLeft.x + correctionToTopLeft * (bottomRightX - topLeft.x))
               .toInt();
-      int estAlignmentY =
+      var estAlignmentY =
           (topLeft.y + correctionToTopLeft * (bottomRightY - topLeft.y))
               .toInt();
 
       // Kind of arbitrary -- expand search radius before giving up
-      for (int i = 4; i <= 16; i <<= 1) {
+      for (var i = 4; i <= 16; i <<= 1) {
         try {
           alignmentPattern = findAlignmentInRegion(
               moduleSize, estAlignmentX, estAlignmentY, i.toDouble());
@@ -90,10 +89,10 @@ class Detector {
       // If we didn't find alignment pattern... well try anyway without it
     }
 
-    PerspectiveTransform transform = _createTransform(
+    var transform = _createTransform(
         topLeft, topRight, bottomLeft, alignmentPattern, dimension);
 
-    BitMatrix bits = _sampleGrid(image, transform, dimension);
+    var bits = _sampleGrid(image, transform, dimension);
 
     List<ResultPoint> points;
     if (alignmentPattern == null) {
@@ -110,7 +109,7 @@ class Detector {
       ResultPoint bottomLeft,
       ResultPoint? alignmentPattern,
       int dimension) {
-    double dimMinusThree = dimension - 3.5;
+    var dimMinusThree = dimension - 3.5;
     double bottomRightX;
     double bottomRightY;
     double sourceBottomRightX;
@@ -149,7 +148,7 @@ class Detector {
 
   static BitMatrix _sampleGrid(
       BitMatrix image, PerspectiveTransform transform, int dimension) {
-    GridSampler sampler = GridSampler.gridSampler;
+    var sampler = GridSampler.gridSampler;
     return sampler.sampleGridTransform(image, dimension, dimension, transform);
   }
 
@@ -157,11 +156,11 @@ class Detector {
   /// of the finder patterns and estimated module size.</p>
   static int _computeDimension(ResultPoint topLeft, ResultPoint topRight,
       ResultPoint bottomLeft, double moduleSize) {
-    int tltrCentersDimension =
+    var tltrCentersDimension =
         MathUtils.round(ResultPoint.distance(topLeft, topRight) / moduleSize);
-    int tlblCentersDimension =
+    var tlblCentersDimension =
         MathUtils.round(ResultPoint.distance(topLeft, bottomLeft) / moduleSize);
-    int dimension = ((tltrCentersDimension + tlblCentersDimension) ~/ 2) + 7;
+    var dimension = ((tltrCentersDimension + tlblCentersDimension) ~/ 2) + 7;
     switch (dimension & 0x03) {
       // mod 4
       case 0:
@@ -197,9 +196,9 @@ class Detector {
   /// width of each, measuring along the axis between their centers.</p>
   double _calculateModuleSizeOneWay(
       ResultPoint pattern, ResultPoint otherPattern) {
-    double moduleSizeEst1 = _sizeOfBlackWhiteBlackRunBothWays(pattern.x.toInt(),
+    var moduleSizeEst1 = _sizeOfBlackWhiteBlackRunBothWays(pattern.x.toInt(),
         pattern.y.toInt(), otherPattern.x.toInt(), otherPattern.y.toInt());
-    double moduleSizeEst2 = _sizeOfBlackWhiteBlackRunBothWays(
+    var moduleSizeEst2 = _sizeOfBlackWhiteBlackRunBothWays(
         otherPattern.x.toInt(),
         otherPattern.y.toInt(),
         pattern.x.toInt(),
@@ -220,11 +219,11 @@ class Detector {
   /// of another point (another finder pattern center), and in the opposite direction too.
   double _sizeOfBlackWhiteBlackRunBothWays(
       int fromX, int fromY, int toX, int toY) {
-    double result = _sizeOfBlackWhiteBlackRun(fromX, fromY, toX, toY);
+    var result = _sizeOfBlackWhiteBlackRun(fromX, fromY, toX, toY);
 
     // Now count other way -- don't run off image though of course
-    double scale = 1.0;
-    int otherToX = fromX - (toX - fromX);
+    var scale = 1.0;
+    var otherToX = fromX - (toX - fromX);
     if (otherToX < 0) {
       scale = fromX / (fromX - otherToX);
       otherToX = 0;
@@ -232,7 +231,7 @@ class Detector {
       scale = (image.width - 1 - fromX) / (otherToX - fromX);
       otherToX = image.width - 1;
     }
-    int otherToY = (fromY - (toY - fromY) * scale).toInt();
+    var otherToY = (fromY - (toY - fromY) * scale).toInt();
 
     scale = 1.0;
     if (otherToY < 0) {
@@ -259,9 +258,9 @@ class Detector {
   double _sizeOfBlackWhiteBlackRun(int fromX, int fromY, int toX, int toY) {
     // Mild variant of Bresenham's algorithm;
     // see http://en.wikipedia.org/wiki/Bresenham's_line_algorithm
-    bool steep = (toY - fromY).abs() > (toX - fromX).abs();
+    var steep = (toY - fromY).abs() > (toX - fromX).abs();
     if (steep) {
-      int temp = fromX;
+      var temp = fromX;
       fromX = fromY;
       fromY = temp;
       temp = toX;
@@ -269,19 +268,19 @@ class Detector {
       toY = temp;
     }
 
-    int dx = (toX - fromX).abs();
-    int dy = (toY - fromY).abs();
-    int error = -dx ~/ 2;
-    int xstep = fromX < toX ? 1 : -1;
-    int ystep = fromY < toY ? 1 : -1;
+    var dx = (toX - fromX).abs();
+    var dy = (toY - fromY).abs();
+    var error = -dx ~/ 2;
+    var xstep = fromX < toX ? 1 : -1;
+    var ystep = fromY < toY ? 1 : -1;
 
     // In black pixels, looking for white, first or second time.
-    int state = 0;
+    var state = 0;
     // Loop up until x == toX, but not beyond
-    int xLimit = toX + xstep;
-    for (int x = fromX, y = fromY; x != xLimit; x += xstep) {
-      int realX = steep ? y : x;
-      int realY = steep ? x : y;
+    var xLimit = toX + xstep;
+    for (var x = fromX, y = fromY; x != xLimit; x += xstep) {
+      var realX = steep ? y : x;
+      var realY = steep ? x : y;
 
       // Does current pixel mean we have moved white to black or vice versa?
       // Scanning black in state 0,2 and white in state 1, so if we find the wrong
@@ -325,22 +324,22 @@ class Detector {
       int estAlignmentX, int estAlignmentY, double allowanceFactor) {
     // Look for an alignment pattern (3 modules in size) around where it
     // should be
-    int allowance = (allowanceFactor * overallEstModuleSize).toInt();
-    int alignmentAreaLeftX = math.max(0, estAlignmentX - allowance);
-    int alignmentAreaRightX =
+    var allowance = (allowanceFactor * overallEstModuleSize).toInt();
+    var alignmentAreaLeftX = math.max(0, estAlignmentX - allowance);
+    var alignmentAreaRightX =
         math.min(image.width - 1, estAlignmentX + allowance);
     if (alignmentAreaRightX - alignmentAreaLeftX < overallEstModuleSize * 3) {
       throw NotFoundException();
     }
 
-    int alignmentAreaTopY = math.max(0, estAlignmentY - allowance);
-    int alignmentAreaBottomY =
+    var alignmentAreaTopY = math.max(0, estAlignmentY - allowance);
+    var alignmentAreaBottomY =
         math.min(image.height - 1, estAlignmentY + allowance);
     if (alignmentAreaBottomY - alignmentAreaTopY < overallEstModuleSize * 3) {
       throw NotFoundException();
     }
 
-    AlignmentPatternFinder alignmentFinder = AlignmentPatternFinder(
+    var alignmentFinder = AlignmentPatternFinder(
         image,
         alignmentAreaLeftX,
         alignmentAreaTopY,

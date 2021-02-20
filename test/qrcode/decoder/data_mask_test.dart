@@ -39,20 +39,20 @@ void main() {
 }
 
 void testMaskAcrossDimensions(int reference, MaskCondition isMasked) {
-  DataMask mask = DataMask.values[reference];
-  for (int version = 1; version <= 40; version++) {
-    int dimension = 17 + 4 * version;
+  var mask = DataMask.values[reference];
+  for (var version = 1; version <= 40; version++) {
+    var dimension = 17 + 4 * version;
     testMask(mask, dimension, isMasked);
   }
 }
 
 void testMask(DataMask mask, int dimension, MaskCondition isMasked) {
-  BitMatrix bits = BitMatrix(dimension);
+  var bits = BitMatrix(dimension);
   mask.unmaskBitMatrix(bits, dimension);
-  for (int i = 0; i < dimension; i++) {
-    for (int j = 0; j < dimension; j++) {
+  for (var i = 0; i < dimension; i++) {
+    for (var j = 0; j < dimension; j++) {
       expect(bits.get(j, i), isMasked(i, j),
-          reason: "($i,$j) Got ${bits.get(j, i)} expected ${isMasked(i, j)}");
+          reason: '($i,$j) Got ${bits.get(j, i)} expected ${isMasked(i, j)}');
     }
   }
 }

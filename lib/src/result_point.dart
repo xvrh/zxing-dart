@@ -25,7 +25,7 @@ class ResultPoint {
 
   @override
   String toString() {
-    return "($x,$y)";
+    return '($x,$y)';
   }
 
   /// Orders an array of three ResultPoints in an order [A,B,C] such that AB is less than AC
@@ -34,9 +34,9 @@ class ResultPoint {
   /// @param patterns array of three {@code ResultPoint} to order
   static void orderBestPatterns(List<ResultPoint> patterns) {
     // Find distances between pattern centers
-    double zeroOneDistance = distance(patterns[0], patterns[1]);
-    double oneTwoDistance = distance(patterns[1], patterns[2]);
-    double zeroTwoDistance = distance(patterns[0], patterns[2]);
+    var zeroOneDistance = distance(patterns[0], patterns[1]);
+    var oneTwoDistance = distance(patterns[1], patterns[2]);
+    var zeroTwoDistance = distance(patterns[0], patterns[2]);
 
     ResultPoint pointA;
     ResultPoint pointB;
@@ -63,7 +63,7 @@ class ResultPoint {
     // we want for A, B, C. If it's negative, then we've got it flipped around and
     // should swap A and C.
     if (crossProductZ(pointA, pointB, pointC) < 0.0) {
-      ResultPoint temp = pointA;
+      var temp = pointA;
       pointA = pointC;
       pointC = temp;
     }
@@ -83,8 +83,8 @@ class ResultPoint {
   /// Returns the z component of the cross product between vectors BC and BA.
   static double crossProductZ(
       ResultPoint pointA, ResultPoint pointB, ResultPoint pointC) {
-    double bX = pointB.x;
-    double bY = pointB.y;
+    var bX = pointB.x;
+    var bY = pointB.y;
     return ((pointC.x - bX) * (pointA.y - bY)) -
         ((pointC.y - bY) * (pointA.x - bX));
   }

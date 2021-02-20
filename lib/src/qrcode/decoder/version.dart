@@ -10,7 +10,7 @@ import 'format_information.dart';
 class Version {
   /// See ISO 18004:2006 Annex D.
   /// Element i represents the raw version bits that specify version i + 7
-  static final _VERSION_DECODE_INFO = [
+  static final _versionDecodeInfo = [
     0x07C94, 0x085BC, 0x09A99, 0x0A4D3, 0x0BBF6, //
     0x0C762, 0x0D847, 0x0E60D, 0x0F928, 0x10B78,
     0x1145D, 0x12A17, 0x13532, 0x149A6, 0x15683,
@@ -20,7 +20,7 @@ class Version {
     0x2542E, 0x26A64, 0x27541, 0x28C69, //
   ];
 
-  static final VERSIONS = buildVersions();
+  static final _versions = buildVersions();
 
   final int versionNumber;
   final List<int> alignmentPatternCenters;
@@ -28,10 +28,10 @@ class Version {
   late int _totalCodewords;
 
   Version._(this.versionNumber, this.alignmentPatternCenters, this._ecBlocks) {
-    int total = 0;
-    int ecCodewords = _ecBlocks[0].ecCodewordsPerBlock;
-    List<ECB> ecbArray = _ecBlocks[0].ecBlocks;
-    for (ECB ecBlock in ecbArray) {
+    var total = 0;
+    var ecCodewords = _ecBlocks[0].ecCodewordsPerBlock;
+    var ecbArray = _ecBlocks[0].ecBlocks;
+    for (var ecBlock in ecbArray) {
       total += ecBlock.count * (ecBlock.dataCodewords + ecCodewords);
     }
     _totalCodewords = total;
@@ -67,21 +67,21 @@ class Version {
     if (versionNumber < 1 || versionNumber > 40) {
       throw ArgumentError();
     }
-    return VERSIONS[versionNumber - 1];
+    return _versions[versionNumber - 1];
   }
 
   static Version? decodeVersionInformation(int versionBits) {
-    int bestDifference = Int32.MAX_VALUE.toInt();
-    int bestVersion = 0;
-    for (int i = 0; i < _VERSION_DECODE_INFO.length; i++) {
-      int targetVersion = _VERSION_DECODE_INFO[i];
+    var bestDifference = Int32.MAX_VALUE.toInt();
+    var bestVersion = 0;
+    for (var i = 0; i < _versionDecodeInfo.length; i++) {
+      var targetVersion = _versionDecodeInfo[i];
       // Do the version info bits match exactly? done.
       if (targetVersion == versionBits) {
         return getVersionForNumber(i + 7);
       }
       // Otherwise see if this is the closest to a real version info bit string
       // we have seen so far
-      int bitsDifference =
+      var bitsDifference =
           FormatInformation.numBitsDiffering(versionBits, targetVersion);
       if (bitsDifference < bestDifference) {
         bestVersion = i + 7;
@@ -99,8 +99,8 @@ class Version {
 
   /// See ISO 18004:2006 Annex E
   BitMatrix buildFunctionPattern() {
-    int dimension = dimensionForVersion;
-    BitMatrix bitMatrix = BitMatrix(dimension);
+    var dimension = dimensionForVersion;
+    var bitMatrix = BitMatrix(dimension);
 
     // Top left finder pattern + separator + format
     bitMatrix.setRegion(0, 0, 9, 9);
@@ -110,10 +110,10 @@ class Version {
     bitMatrix.setRegion(0, dimension - 8, 9, 8);
 
     // Alignment patterns
-    int max = alignmentPatternCenters.length;
-    for (int x = 0; x < max; x++) {
-      int i = alignmentPatternCenters[x] - 2;
-      for (int y = 0; y < max; y++) {
+    var max = alignmentPatternCenters.length;
+    for (var x = 0; x < max; x++) {
+      var i = alignmentPatternCenters[x] - 2;
+      for (var y = 0; y < max; y++) {
         if ((x != 0 || (y != 0 && y != max - 1)) && (x != max - 1 || y != 0)) {
           bitMatrix.setRegion(alignmentPatternCenters[y] - 2, i, 5, 5);
         }
@@ -616,8 +616,8 @@ class ECBlocks {
   ECBlocks(this.ecCodewordsPerBlock, this.ecBlocks);
 
   int get numBlocks {
-    int total = 0;
-    for (ECB ecBlock in ecBlocks) {
+    var total = 0;
+    for (var ecBlock in ecBlocks) {
       total += ecBlock.count;
     }
     return total;
@@ -627,6 +627,7 @@ class ECBlocks {
     return ecCodewordsPerBlock * numBlocks;
   }
 
+  @override
   String toString() => 'ECBlocks($ecBlocks, $ecCodewordsPerBlock)';
 }
 
@@ -639,5 +640,6 @@ class ECB {
 
   ECB(this.count, this.dataCodewords);
 
+  @override
   String toString() => 'ECB($count, $dataCodewords)';
 }

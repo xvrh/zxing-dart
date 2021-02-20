@@ -22,13 +22,13 @@ class RGBLuminanceSource extends LuminanceSource {
     // up front, which is the same as the Y channel of the YUVLuminanceSource in the real app.
     //
     // Total number of pixels suffices, can ignore shape
-    int size = _dataWidth * _dataHeight;
+    var size = _dataWidth * _dataHeight;
     _luminances = Int8List(size);
-    for (int offset = 0; offset < size; offset++) {
-      int pixel = pixels[offset];
-      int r = (pixel >> 16) & 0xff; // red
-      int g2 = (pixel >> 7) & 0x1fe; // 2 * green
-      int b = pixel & 0xff; // blue
+    for (var offset = 0; offset < size; offset++) {
+      var pixel = pixels[offset];
+      var r = (pixel >> 16) & 0xff; // red
+      var g2 = (pixel >> 7) & 0x1fe; // 2 * green
+      var b = pixel & 0xff; // blue
       // Calculate green-favouring average cheaply
       _luminances[offset] = ((r + g2 + b) ~/ 4).toInt();
     }
@@ -39,28 +39,28 @@ class RGBLuminanceSource extends LuminanceSource {
       : _luminances = pixels,
         super(width, height) {
     if (_left + width > _dataWidth || _top + height > _dataHeight) {
-      throw ArgumentError("Crop rectangle does not fit within image data.");
+      throw ArgumentError('Crop rectangle does not fit within image data.');
     }
   }
 
   @override
   Int8List getRow(int y, Int8List? row) {
     if (y < 0 || y >= height) {
-      throw ArgumentError("Requested row is outside the image: $y");
+      throw ArgumentError('Requested row is outside the image: $y');
     }
-    int width = this.width;
+    var width = this.width;
     if (row == null || row.length < width) {
       row = Int8List(width);
     }
-    int offset = (y + _top) * _dataWidth + _left;
+    var offset = (y + _top) * _dataWidth + _left;
     system.arraycopy(_luminances, offset, row, 0, width);
     return row;
   }
 
   @override
   Int8List getMatrix() {
-    int width = this.width;
-    int height = this.height;
+    var width = this.width;
+    var height = this.height;
 
     // If the caller asks for the entire underlying image, save the copy and give them the
     // original data. The docs specifically warn that result.length must be ignored.
@@ -68,9 +68,9 @@ class RGBLuminanceSource extends LuminanceSource {
       return _luminances;
     }
 
-    int area = width * height;
-    Int8List matrix = Int8List(area);
-    int inputOffset = _top * _dataWidth + _left;
+    var area = width * height;
+    var matrix = Int8List(area);
+    var inputOffset = _top * _dataWidth + _left;
 
     // If the width matches the full width of the underlying data, perform a single copy.
     if (width == _dataWidth) {
@@ -79,8 +79,8 @@ class RGBLuminanceSource extends LuminanceSource {
     }
 
     // Otherwise copy one cropped row at a time.
-    for (int y = 0; y < height; y++) {
-      int outputOffset = y * width;
+    for (var y = 0; y < height; y++) {
+      var outputOffset = y * width;
       system.arraycopy(_luminances, inputOffset, matrix, outputOffset, width);
       inputOffset += _dataWidth;
     }
@@ -95,6 +95,6 @@ class RGBLuminanceSource extends LuminanceSource {
   @override
   LuminanceSource crop(int left, int top, int width, int height) {
     return RGBLuminanceSource.crop(_luminances, _dataWidth, _dataHeight,
-        this._left + left, this._top + top, width, height);
+        _left + left, _top + top, width, height);
   }
 }

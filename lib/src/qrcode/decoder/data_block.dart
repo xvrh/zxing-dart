@@ -30,17 +30,17 @@ class DataBlock {
 
     // Figure out the number and size of data blocks used by this version and
     // error correction level
-    ECBlocks ecBlocks = version.getECBlocksForLevel(ecLevel);
+    var ecBlocks = version.getECBlocksForLevel(ecLevel);
 
-    List<ECB> ecBlockArray = ecBlocks.ecBlocks;
+    var ecBlockArray = ecBlocks.ecBlocks;
 
     // Now establish DataBlocks of the appropriate size and number of data codewords
-    List<DataBlock> result = <DataBlock>[];
-    int numResultBlocks = 0;
-    for (ECB ecBlock in ecBlockArray) {
-      for (int i = 0; i < ecBlock.count; i++) {
-        int numDataCodewords = ecBlock.dataCodewords;
-        int numBlockCodewords = ecBlocks.ecCodewordsPerBlock + numDataCodewords;
+    var result = <DataBlock>[];
+    var numResultBlocks = 0;
+    for (var ecBlock in ecBlockArray) {
+      for (var i = 0; i < ecBlock.count; i++) {
+        var numDataCodewords = ecBlock.dataCodewords;
+        var numBlockCodewords = ecBlocks.ecCodewordsPerBlock + numDataCodewords;
         ++numResultBlocks;
         result.add(DataBlock(numDataCodewords, Int8List(numBlockCodewords)));
       }
@@ -48,10 +48,10 @@ class DataBlock {
 
     // All blocks have the same amount of data, except that the last n
     // (where n may be 0) have 1 more byte. Figure out where these start.
-    int shorterBlocksTotalCodewords = result[0].codewords.length;
-    int longerBlocksStartAt = result.length - 1;
+    var shorterBlocksTotalCodewords = result[0].codewords.length;
+    var longerBlocksStartAt = result.length - 1;
     while (longerBlocksStartAt >= 0) {
-      int numCodewords = result[longerBlocksStartAt].codewords.length;
+      var numCodewords = result[longerBlocksStartAt].codewords.length;
       if (numCodewords == shorterBlocksTotalCodewords) {
         break;
       }
@@ -59,26 +59,26 @@ class DataBlock {
     }
     longerBlocksStartAt++;
 
-    int shorterBlocksNumDataCodewords =
+    var shorterBlocksNumDataCodewords =
         shorterBlocksTotalCodewords - ecBlocks.ecCodewordsPerBlock;
     // The last elements of result may be 1 element longer;
     // first fill out as many elements as all of them have
-    int rawCodewordsOffset = 0;
-    for (int i = 0; i < shorterBlocksNumDataCodewords; i++) {
-      for (int j = 0; j < numResultBlocks; j++) {
+    var rawCodewordsOffset = 0;
+    for (var i = 0; i < shorterBlocksNumDataCodewords; i++) {
+      for (var j = 0; j < numResultBlocks; j++) {
         result[j].codewords[i] = rawCodewords[rawCodewordsOffset++];
       }
     }
     // Fill out the last data block in the longer ones
-    for (int j = longerBlocksStartAt; j < numResultBlocks; j++) {
+    for (var j = longerBlocksStartAt; j < numResultBlocks; j++) {
       result[j].codewords[shorterBlocksNumDataCodewords] =
           rawCodewords[rawCodewordsOffset++];
     }
     // Now add in error correction blocks
-    int max = result[0].codewords.length;
-    for (int i = shorterBlocksNumDataCodewords; i < max; i++) {
-      for (int j = 0; j < numResultBlocks; j++) {
-        int iOffset = j < longerBlocksStartAt ? i : i + 1;
+    var max = result[0].codewords.length;
+    for (var i = shorterBlocksNumDataCodewords; i < max; i++) {
+      for (var j = 0; j < numResultBlocks; j++) {
+        var iOffset = j < longerBlocksStartAt ? i : i + 1;
         result[j].codewords[iOffset] = rawCodewords[rawCodewordsOffset++];
       }
     }

@@ -4,11 +4,11 @@ import 'package:zxing/src/qrcode/decoder/version.dart';
 
 void main() {
   test('For bits', () {
-    expect(Mode.forBits(0x00), Mode.TERMINATOR);
-    expect(Mode.forBits(0x01), Mode.NUMERIC);
-    expect(Mode.forBits(0x02), Mode.ALPHANUMERIC);
-    expect(Mode.forBits(0x04), Mode.BYTE);
-    expect(Mode.forBits(0x08), Mode.KANJI);
+    expect(Mode.forBits(0x00), Mode.terminator);
+    expect(Mode.forBits(0x01), Mode.numeric);
+    expect(Mode.forBits(0x02), Mode.alphanumeric);
+    expect(Mode.forBits(0x04), Mode.byte);
+    expect(Mode.forBits(0x08), Mode.kanji);
   });
 
   test('Bad mode', () {
@@ -18,16 +18,16 @@ void main() {
   test('Character count', () {
     // Spot check a few values
     expect(
-        Mode.NUMERIC.getCharacterCountBits(Version.getVersionForNumber(5)), 10);
-    expect(Mode.NUMERIC.getCharacterCountBits(Version.getVersionForNumber(26)),
+        Mode.numeric.getCharacterCountBits(Version.getVersionForNumber(5)), 10);
+    expect(Mode.numeric.getCharacterCountBits(Version.getVersionForNumber(26)),
         12);
-    expect(Mode.NUMERIC.getCharacterCountBits(Version.getVersionForNumber(40)),
+    expect(Mode.numeric.getCharacterCountBits(Version.getVersionForNumber(40)),
         14);
     expect(
-        Mode.ALPHANUMERIC.getCharacterCountBits(Version.getVersionForNumber(6)),
+        Mode.alphanumeric.getCharacterCountBits(Version.getVersionForNumber(6)),
         9);
-    expect(Mode.BYTE.getCharacterCountBits(Version.getVersionForNumber(7)), 8);
-    expect(Mode.KANJI.getCharacterCountBits(Version.getVersionForNumber(8)), 8);
+    expect(Mode.byte.getCharacterCountBits(Version.getVersionForNumber(7)), 8);
+    expect(Mode.kanji.getCharacterCountBits(Version.getVersionForNumber(8)), 8);
   });
 }
 

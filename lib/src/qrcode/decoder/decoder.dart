@@ -10,9 +10,7 @@ import '../../format_reader_exception.dart';
 import 'bit_matrix_parser.dart';
 import 'data_block.dart';
 import 'decoded_bit_stream_parser.dart';
-import 'error_correction_level.dart';
 import 'qr_code_decoder_meta_data.dart';
-import 'version.dart';
 
 /// <p>The main class which implements QR Code decoding -- as opposed to locating and extracting
 /// the QR Code from an image.</p>
@@ -20,7 +18,7 @@ import 'version.dart';
 /// @author Sean Owen
 class Decoder {
   final ReedSolomonDecoder rsDecoder =
-      ReedSolomonDecoder(GenericGF.QR_CODE_FIELD_256);
+      ReedSolomonDecoder(GenericGF.qrCodeField256);
 
   /// <p>Decodes a QR Code represented as a {@link BitMatrix}. A 1 or "true" is taken to mean a black module.</p>
   ///
@@ -31,9 +29,9 @@ class Decoder {
   /// @throws ChecksumException if error correction fails
   DecoderResult decode(BitMatrix bits, {required DecodeHints hints}) {
     // Construct a parser and read version, error-correction level
-    BitMatrixParser parser = BitMatrixParser(bits);
-    FormatReaderException? fe = null;
-    ChecksumException? ce = null;
+    var parser = BitMatrixParser(bits);
+    FormatReaderException? fe;
+    ChecksumException? ce;
     try {
       return _decode(parser, hints);
     } on FormatReaderException catch (e) {
@@ -64,7 +62,7 @@ class Decoder {
       // Prepare for a mirrored reading.
       parser.mirror();
 
-      DecoderResult result = _decode(parser, hints);
+      var result = _decode(parser, hints);
 
       // Success! Notify the caller that the code was mirrored.
       result.other = QRCodeDecoderMetaData(mirrored: true);
@@ -86,30 +84,28 @@ class Decoder {
   }
 
   DecoderResult _decode(BitMatrixParser parser, DecodeHints hints) {
-    Version version = parser.readVersion();
-    ErrorCorrectionLevel ecLevel =
-        parser.readFormatInformation().errorCorrectionLevel;
+    var version = parser.readVersion();
+    var ecLevel = parser.readFormatInformation().errorCorrectionLevel;
 
     // Read codewords
-    Int8List codewords = parser.readCodewords();
+    var codewords = parser.readCodewords();
     // Separate into data blocks
-    List<DataBlock> dataBlocks =
-        DataBlock.getDataBlocks(codewords, version, ecLevel);
+    var dataBlocks = DataBlock.getDataBlocks(codewords, version, ecLevel);
 
     // Count total number of data bytes
-    int totalBytes = 0;
-    for (DataBlock dataBlock in dataBlocks) {
+    var totalBytes = 0;
+    for (var dataBlock in dataBlocks) {
       totalBytes += dataBlock.getNumDataCodewords();
     }
-    Int8List resultBytes = Int8List(totalBytes);
-    int resultOffset = 0;
+    var resultBytes = Int8List(totalBytes);
+    var resultOffset = 0;
 
     // Error-correct and copy data blocks together into a stream of bytes
-    for (DataBlock dataBlock in dataBlocks) {
-      Int8List codewordBytes = dataBlock.codewords;
-      int numDataCodewords = dataBlock.getNumDataCodewords();
+    for (var dataBlock in dataBlocks) {
+      var codewordBytes = dataBlock.codewords;
+      var numDataCodewords = dataBlock.getNumDataCodewords();
       _correctErrors(codewordBytes, numDataCodewords);
-      for (int i = 0; i < numDataCodewords; i++) {
+      for (var i = 0; i < numDataCodewords; i++) {
         resultBytes[resultOffset++] = codewordBytes[i];
       }
     }
@@ -125,10 +121,10 @@ class Decoder {
   /// @param numDataCodewords number of codewords that are data bytes
   /// @throws ChecksumException if error correction fails
   void _correctErrors(Int8List codewordBytes, int numDataCodewords) {
-    int numCodewords = codewordBytes.length;
+    var numCodewords = codewordBytes.length;
     // First read into an array of ints
     var codewordsInts = Int32List(numCodewords);
-    for (int i = 0; i < numCodewords; i++) {
+    for (var i = 0; i < numCodewords; i++) {
       codewordsInts[i] = codewordBytes[i] & 0xFF;
     }
     try {
@@ -138,7 +134,7 @@ class Decoder {
     }
     // Copy back into array of bytes -- only need to worry about the bytes that were data
     // We don't care about errors in the error-correction codewords
-    for (int i = 0; i < numDataCodewords; i++) {
+    for (var i = 0; i < numDataCodewords; i++) {
       codewordBytes[i] = codewordsInts[i];
     }
   }

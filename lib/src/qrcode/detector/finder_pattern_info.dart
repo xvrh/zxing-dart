@@ -10,7 +10,7 @@ class FinderPatternInfo {
   final FinderPattern topRight;
 
   FinderPatternInfo(List<FinderPattern> patternCenters)
-      : this.bottomLeft = patternCenters[0],
-        this.topLeft = patternCenters[1],
-        this.topRight = patternCenters[2];
+      : bottomLeft = patternCenters[0],
+        topLeft = patternCenters[1],
+        topRight = patternCenters[2];
 }

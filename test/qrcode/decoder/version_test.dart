@@ -8,7 +8,7 @@ void main() {
   });
 
   test('Version for number', () {
-    for (int i = 1; i <= 40; i++) {
+    for (var i = 1; i <= 40; i++) {
       checkVersion(Version.getVersionForNumber(i), i, 4 * i + 17);
     }
   });
@@ -18,13 +18,13 @@ void checkVersion(Version version, int number, int dimension) {
   expect(version, isNotNull);
   expect(version.versionNumber, number);
   if (number > 1) {
-    expect(version.alignmentPatternCenters.length > 0, isTrue);
+    expect(version.alignmentPatternCenters.isNotEmpty, isTrue);
   }
   expect(version.dimensionForVersion, dimension);
-  expect(version.getECBlocksForLevel(ErrorCorrectionLevel.H), isNotNull);
-  expect(version.getECBlocksForLevel(ErrorCorrectionLevel.L), isNotNull);
-  expect(version.getECBlocksForLevel(ErrorCorrectionLevel.M), isNotNull);
-  expect(version.getECBlocksForLevel(ErrorCorrectionLevel.Q), isNotNull);
+  expect(version.getECBlocksForLevel(ErrorCorrectionLevel.h), isNotNull);
+  expect(version.getECBlocksForLevel(ErrorCorrectionLevel.l), isNotNull);
+  expect(version.getECBlocksForLevel(ErrorCorrectionLevel.m), isNotNull);
+  expect(version.getECBlocksForLevel(ErrorCorrectionLevel.q), isNotNull);
   expect(version.buildFunctionPattern(), isNotNull);
 }
 

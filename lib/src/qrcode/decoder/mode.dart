@@ -5,18 +5,18 @@ import 'version.dart';
 ///
 /// @author Sean Owen
 class Mode {
-  static const TERMINATOR = Mode._([0, 0, 0], 0x00); // Not really a mode...
-  static const NUMERIC = Mode._([10, 12, 14], 0x01);
-  static const ALPHANUMERIC = Mode._([9, 11, 13], 0x02);
-  static const STRUCTURED_APPEND = Mode._([0, 0, 0], 0x03); // Not supported
-  static const BYTE = Mode._([8, 16, 16], 0x04);
-  static const ECI = Mode._([0, 0, 0], 0x07); // character counts don't apply
-  static const KANJI = Mode._([8, 10, 12], 0x08);
-  static const FNC1_FIRST_POSITION = Mode._([0, 0, 0], 0x05);
-  static const FNC1_SECOND_POSITION = Mode._([0, 0, 0], 0x09);
+  static const terminator = Mode._([0, 0, 0], 0x00); // Not really a mode...
+  static const numeric = Mode._([10, 12, 14], 0x01);
+  static const alphanumeric = Mode._([9, 11, 13], 0x02);
+  static const structuredAppend = Mode._([0, 0, 0], 0x03); // Not supported
+  static const byte = Mode._([8, 16, 16], 0x04);
+  static const eci = Mode._([0, 0, 0], 0x07); // character counts don't apply
+  static const kanji = Mode._([8, 10, 12], 0x08);
+  static const fnc1FirstPosition = Mode._([0, 0, 0], 0x05);
+  static const fnc1SecondPosition = Mode._([0, 0, 0], 0x09);
 
   /// See GBT 18284-2000; "Hanzi" is a transliteration of this mode name.
-  static const HANZI = Mode._([8, 10, 12], 0x0D);
+  static const hanzi = Mode._([8, 10, 12], 0x0D);
 
   final List<int> _characterCountBitsForVersions;
   final int bits;
@@ -29,26 +29,26 @@ class Mode {
   static Mode forBits(int bits) {
     switch (bits) {
       case 0x0:
-        return TERMINATOR;
+        return terminator;
       case 0x1:
-        return NUMERIC;
+        return numeric;
       case 0x2:
-        return ALPHANUMERIC;
+        return alphanumeric;
       case 0x3:
-        return STRUCTURED_APPEND;
+        return structuredAppend;
       case 0x4:
-        return BYTE;
+        return byte;
       case 0x5:
-        return FNC1_FIRST_POSITION;
+        return fnc1FirstPosition;
       case 0x7:
-        return ECI;
+        return eci;
       case 0x8:
-        return KANJI;
+        return kanji;
       case 0x9:
-        return FNC1_SECOND_POSITION;
+        return fnc1SecondPosition;
       case 0xD:
         // 0xD is defined in GBT 18284-2000, may not be supported in foreign country
-        return HANZI;
+        return hanzi;
       default:
         throw ArgumentError();
     }
@@ -58,7 +58,7 @@ class Mode {
   /// @return number of bits used, in this QR Code symbol {@link Version}, to encode the
   ///         count of characters that will follow encoded in this Mode
   int getCharacterCountBits(Version version) {
-    int number = version.versionNumber;
+    var number = version.versionNumber;
     int offset;
     if (number <= 9) {
       offset = 0;

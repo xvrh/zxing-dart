@@ -18,7 +18,7 @@ class FinderPattern extends ResultPoint {
   /// position and size -- meaning, it is at nearly the same center with nearly the same size.</p>
   bool aboutEquals(double moduleSize, double i, double j) {
     if ((i - y).abs() <= moduleSize && (j - x).abs() <= moduleSize) {
-      double moduleSizeDiff = (moduleSize - estimatedModuleSize).abs();
+      var moduleSizeDiff = (moduleSize - estimatedModuleSize).abs();
       return moduleSizeDiff <= 1.0 || moduleSizeDiff <= estimatedModuleSize;
     }
     return false;
@@ -28,10 +28,10 @@ class FinderPattern extends ResultPoint {
   /// with a new estimate. It returns a new {@code FinderPattern} containing a weighted average
   /// based on count.
   FinderPattern combineEstimate(double i, double j, double newModuleSize) {
-    int combinedCount = count + 1;
-    double combinedX = (count * x + j) / combinedCount;
-    double combinedY = (count * y + i) / combinedCount;
-    double combinedModuleSize =
+    var combinedCount = count + 1;
+    var combinedX = (count * x + j) / combinedCount;
+    var combinedY = (count * y + i) / combinedCount;
+    var combinedModuleSize =
         (count * estimatedModuleSize + newModuleSize) / combinedCount;
     return FinderPattern(combinedX, combinedY, combinedModuleSize,
         count: combinedCount);

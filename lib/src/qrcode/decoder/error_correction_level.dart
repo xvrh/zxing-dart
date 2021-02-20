@@ -4,18 +4,18 @@
 /// @author Sean Owen
 class ErrorCorrectionLevel {
   /// L = ~7% correction
-  static final L = ErrorCorrectionLevel._(0, 0x01, 'L');
+  static final l = ErrorCorrectionLevel._(0, 0x01, 'L');
 
   /// M = ~15% correction
-  static final M = ErrorCorrectionLevel._(1, 0x00, 'M');
+  static final m = ErrorCorrectionLevel._(1, 0x00, 'M');
 
   /// Q = ~25% correction
-  static final Q = ErrorCorrectionLevel._(2, 0x03, 'Q');
+  static final q = ErrorCorrectionLevel._(2, 0x03, 'Q');
 
   /// H = ~30% correction
-  static final H = ErrorCorrectionLevel._(3, 0x02, 'H');
+  static final h = ErrorCorrectionLevel._(3, 0x02, 'H');
 
-  static final FOR_BITS = [M, L, H, Q];
+  static final _forBits = [m, l, h, q];
 
   final int ordinal;
   final int bits;
@@ -26,11 +26,12 @@ class ErrorCorrectionLevel {
   /// @param bits int containing the two bits encoding a QR Code's error correction level
   /// @return ErrorCorrectionLevel representing the encoded error correction level
   static ErrorCorrectionLevel forBits(int bits) {
-    if (bits < 0 || bits >= FOR_BITS.length) {
+    if (bits < 0 || bits >= _forBits.length) {
       throw ArgumentError();
     }
-    return FOR_BITS[bits];
+    return _forBits[bits];
   }
 
+  @override
   String toString() => 'ErrorCorrectionLevel.$name';
 }

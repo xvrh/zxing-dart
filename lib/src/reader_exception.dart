@@ -8,9 +8,10 @@ abstract class ReaderException implements Exception {
 
   ReaderException([this.cause]);
 
+  @override
   String toString() {
-    Object? message = this.cause;
-    if (message == null) return "ReaderException";
-    return "ReaderException: $message";
+    var message = cause;
+    if (message == null) return 'ReaderException';
+    return 'ReaderException: $message';
   }
 }
