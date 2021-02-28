@@ -5,23 +5,32 @@ import 'version.dart';
 ///
 /// @author Sean Owen
 class Mode {
-  static const terminator = Mode._([0, 0, 0], 0x00); // Not really a mode...
-  static const numeric = Mode._([10, 12, 14], 0x01);
-  static const alphanumeric = Mode._([9, 11, 13], 0x02);
-  static const structuredAppend = Mode._([0, 0, 0], 0x03); // Not supported
-  static const byte = Mode._([8, 16, 16], 0x04);
-  static const eci = Mode._([0, 0, 0], 0x07); // character counts don't apply
-  static const kanji = Mode._([8, 10, 12], 0x08);
-  static const fnc1FirstPosition = Mode._([0, 0, 0], 0x05);
-  static const fnc1SecondPosition = Mode._([0, 0, 0], 0x09);
+  static const terminator =
+      Mode._('TERMINATOR', [0, 0, 0], 0x00); // Not really a mode...
+  static const numeric = Mode._('NUMERIC', [10, 12, 14], 0x01);
+  static const alphanumeric = Mode._('ALPHANUMERIC', [9, 11, 13], 0x02);
+  static const structuredAppend =
+      Mode._('STRUCTURED_APPEND', [0, 0, 0], 0x03); // Not supported
+  static const byte = Mode._('BYTE', [8, 16, 16], 0x04);
+  static const eci =
+      Mode._('ECI', [0, 0, 0], 0x07); // character counts don't apply
+  static const kanji = Mode._('KANJI', [8, 10, 12], 0x08);
+  static const fnc1FirstPosition =
+      Mode._('FNC1_FIRST_POSITION', [0, 0, 0], 0x05);
+  static const fnc1SecondPosition =
+      Mode._('FNC1_SECOND_POSITION', [0, 0, 0], 0x09);
 
   /// See GBT 18284-2000; "Hanzi" is a transliteration of this mode name.
-  static const hanzi = Mode._([8, 10, 12], 0x0D);
+  static const hanzi = Mode._('HANZI', [8, 10, 12], 0x0D);
 
+  final String name;
   final List<int> _characterCountBitsForVersions;
   final int bits;
 
-  const Mode._(this._characterCountBitsForVersions, this.bits);
+  const Mode._(this.name, this._characterCountBitsForVersions, this.bits);
+
+  @override
+  String toString() => name;
 
   /// @param bits four bits encoding a QR Code data mode
   /// @return Mode encoded by these bits
