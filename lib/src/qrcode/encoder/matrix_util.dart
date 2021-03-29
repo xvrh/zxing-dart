@@ -1,19 +1,17 @@
 import 'package:fixnum/fixnum.dart';
-import 'package:zxing/src/common/bit_array.dart';
-import 'package:zxing/src/qrcode/decoder/error_correction_level.dart';
-import 'package:zxing/src/qrcode/decoder/version.dart';
+import '../../common/bit_array.dart';
+import '../decoder/error_correction_level.dart';
+import '../decoder/version.dart';
 
 import '../../writer_exception.dart';
 import 'byte_matrix.dart';
 import 'mask_util.dart';
 import 'qr_code.dart';
 
-/**
- * @author satorux@google.com (Satoru Takabayashi) - creator
- * @author dswitkin@google.com (Daniel Switkin) - ported from C++
- */
+/// @author satorux@google.com (Satoru Takabayashi) - creator
+/// @author dswitkin@google.com (Daniel Switkin) - ported from C++
 class MatrixUtil {
-  static final List<List<int>> _POSITION_DETECTION_PATTERN = [
+  static final List<List<int>> _positionDetectionPattern = [
     [1, 1, 1, 1, 1, 1, 1],
     [1, 0, 0, 0, 0, 0, 1],
     [1, 0, 1, 1, 1, 0, 1],
@@ -23,7 +21,7 @@ class MatrixUtil {
     [1, 1, 1, 1, 1, 1, 1],
   ];
 
-  static final List<List<int>> _POSITION_ADJUSTMENT_PATTERN = [
+  static final List<List<int>> _positionAdjustmentPattern = [
     [1, 1, 1, 1, 1],
     [1, 0, 0, 0, 1],
     [1, 0, 1, 0, 1],
@@ -32,7 +30,7 @@ class MatrixUtil {
   ];
 
   // From Appendix E. Table 1, JIS0510X:2004 (p 71). The table was double-checked by komatsu.
-  static final List<List<int>> _POSITION_ADJUSTMENT_PATTERN_COORDINATE_TABLE = [
+  static final List<List<int>> _positionAdjustmentPatternCoordinateTable = [
     [-1, -1, -1, -1, -1, -1, -1], // Version 1
     [6, 18, -1, -1, -1, -1, -1], // Version 2
     [6, 22, -1, -1, -1, -1, -1], // Version 3
@@ -76,7 +74,7 @@ class MatrixUtil {
   ];
 
   // Type info cells at the left top corner.
-  static final List<List<int>> _TYPE_INFO_COORDINATES = [
+  static final List<List<int>> _typeInfoCoordinates = [
     [8, 0],
     [8, 1],
     [8, 2],
@@ -95,11 +93,11 @@ class MatrixUtil {
   ];
 
   // From Appendix D in JISX0510:2004 (p. 67)
-  static final int _VERSION_INFO_POLY = 0x1f25; // 1 1111 0010 0101
+  static final int _versionInfoPoly = 0x1f25; // 1 1111 0010 0101
 
   // From Appendix C in JISX0510:2004 (p.65).
-  static final int _TYPE_INFO_POLY = 0x537;
-  static final int _TYPE_INFO_MASK_PATTERN = 0x5412;
+  static final int _typeInfoPoly = 0x537;
+  static final int _typeInfoMaskPattern = 0x5412;
 
   MatrixUtil._();
 
@@ -146,18 +144,18 @@ class MatrixUtil {
   // Embed type information. On success, modify the matrix.
   static void embedTypeInfo(
       ErrorCorrectionLevel ecLevel, int maskPattern, ByteMatrix matrix) {
-    BitArray typeInfoBits = new BitArray();
+    var typeInfoBits = BitArray();
     makeTypeInfoBits(ecLevel, maskPattern, typeInfoBits);
 
-    for (int i = 0; i < typeInfoBits.size; ++i) {
+    for (var i = 0; i < typeInfoBits.size; ++i) {
       // Place bits in LSB to MSB order.  LSB (least significant bit) is the last value in
       // "typeInfoBits".
-      bool bit = typeInfoBits.get(typeInfoBits.size - 1 - i);
+      var bit = typeInfoBits.get(typeInfoBits.size - 1 - i);
 
       // Type info bits at the left top corner. See 8.9 of JISX0510:2004 (p.46).
-      List<int> coordinates = _TYPE_INFO_COORDINATES[i];
-      int x1 = coordinates[0];
-      int y1 = coordinates[1];
+      var coordinates = _typeInfoCoordinates[i];
+      var x1 = coordinates[0];
+      var y1 = coordinates[1];
       matrix.setBool(x1, y1, bit);
 
       int x2;
@@ -182,14 +180,14 @@ class MatrixUtil {
       // Version info is necessary if version >= 7.
       return; // Don't need version info.
     }
-    BitArray versionInfoBits = new BitArray();
+    var versionInfoBits = BitArray();
     makeVersionInfoBits(version, versionInfoBits);
 
-    int bitIndex = 6 * 3 - 1; // It will decrease from 17 to 0.
-    for (int i = 0; i < 6; ++i) {
-      for (int j = 0; j < 3; ++j) {
+    var bitIndex = 6 * 3 - 1; // It will decrease from 17 to 0.
+    for (var i = 0; i < 6; ++i) {
+      for (var j = 0; j < 3; ++j) {
         // Place bits in LSB (least significant bit) to MSB order.
-        bool bit = versionInfoBits.get(bitIndex);
+        var bit = versionInfoBits.get(bitIndex);
         bitIndex--;
         // Left bottom corner.
         matrix.setBool(i, matrix.height - 11 + j, bit);
@@ -204,19 +202,19 @@ class MatrixUtil {
   // See 8.7 of JISX0510:2004 (p.38) for how to embed data bits.
   static void embedDataBits(
       BitArray dataBits, int maskPattern, ByteMatrix matrix) {
-    int bitIndex = 0;
-    int direction = -1;
+    var bitIndex = 0;
+    var direction = -1;
     // Start from the right bottom cell.
-    int x = matrix.width - 1;
-    int y = matrix.height - 1;
+    var x = matrix.width - 1;
+    var y = matrix.height - 1;
     while (x > 0) {
       // Skip the vertical timing pattern.
       if (x == 6) {
         x -= 1;
       }
       while (y >= 0 && y < matrix.height) {
-        for (int i = 0; i < 2; ++i) {
-          int xx = x - i;
+        for (var i = 0; i < 2; ++i) {
+          var xx = x - i;
           // Skip the cell if it's not empty.
           if (!_isEmpty(matrix.get(xx, y))) {
             continue;
@@ -247,7 +245,7 @@ class MatrixUtil {
     // All bits should be consumed.
     if (bitIndex != dataBits.size) {
       throw WriterException(
-          message: "Not all bits consumed: $bitIndex/${dataBits.size}");
+          'Not all bits consumed: $bitIndex/${dataBits.size}');
     }
   }
 
@@ -287,11 +285,11 @@ class MatrixUtil {
   // operations. We don't care if coefficients are positive or negative.
   static int calculateBCHCode(int value, int poly) {
     if (poly == 0) {
-      throw new ArgumentError("0 polynomial");
+      throw ArgumentError('0 polynomial');
     }
     // If poly is "1 1111 0010 0101" (version info poly), msbSetInPoly is 13. We'll subtract 1
     // from 13 to make it 12.
-    int msbSetInPoly = findMSBSet(poly);
+    var msbSetInPoly = findMSBSet(poly);
     value <<= msbSetInPoly - 1;
     // Do the division business using exclusive-or operations.
     while (findMSBSet(value) >= msbSetInPoly) {
@@ -307,22 +305,21 @@ class MatrixUtil {
   static void makeTypeInfoBits(
       ErrorCorrectionLevel ecLevel, int maskPattern, BitArray bits) {
     if (!QRCode.isValidMaskPattern(maskPattern)) {
-      throw WriterException(message: "Invalid mask pattern");
+      throw WriterException('Invalid mask pattern');
     }
-    int typeInfo = (ecLevel.bits << 3) | maskPattern;
+    var typeInfo = (ecLevel.bits << 3) | maskPattern;
     bits.appendBits(typeInfo, 5);
 
-    int bchCode = calculateBCHCode(typeInfo, _TYPE_INFO_POLY);
+    var bchCode = calculateBCHCode(typeInfo, _typeInfoPoly);
     bits.appendBits(bchCode, 10);
 
-    BitArray maskBits = new BitArray();
-    maskBits.appendBits(_TYPE_INFO_MASK_PATTERN, 15);
+    var maskBits = BitArray();
+    maskBits.appendBits(_typeInfoMaskPattern, 15);
     bits.xor(maskBits);
 
     if (bits.size != 15) {
       // Just in case.
-      throw new WriterException(
-          message: "should not happen but we got: ${bits.size}");
+      throw WriterException('should not happen but we got: ${bits.size}');
     }
   }
 
@@ -330,13 +327,12 @@ class MatrixUtil {
   // See 8.10 of JISX0510:2004 (p.45) for details.
   static void makeVersionInfoBits(Version version, BitArray bits) {
     bits.appendBits(version.versionNumber, 6);
-    int bchCode = calculateBCHCode(version.versionNumber, _VERSION_INFO_POLY);
+    var bchCode = calculateBCHCode(version.versionNumber, _versionInfoPoly);
     bits.appendBits(bchCode, 12);
 
     if (bits.size != 18) {
       // Just in case.
-      throw new WriterException(
-          message: "should not happen but we got: ${bits.size}");
+      throw WriterException('should not happen but we got: ${bits.size}');
     }
   }
 
@@ -348,8 +344,8 @@ class MatrixUtil {
   static void _embedTimingPatterns(ByteMatrix matrix) {
     // -8 is for skipping position detection patterns (size 7), and two horizontal/vertical
     // separation patterns (size 1). Thus, 8 = 7 + 1.
-    for (int i = 8; i < matrix.width - 8; ++i) {
-      int bit = (i + 1) % 2;
+    for (var i = 8; i < matrix.width - 8; ++i) {
+      var bit = (i + 1) % 2;
       // Horizontal line.
       if (_isEmpty(matrix.get(i, 6))) {
         matrix.set(i, 6, bit);
@@ -364,16 +360,16 @@ class MatrixUtil {
   // Embed the lonely dark dot at left bottom corner. JISX0510:2004 (p.46)
   static void _embedDarkDotAtLeftBottomCorner(ByteMatrix matrix) {
     if (matrix.get(8, matrix.height - 8) == 0) {
-      throw new WriterException();
+      throw WriterException('');
     }
     matrix.set(8, matrix.height - 8, 1);
   }
 
   static void _embedHorizontalSeparationPattern(
       int xStart, int yStart, ByteMatrix matrix) {
-    for (int x = 0; x < 8; ++x) {
+    for (var x = 0; x < 8; ++x) {
       if (!_isEmpty(matrix.get(xStart + x, yStart))) {
-        throw new WriterException();
+        throw WriterException('');
       }
       matrix.set(xStart + x, yStart, 0);
     }
@@ -381,9 +377,9 @@ class MatrixUtil {
 
   static void _embedVerticalSeparationPattern(
       int xStart, int yStart, ByteMatrix matrix) {
-    for (int y = 0; y < 7; ++y) {
+    for (var y = 0; y < 7; ++y) {
       if (!_isEmpty(matrix.get(xStart, yStart + y))) {
-        throw new WriterException();
+        throw WriterException('');
       }
       matrix.set(xStart, yStart + y, 0);
     }
@@ -391,9 +387,9 @@ class MatrixUtil {
 
   static void _embedPositionAdjustmentPattern(
       int xStart, int yStart, ByteMatrix matrix) {
-    for (int y = 0; y < 5; ++y) {
-      var patternY = _POSITION_ADJUSTMENT_PATTERN[y];
-      for (int x = 0; x < 5; ++x) {
+    for (var y = 0; y < 5; ++y) {
+      var patternY = _positionAdjustmentPattern[y];
+      for (var x = 0; x < 5; ++x) {
         matrix.set(xStart + x, yStart + y, patternY[x]);
       }
     }
@@ -401,9 +397,9 @@ class MatrixUtil {
 
   static void _embedPositionDetectionPattern(
       int xStart, int yStart, ByteMatrix matrix) {
-    for (int y = 0; y < 7; ++y) {
-      var patternY = _POSITION_DETECTION_PATTERN[y];
-      for (int x = 0; x < 7; ++x) {
+    for (var y = 0; y < 7; ++y) {
+      var patternY = _positionDetectionPattern[y];
+      for (var x = 0; x < 7; ++x) {
         matrix.set(xStart + x, yStart + y, patternY[x]);
       }
     }
@@ -412,7 +408,7 @@ class MatrixUtil {
   // Embed position detection patterns and surrounding vertical/horizontal separators.
   static void _embedPositionDetectionPatternsAndSeparators(ByteMatrix matrix) {
     // Embed three big squares at corners.
-    int pdpWidth = _POSITION_DETECTION_PATTERN[0].length;
+    var pdpWidth = _positionDetectionPattern[0].length;
     // Left top corner.
     _embedPositionDetectionPattern(0, 0, matrix);
     // Right top corner.
@@ -421,7 +417,7 @@ class MatrixUtil {
     _embedPositionDetectionPattern(0, matrix.width - pdpWidth, matrix);
 
     // Embed horizontal separation patterns around the squares.
-    int hspWidth = 8;
+    var hspWidth = 8;
     // Left top corner.
     _embedHorizontalSeparationPattern(0, hspWidth - 1, matrix);
     // Right top corner.
@@ -431,7 +427,7 @@ class MatrixUtil {
     _embedHorizontalSeparationPattern(0, matrix.width - hspWidth, matrix);
 
     // Embed vertical separation patterns around the squares.
-    int vspSize = 7;
+    var vspSize = 7;
     // Left top corner.
     _embedVerticalSeparationPattern(vspSize, 0, matrix);
     // Right top corner.
@@ -447,12 +443,11 @@ class MatrixUtil {
       // The patterns appear if version >= 2
       return;
     }
-    int index = version.versionNumber - 1;
-    List<int> coordinates =
-        _POSITION_ADJUSTMENT_PATTERN_COORDINATE_TABLE[index];
-    for (int y in coordinates) {
+    var index = version.versionNumber - 1;
+    var coordinates = _positionAdjustmentPatternCoordinateTable[index];
+    for (var y in coordinates) {
       if (y >= 0) {
-        for (int x in coordinates) {
+        for (var x in coordinates) {
           if (x >= 0 && _isEmpty(matrix.get(x, y))) {
             // If the cell is unset, we embed the position adjustment pattern here.
             // -2 is necessary since the x/y coordinates point to the center of the pattern, not the

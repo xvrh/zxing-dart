@@ -22,7 +22,7 @@ class ByteMatrix {
   }
 
   void setBool(int x, int y, bool value) {
-    bytes[y][x] = (value ? 1 : 0);
+    bytes[y][x] = value ? 1 : 0;
   }
 
   void clear(int value) {

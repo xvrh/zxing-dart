@@ -44,7 +44,7 @@ packages:
     source: hosted
     version: "2.1.0"
   charcode:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: charcode
       url: "https://pub.dartlang.org"

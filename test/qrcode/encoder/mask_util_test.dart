@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:test/test.dart';
 import 'package:zxing/src/qrcode/encoder/byte_matrix.dart';
 import 'package:zxing/src/qrcode/encoder/mask_util.dart';
