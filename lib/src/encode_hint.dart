@@ -16,9 +16,7 @@ class EncodeHintType<T> {
   /// Specifies what character encoding to use where applicable (type {@link String})
   static final characterSet = EncodeHintType<CharacterSetECI>();
 
-  /**
-   * Specifies the matrix shape for Data Matrix (type {@link com.google.zxing.datamatrix.encoder.SymbolShapeHint})
-   */
+  /// Specifies the matrix shape for Data Matrix (type {@link com.google.zxing.datamatrix.encoder.SymbolShapeHint})
   //static final DATA_MATRIX_SHAPE = EncodeHintType<SymbolShapeHint>();
 
   /// Specifies margin, in pixels, to use when generating the barcode. The meaning can vary
@@ -35,10 +33,8 @@ class EncodeHintType<T> {
   /// enum values).
   static final pdf417Compaction = EncodeHintType<Object>();
 
-/**
- * Specifies the minimum and maximum number of rows and columns for PDF417 (type
- * {@link com.google.zxing.pdf417.encoder.Dimensions Dimensions}).
- */
+/// Specifies the minimum and maximum number of rows and columns for PDF417 (type
+  /// {@link com.google.zxing.pdf417.encoder.Dimensions Dimensions}).
   //static final PDF417_DIMENSIONS = EncodeHintType<Dimensions>();
 
   /// Specifies the required number of layers for an Aztec code.

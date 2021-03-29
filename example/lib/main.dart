@@ -2,7 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:pedantic/pedantic.dart';
 
-List<CameraDescription> cameras;
+late List<CameraDescription> cameras;
 
 void main() async {
   // Fetch the available cameras before initializing the app.
@@ -35,12 +35,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
-  CameraController _controller;
+  CameraController? _controller;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addObserver(this);
 
     var camera = cameras.first;
     _onCameraSelected(camera);
@@ -48,23 +48,23 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (_controller == null || !_controller.value.isInitialized) {
+    var controller = _controller;
+    if (controller == null || !controller.value.isInitialized) {
       return;
     }
     if (state == AppLifecycleState.inactive) {
       _controller?.dispose();
     } else if (state == AppLifecycleState.resumed) {
-      if (_controller != null) {
-        _onCameraSelected(_controller.description);
-      }
+      _onCameraSelected(controller.description);
     }
   }
 
   void _onCameraSelected(CameraDescription cameraDescription) async {
-    if (_controller != null) {
-      await _controller.dispose();
+    var controller = _controller;
+    if (controller != null) {
+      await controller.dispose();
     }
-    _controller = CameraController(
+    controller = _controller = CameraController(
       cameraDescription,
       ResolutionPreset.medium,
       enableAudio: false,
@@ -72,20 +72,22 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     );
 
     // If the controller is updated then update the UI.
-    _controller.addListener(() {
+    controller.addListener(() {
+      var controller = _controller!;
       if (mounted) setState(() {});
-      if (_controller.value.hasError) {
-        print('Camera error ${_controller.value.errorDescription}');
+      if (controller.value.hasError) {
+        print('Camera error ${controller.value.errorDescription}');
       }
     });
 
-    unawaited(_controller.startImageStream((image) {
+    unawaited(controller.startImageStream((image) {
       print('image available ${image.width}x${image.height}');
     }));
   }
 
   @override
   Widget build(BuildContext context) {
+    var controller = _controller;
     return Scaffold(
       appBar: AppBar(
         title: Text('ZXing Demo'),
@@ -94,10 +96,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            if (_controller != null)
+            if (controller != null)
               SizedBox(
-                child: CameraPreview(_controller),
                 height: 500,
+                child: CameraPreview(controller),
               ),
           ],
         ),
@@ -107,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
     super.dispose();
   }
 }

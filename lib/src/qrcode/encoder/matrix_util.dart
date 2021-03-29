@@ -1,9 +1,8 @@
 import 'package:fixnum/fixnum.dart';
 import '../../common/bit_array.dart';
+import '../../writer_exception.dart';
 import '../decoder/error_correction_level.dart';
 import '../decoder/version.dart';
-
-import '../../writer_exception.dart';
 import 'byte_matrix.dart';
 import 'mask_util.dart';
 import 'qr_code.dart';

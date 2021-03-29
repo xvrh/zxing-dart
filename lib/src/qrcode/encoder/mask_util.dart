@@ -1,5 +1,5 @@
-import 'dart:typed_data';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'byte_matrix.dart';
 
 /// @author Satoru Takabayashi

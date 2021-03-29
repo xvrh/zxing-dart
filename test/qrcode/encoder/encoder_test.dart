@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-
+import 'package:charcode/charcode.dart';
 import 'package:test/test.dart';
 import 'package:zxing/src/common/bit_array.dart';
 import 'package:zxing/src/common/character_set_eci.dart';
@@ -9,7 +9,6 @@ import 'package:zxing/src/qrcode/decoder/error_correction_level.dart';
 import 'package:zxing/src/qrcode/decoder/mode.dart';
 import 'package:zxing/src/qrcode/decoder/version.dart';
 import 'package:zxing/src/qrcode/encoder/encoder.dart';
-import 'package:charcode/charcode.dart';
 import 'package:zxing/src/qrcode/encoder/qr_code.dart';
 import 'package:zxing/src/writer_exception.dart';
 

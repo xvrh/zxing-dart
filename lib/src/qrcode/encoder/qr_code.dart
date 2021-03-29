@@ -1,7 +1,6 @@
 import '../decoder/error_correction_level.dart';
 import '../decoder/mode.dart';
 import '../decoder/version.dart';
-
 import 'byte_matrix.dart';
 
 /// @author satorux@google.com (Satoru Takabayashi) - creator

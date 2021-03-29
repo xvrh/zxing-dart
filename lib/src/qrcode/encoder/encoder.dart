@@ -1,18 +1,17 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'package:charcode/charcode.dart';
 import 'package:fixnum/fixnum.dart';
 import '../../common/bit_array.dart';
 import '../../common/character_set_eci.dart';
 import '../../common/reedsolomon/generic_gf.dart';
 import '../../common/reedsolomon/reed_solomon_encoder.dart';
+import '../../encode_hint.dart';
+import '../../writer_exception.dart';
 import '../decoder/error_correction_level.dart';
 import '../decoder/mode.dart';
 import '../decoder/version.dart';
-
-import '../../encode_hint.dart';
-import '../../writer_exception.dart';
 import 'block_pair.dart';
 import 'byte_matrix.dart';
 import 'mask_util.dart';

@@ -1,30 +1,8 @@
-import 'dart:isolate';
 import 'dart:typed_data';
-
 import 'package:camera/camera.dart' show CameraImage;
-import 'package:flutter/foundation.dart';
 import 'package:zxing/zxing.dart';
 
-//Future<Result> decode(CameraImage image) async {
-//  var plane = image.planes.first;
-//
-//  return await compute<Transfer, Result>(
-//      decodeCompute,
-//      Transfer(
-//        image.width,
-//        image.height,
-//        TransferableTypedData.fromList([plane.bytes]),
-//      ));
-//}
-//
-//class Transfer {
-//  final int width, height;
-//  final TransferableTypedData bytes;
-//
-//  Transfer(this.width, this.height, this.bytes);
-//}
-
-Result decode(CameraImage image) {
+Result? decode(CameraImage image) {
   var plane = image.planes.first;
   LuminanceSource source = RGBLuminanceSource(
       image.width, image.height, plane.bytes.buffer.asInt32List());
@@ -48,7 +26,7 @@ class ImageLuminanceSource extends LuminanceSource {
       : super(width, height);
 
   @override
-  Int8List getRow(int y, Int8List row) {
+  Int8List getRow(int y, Int8List? row) {
     if (y < 0 || y >= height) {
       throw ArgumentError('Requested row is outside the image: $y');
     }
