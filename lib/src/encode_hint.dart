@@ -33,7 +33,7 @@ class EncodeHintType<T> {
   /// enum values).
   static final pdf417Compaction = EncodeHintType<Object>();
 
-/// Specifies the minimum and maximum number of rows and columns for PDF417 (type
+  /// Specifies the minimum and maximum number of rows and columns for PDF417 (type
   /// {@link com.google.zxing.pdf417.encoder.Dimensions Dimensions}).
   //static final PDF417_DIMENSIONS = EncodeHintType<Dimensions>();
 
