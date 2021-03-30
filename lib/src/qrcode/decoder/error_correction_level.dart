@@ -33,5 +33,5 @@ class ErrorCorrectionLevel {
   }
 
   @override
-  String toString() => 'ErrorCorrectionLevel.$name';
+  String toString() => '$name';
 }

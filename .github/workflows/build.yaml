@@ -16,12 +16,14 @@ jobs:
 #      #In travis/docker we need the --no-sandbox flag in chrome
 #      CHROME_FORCE_NO_SANDBOX: true
     steps:
-      - uses: dart-lang/setup-dart@v0.3
+      - uses: subosito/flutter-action@v1
         with:
-          sdk: ${{ matrix.sdk }}
+          channel: ${{ matrix.sdk }}
       - uses: actions/checkout@v2
       - run: dart --version
       - run: dart pub get
+      - run: flutter pub get
+        working-directory: 'example'
       - run: dart analyze --fatal-infos --fatal-warnings .
       - run: dart test
       - run: dart tool/prepare_submit.dart

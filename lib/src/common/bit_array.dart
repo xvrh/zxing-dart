@@ -290,7 +290,7 @@ class BitArray {
 
   @override
   String toString() {
-    var result = StringBuffer(size + (size / 8) + 1);
+    var result = StringBuffer();
     for (var i = 0; i < size; i++) {
       if ((i & 0x07) == 0) {
         result.write(' ');
