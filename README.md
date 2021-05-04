@@ -3,7 +3,7 @@
 ZXing ("zebra crossing") is an open-source, multi-format 1D/2D barcode image processing library.  
 This package is a pure Dart port of the original Java library.
 
-For now, it only supports **QR-Code** (encoding and decoding). New format can be added if this port proves useful.
+For now, it only supports **QR-Code** (encoding and decoding). New format can easily be added if this port proves useful.
 
 ## Getting started
 
