@@ -1,6 +1,6 @@
 import 'package:test/test.dart';
-import 'package:zxing/src/common/bit_array.dart';
-import 'package:zxing/src/common/bit_matrix.dart';
+import 'package:zxing2/src/common/bit_array.dart';
+import 'package:zxing2/src/common/bit_matrix.dart';
 
 final bitMatrixPoints = <int>[1, 2, 2, 0, 3, 1];
 

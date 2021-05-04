@@ -6,7 +6,6 @@ export 'src/common/hybrid_binarizer.dart' show HybridBinarizer;
 export 'src/decode_hint.dart' show DecodeHints, DecodeHintType;
 export 'src/inverted_luminance_source.dart' show InvertedLuminanceSource;
 export 'src/luminance_source.dart' show LuminanceSource;
-export 'src/qrcode/qrcode_reader.dart' show QRCodeReader;
 export 'src/reader.dart' show Reader;
 export 'src/reader_exception.dart' show ReaderException;
 export 'src/result.dart' show Result;

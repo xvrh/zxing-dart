@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'package:image/image.dart' as img;
-import 'package:zxing/src/luminance_source.dart';
+import 'package:zxing2/src/luminance_source.dart';
 
 /// This LuminanceSource implementation is meant for J2SE clients and our blackbox unit tests.
 ///

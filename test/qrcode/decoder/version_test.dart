@@ -1,6 +1,6 @@
 import 'package:test/test.dart';
-import 'package:zxing/src/qrcode/decoder/error_correction_level.dart';
-import 'package:zxing/src/qrcode/decoder/version.dart';
+import 'package:zxing2/src/qrcode/decoder/error_correction_level.dart';
+import 'package:zxing2/src/qrcode/decoder/version.dart';
 
 void main() {
   test('Bad version', () {

@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'package:test/test.dart';
-import 'package:zxing/src/rgb_luminance_source.dart';
+import 'package:zxing2/src/rgb_luminance_source.dart';
 
 /// Tests {@link RGBLuminanceSource}.
 void main() {

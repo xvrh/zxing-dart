@@ -1,6 +1,6 @@
 import 'package:test/test.dart';
-import 'package:zxing/src/qrcode/decoder/error_correction_level.dart';
-import 'package:zxing/src/qrcode/decoder/format_information.dart';
+import 'package:zxing2/src/qrcode/decoder/error_correction_level.dart';
+import 'package:zxing2/src/qrcode/decoder/format_information.dart';
 
 final int _maskedTestFormatInfo = 0x2BED;
 final int _unmaskedTestFormatInfo = _maskedTestFormatInfo ^ 0x5412;

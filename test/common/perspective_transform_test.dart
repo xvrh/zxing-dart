@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:zxing/src/common/perspective_transform.dart';
+import 'package:zxing2/src/common/perspective_transform.dart';
 
 final _epsilon = 1.0E-4;
 void main() {

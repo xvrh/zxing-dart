@@ -34,3 +34,4 @@ _*
 .*
 !.gitignore
 !.github
+!.pubignore

@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:zxing/src/common/bit_array.dart';
+import 'package:zxing2/src/common/bit_array.dart';
 
 void main() {
   test('Append bit', () {

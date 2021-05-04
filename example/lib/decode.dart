@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'package:camera/camera.dart' show CameraImage;
-import 'package:zxing/zxing.dart';
+import 'package:zxing2/qrcode.dart';
 
 Result? decode(CameraImage image) {
   var plane = image.planes.first;

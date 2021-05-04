@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'package:test/test.dart';
-import 'package:zxing/src/common/bit_source.dart';
+import 'package:zxing2/src/common/bit_source.dart';
 
 void main() {
   test('Source', () {

@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'package:test/test.dart';
-import 'package:zxing/src/common/reedsolomon/generic_gf.dart';
-import 'package:zxing/src/common/reedsolomon/generic_gf_poly.dart';
+import 'package:zxing2/src/common/reedsolomon/generic_gf.dart';
+import 'package:zxing2/src/common/reedsolomon/generic_gf_poly.dart';
 
 final _field = GenericGF.qrCodeField256;
 

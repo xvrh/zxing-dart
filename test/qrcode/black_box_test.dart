@@ -1,4 +1,4 @@
-import 'package:zxing/zxing.dart';
+import 'package:zxing2/qrcode.dart';
 import '../goldens.dart';
 
 void main() {

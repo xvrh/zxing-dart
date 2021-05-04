@@ -1,12 +1,12 @@
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:test/test.dart';
-import 'package:zxing/src/common/bit_set.dart';
-import 'package:zxing/src/common/reedsolomon/generic_gf.dart';
-import 'package:zxing/src/common/reedsolomon/reed_solomon_decoder.dart';
-import 'package:zxing/src/common/reedsolomon/reed_solomon_encoder.dart';
-import 'package:zxing/src/common/reedsolomon/reed_solomon_exception.dart';
-import 'package:zxing/src/common/system.dart' as system;
+import 'package:zxing2/src/common/bit_set.dart';
+import 'package:zxing2/src/common/reedsolomon/generic_gf.dart';
+import 'package:zxing2/src/common/reedsolomon/reed_solomon_decoder.dart';
+import 'package:zxing2/src/common/reedsolomon/reed_solomon_encoder.dart';
+import 'package:zxing2/src/common/reedsolomon/reed_solomon_exception.dart';
+import 'package:zxing2/src/common/system.dart' as system;
 
 final int _decoderRandomTestIterations = 3;
 final int _decoderTestIterations = 10;
