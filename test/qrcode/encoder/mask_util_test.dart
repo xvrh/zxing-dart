@@ -1,6 +1,6 @@
 import 'package:test/test.dart';
-import 'package:zxing/src/qrcode/encoder/byte_matrix.dart';
-import 'package:zxing/src/qrcode/encoder/mask_util.dart';
+import 'package:zxing2/src/qrcode/encoder/byte_matrix.dart';
+import 'package:zxing2/src/qrcode/encoder/mask_util.dart';
 
 void main() {
   test('Apply mask penalty rule1', () {

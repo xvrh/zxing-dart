@@ -1,4 +1,4 @@
-name: zxing_example
+name: zxing2_example
 description: A new Flutter project.
 publish_to: 'none'
 
@@ -12,7 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   pedantic:
-  zxing:
+  zxing2:
     path: ../
 
 dev_dependencies:

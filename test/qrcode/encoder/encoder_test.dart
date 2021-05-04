@@ -1,16 +1,16 @@
 import 'dart:typed_data';
 import 'package:charcode/charcode.dart';
 import 'package:test/test.dart';
-import 'package:zxing/src/common/bit_array.dart';
-import 'package:zxing/src/common/character_set_eci.dart';
-import 'package:zxing/src/common/sjis.dart';
-import 'package:zxing/src/encode_hint.dart';
-import 'package:zxing/src/qrcode/decoder/error_correction_level.dart';
-import 'package:zxing/src/qrcode/decoder/mode.dart';
-import 'package:zxing/src/qrcode/decoder/version.dart';
-import 'package:zxing/src/qrcode/encoder/encoder.dart';
-import 'package:zxing/src/qrcode/encoder/qr_code.dart';
-import 'package:zxing/src/writer_exception.dart';
+import 'package:zxing2/src/common/bit_array.dart';
+import 'package:zxing2/src/common/character_set_eci.dart';
+import 'package:zxing2/src/common/sjis.dart';
+import 'package:zxing2/src/encode_hint.dart';
+import 'package:zxing2/src/qrcode/decoder/error_correction_level.dart';
+import 'package:zxing2/src/qrcode/decoder/mode.dart';
+import 'package:zxing2/src/qrcode/decoder/version.dart';
+import 'package:zxing2/src/qrcode/encoder/encoder.dart';
+import 'package:zxing2/src/qrcode/encoder/qr_code.dart';
+import 'package:zxing2/src/writer_exception.dart';
 
 void main() {
   CharacterSetECI.SJIS.encoding = sjis;

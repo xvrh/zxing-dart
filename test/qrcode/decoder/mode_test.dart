@@ -1,6 +1,6 @@
 import 'package:test/test.dart';
-import 'package:zxing/src/qrcode/decoder/mode.dart';
-import 'package:zxing/src/qrcode/decoder/version.dart';
+import 'package:zxing2/src/qrcode/decoder/mode.dart';
+import 'package:zxing2/src/qrcode/decoder/version.dart';
 
 void main() {
   test('For bits', () {

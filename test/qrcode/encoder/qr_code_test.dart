@@ -1,9 +1,9 @@
 import 'package:test/test.dart';
-import 'package:zxing/src/qrcode/decoder/error_correction_level.dart';
-import 'package:zxing/src/qrcode/decoder/mode.dart';
-import 'package:zxing/src/qrcode/decoder/version.dart';
-import 'package:zxing/src/qrcode/encoder/byte_matrix.dart';
-import 'package:zxing/src/qrcode/encoder/qr_code.dart';
+import 'package:zxing2/src/qrcode/decoder/error_correction_level.dart';
+import 'package:zxing2/src/qrcode/decoder/mode.dart';
+import 'package:zxing2/src/qrcode/decoder/version.dart';
+import 'package:zxing2/src/qrcode/encoder/byte_matrix.dart';
+import 'package:zxing2/src/qrcode/encoder/qr_code.dart';
 
 void main() {
   test('QrCode', () {

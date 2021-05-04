@@ -1,6 +1,6 @@
 import 'package:test/test.dart';
-import 'package:zxing/src/common/bit_matrix.dart';
-import 'package:zxing/src/qrcode/decoder/data_mask.dart';
+import 'package:zxing2/src/common/bit_matrix.dart';
+import 'package:zxing2/src/qrcode/decoder/data_mask.dart';
 
 void main() {
   test('Mask0', () {
