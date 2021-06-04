@@ -1,115 +1,72 @@
-import 'package:camera/camera.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:pedantic/pedantic.dart';
+import 'package:camera/camera.dart';
+import 'package:zxing2/qrcode.dart';
+import 'package:zxing2_example/decode.dart';
 
 late List<CameraDescription> cameras;
 
-void main() async {
-  // Fetch the available cameras before initializing the app.
-  try {
-    WidgetsFlutterBinding.ensureInitialized();
-    cameras = await availableCameras();
-  } on CameraException catch (e) {
-    print('Camera error: $e');
-  }
-  runApp(MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  cameras = await availableCameras();
+  runApp(CameraApp());
 }
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+class CameraApp extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'ZXing Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(),
-    );
-  }
+  _CameraAppState createState() => _CameraAppState();
 }
 
-class MyHomePage extends StatefulWidget {
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
-  CameraController? _controller;
+class _CameraAppState extends State<CameraApp> {
+  late CameraController controller;
+  Result? _result;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addObserver(this);
-
-    var camera = cameras.first;
-    _onCameraSelected(camera);
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    var controller = _controller;
-    if (controller == null || !controller.value.isInitialized) {
-      return;
-    }
-    if (state == AppLifecycleState.inactive) {
-      _controller?.dispose();
-    } else if (state == AppLifecycleState.resumed) {
-      _onCameraSelected(controller.description);
-    }
-  }
-
-  void _onCameraSelected(CameraDescription cameraDescription) async {
-    var controller = _controller;
-    if (controller != null) {
-      await controller.dispose();
-    }
-    controller = _controller = CameraController(
-      cameraDescription,
-      ResolutionPreset.medium,
-      enableAudio: false,
-      imageFormatGroup: ImageFormatGroup.bgra8888,
-    );
-
-    // If the controller is updated then update the UI.
-    controller.addListener(() {
-      var controller = _controller!;
-      if (mounted) setState(() {});
-      if (controller.value.hasError) {
-        print('Camera error ${controller.value.errorDescription}');
+    controller = CameraController(cameras[0], ResolutionPreset.max);
+    controller.initialize().then((_) {
+      if (!mounted) {
+        return;
       }
-    });
+      setState(() {});
 
-    unawaited(controller.startImageStream((image) {
-      print('image available ${image.width}x${image.height}');
-    }));
+      controller.startImageStream((image) {
+        //var decoded = decode(image);
+        //if (decoded != _result) {
+        //  setState(() {
+        //    _result = decoded;
+        //  });
+        //}
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    var controller = _controller;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('ZXing Demo'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            if (controller != null)
-              SizedBox(
-                height: 500,
-                child: CameraPreview(controller),
-              ),
-          ],
-        ),
-      ),
+    if (!controller.value.isInitialized) {
+      return Container();
+    }
+    var result = _result;
+    return MaterialApp(
+      home: Scaffold(
+          body: Column(
+        children: [
+          Expanded(child: CameraPreview(controller)),
+          if (result != null)
+            Text('Scanned: ${result.text}')
+          else
+            Text('Nothing scanned'),
+          SizedBox(height: 150),
+        ],
+      )),
     );
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
+    controller.dispose();
     super.dispose();
   }
 }
