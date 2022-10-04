@@ -44,7 +44,7 @@ class SjisEncoder extends Converter<String, List<int>> {
   List<int> convert(String input) {
     var sjisCodeUnits = <int>[];
 
-    input.runes.forEach((codeUnit) {
+    for (var codeUnit in input.runes) {
       var sjisCodeUnit = utfSjis[codeUnit];
       if (sjisCodeUnit != null) {
         if (sjisCodeUnit < 256) {
@@ -57,7 +57,7 @@ class SjisEncoder extends Converter<String, List<int>> {
         throw FormatException(
             "Couldn't find corresponding code to U+${codeUnit.toRadixString(16)}");
       }
-    });
+    }
 
     return sjisCodeUnits;
   }

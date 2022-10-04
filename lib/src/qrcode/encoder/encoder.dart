@@ -468,7 +468,12 @@ class Encoder {
       case Mode.kanji:
         appendKanjiBytes(content, bits);
         break;
-      default:
+      case Mode.terminator:
+      case Mode.fnc1FirstPosition:
+      case Mode.fnc1SecondPosition:
+      case Mode.structuredAppend:
+      case Mode.eci:
+      case Mode.hanzi:
         throw WriterException('Invalid mode: $mode');
     }
   }

@@ -3,7 +3,6 @@ import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:path/path.dart' as p;
 import 'dart_project.dart';
-import 'fix_import_order.dart' show nullSafetyFeatureSet;
 
 // A script that replace all absolute imports to relative one
 // import 'package:slot/src/my_slot.dart' => 'import '../my_slot.dart';
@@ -33,8 +32,7 @@ String fixCode(DartFile dartFile, String content) {
   try {
     var newContent = content;
 
-    var unit =
-        parseString(content: content, featureSet: nullSafetyFeatureSet).unit;
+    var unit = parseString(content: content).unit;
 
     for (var directive
         in unit.directives.reversed.whereType<NamespaceDirective>()) {
@@ -45,7 +43,7 @@ String fixCode(DartFile dartFile, String content) {
         var thisFilePath = dartFile.relativePath.substring('lib/'.length);
         var relativePath = p
             .relative(absoluteImportFromLib, from: p.dirname(thisFilePath))
-            .replaceAll('\\', '/');
+            .replaceAll(r'\', '/');
 
         var directiveContent =
             directive.uri.toString().replaceAll(uriValue, relativePath);

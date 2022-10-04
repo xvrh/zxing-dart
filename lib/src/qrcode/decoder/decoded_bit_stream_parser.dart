@@ -79,7 +79,10 @@ class DecodedBitStreamParser {
               _decodeHanziSegment(bits, result, countHanzi);
             }
             break;
-          default:
+          case Mode.numeric:
+          case Mode.alphanumeric:
+          case Mode.byte:
+          case Mode.kanji:
             // "Normal" QR code modes:
             // How many characters will follow, encoded in this mode?
             var count = bits.readBits(mode.getCharacterCountBits(version));
@@ -97,7 +100,12 @@ class DecodedBitStreamParser {
               case Mode.kanji:
                 _decodeKanjiSegment(bits, result, count);
                 break;
-              default:
+              case Mode.terminator:
+              case Mode.fnc1FirstPosition:
+              case Mode.fnc1SecondPosition:
+              case Mode.structuredAppend:
+              case Mode.eci:
+              case Mode.hanzi:
                 throw FormatReaderException();
             }
             break;

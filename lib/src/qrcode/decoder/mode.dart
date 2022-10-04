@@ -4,30 +4,26 @@ import 'version.dart';
 /// data can be encoded to bits in the QR code standard.</p>
 ///
 /// @author Sean Owen
-class Mode {
-  static const terminator =
-      Mode._('TERMINATOR', [0, 0, 0], 0x00); // Not really a mode...
-  static const numeric = Mode._('NUMERIC', [10, 12, 14], 0x01);
-  static const alphanumeric = Mode._('ALPHANUMERIC', [9, 11, 13], 0x02);
-  static const structuredAppend =
-      Mode._('STRUCTURED_APPEND', [0, 0, 0], 0x03); // Not supported
-  static const byte = Mode._('BYTE', [8, 16, 16], 0x04);
-  static const eci =
-      Mode._('ECI', [0, 0, 0], 0x07); // character counts don't apply
-  static const kanji = Mode._('KANJI', [8, 10, 12], 0x08);
-  static const fnc1FirstPosition =
-      Mode._('FNC1_FIRST_POSITION', [0, 0, 0], 0x05);
-  static const fnc1SecondPosition =
-      Mode._('FNC1_SECOND_POSITION', [0, 0, 0], 0x09);
+enum Mode {
+  terminator('TERMINATOR', [0, 0, 0], 0x00), // Not really a mode...
+  numeric('NUMERIC', [10, 12, 14], 0x01),
+  alphanumeric('ALPHANUMERIC', [9, 11, 13], 0x02),
+  structuredAppend('STRUCTURED_APPEND', [0, 0, 0], 0x03), // Not supported
+  byte('BYTE', [8, 16, 16], 0x04),
+  eci('ECI', [0, 0, 0], 0x07), // character counts don't apply
+  kanji('KANJI', [8, 10, 12], 0x08),
+  fnc1FirstPosition('FNC1_FIRST_POSITION', [0, 0, 0], 0x05),
+  fnc1SecondPosition('FNC1_SECOND_POSITION', [0, 0, 0], 0x09),
 
   /// See GBT 18284-2000; "Hanzi" is a transliteration of this mode name.
-  static const hanzi = Mode._('HANZI', [8, 10, 12], 0x0D);
+  hanzi('HANZI', [8, 10, 12], 0x0D),
+  ;
 
   final String name;
   final List<int> _characterCountBitsForVersions;
   final int bits;
 
-  const Mode._(this.name, this._characterCountBitsForVersions, this.bits);
+  const Mode(this.name, this._characterCountBitsForVersions, this.bits);
 
   @override
   String toString() => name;
