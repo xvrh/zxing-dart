@@ -117,7 +117,7 @@ class DartFile {
 
   String get relativePath => _relativePath;
 
-  String get normalizedRelativePath => relativePath.replaceAll('\\', '/');
+  String get normalizedRelativePath => relativePath.replaceAll(r'\', '/');
 
   @override
   String toString() => 'DartFile($file)';

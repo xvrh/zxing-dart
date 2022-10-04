@@ -366,7 +366,7 @@ void main() {
         'abc', Mode.byte, bits, Encoder.defaultByteModeEncoding);
     expect(' .XX....X .XX...X. .XX...XX', bits.toString());
     // Anything can be encoded in QRCode.MODE_8BIT_BYTE.
-    Encoder.appendBytes('\0', Mode.byte, bits, Encoder.defaultByteModeEncoding);
+    Encoder.appendBytes('0', Mode.byte, bits, Encoder.defaultByteModeEncoding);
     // Should use appendKanjiBytes.
     // 0x93, 0x5f
     bits = BitArray();

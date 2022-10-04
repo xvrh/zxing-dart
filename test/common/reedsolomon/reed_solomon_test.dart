@@ -485,7 +485,7 @@ String _arrayToString(List<int> data) {
   var sb = StringBuffer('{');
   for (var i = 0; i < data.length; i++) {
     var d = data[i].toRadixString(16);
-    sb.write(i > 0 ? ',$d' : '$d');
+    sb.write(i > 0 ? ',$d' : d);
   }
   sb.write('}');
   return sb.toString();
