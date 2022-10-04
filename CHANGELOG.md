@@ -1,3 +1,7 @@
-## [0.1.0] - 2021-05-04
+## [0.1.1]
+
+* Export `EncodeHints` from `qrcode.dart`
+
+## [0.1.0]
 
 * initial release.
