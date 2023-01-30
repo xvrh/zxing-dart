@@ -6,8 +6,8 @@ void main() {
   var image = img.decodePng(File('tool/example.png').readAsBytesSync())!;
 
   LuminanceSource source = RGBLuminanceSource(image.width, image.height,
-      image.getBytes(format: img.Format.abgr).buffer.asInt32List());
-  var bitmap = BinaryBitmap(HybridBinarizer(source));
+      image.convert(numChannels: 4).getBytes(order: img.ChannelOrder.abgr).buffer.asInt32List());
+  var bitmap = BinaryBitmap(GlobalHistogramBinarizer(source));
 
   var reader = QRCodeReader();
   var result = reader.decode(bitmap);

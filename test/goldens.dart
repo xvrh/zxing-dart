@@ -25,7 +25,7 @@ void testGolden(
 
       var image = img.decodePng(pngFile.readAsBytesSync())!;
       if (rotation != 0) {
-        image = img.copyRotate(image, rotation);
+        image = img.copyRotate(image, angle: rotation);
       }
 
       LuminanceSource source = ImageLuminanceSource(image);

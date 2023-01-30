@@ -23,7 +23,12 @@ class ImageLuminanceSource extends LuminanceSource {
 
   factory ImageLuminanceSource.fromLTWH(
       img.Image image, int left, int top, int width, int height) {
-    var bytes = image.getBytes(format: img.Format.luminance);
+    var bytes = Uint8List(width * height);
+    var i = 0;
+    for (var pixel in image) {
+      bytes[i] = pixel.luminance.round();
+      ++i;
+    }
     return ImageLuminanceSource._(bytes, left, top, width, height);
   }
 
