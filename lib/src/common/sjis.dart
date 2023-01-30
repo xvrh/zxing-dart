@@ -5,7 +5,6 @@
 /// Because they patches these table in constructors of MS932 d/encoder.
 library sjis;
 
-import 'dart:async';
 import 'dart:convert';
 
 part 'sjis_utf_map.dart';
@@ -61,10 +60,6 @@ class SjisEncoder extends Converter<String, List<int>> {
 
     return sjisCodeUnits;
   }
-
-  // Override the base-classes bind, to provide a better type.
-  @override
-  Stream<List<int>> bind(Stream<String> stream) => super.bind(stream);
 }
 
 /// This class converts SJIS code units to a string.
@@ -111,8 +106,4 @@ class SjisDecoder extends Converter<List<int>, String> {
 
     return stringBuffer.toString();
   }
-
-  // Override the base-classes bind, to provide a better type.
-  @override
-  Stream<String> bind(Stream<List<int>> stream) => super.bind(stream);
 }

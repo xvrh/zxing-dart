@@ -59,13 +59,13 @@ class Version {
     try {
       return getVersionForNumber((dimension - 17) ~/ 4);
     } on ArgumentError catch (_) {
-      throw FormatReaderException();
+      rethrow;
     }
   }
 
   static Version getVersionForNumber(int versionNumber) {
     if (versionNumber < 1 || versionNumber > 40) {
-      throw ArgumentError();
+      throw ArgumentError('Version is $versionNumber');
     }
     return _versions[versionNumber - 1];
   }

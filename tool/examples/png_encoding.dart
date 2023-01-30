@@ -7,12 +7,19 @@ void main() {
   var matrix = qrcode.matrix!;
   var scale = 4;
 
-  var image = img.Image(matrix.width * scale, matrix.height * scale);
+  var image = img.Image(
+      width: matrix.width * scale,
+      height: matrix.height * scale,
+      numChannels: 4);
   for (var x = 0; x < matrix.width; x++) {
     for (var y = 0; y < matrix.height; y++) {
       if (matrix.get(x, y) == 1) {
-        img.fillRect(image, x * scale, y * scale, x * scale + scale,
-            y * scale + scale, 0xFF000000);
+        img.fillRect(image,
+            x1: x * scale,
+            y1: y * scale,
+            x2: x * scale + scale,
+            y2: y * scale + scale,
+            color: img.ColorRgba8(0, 0, 0, 0xFF));
       }
     }
   }
