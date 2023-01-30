@@ -33,5 +33,6 @@ build/
 _*
 .*
 !.gitignore
+!.gitattributes
 !.github
 !.pubignore
