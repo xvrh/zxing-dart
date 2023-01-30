@@ -1,7 +1,6 @@
 import 'dart:typed_data';
-
-import 'luminance_source.dart';
 import 'common/system.dart' as system;
+import 'luminance_source.dart';
 
 /// This object extends LuminanceSource around an array of YUV data returned from the camera driver,
 /// with the option to crop to a rectangle within the full data. This can be used to exclude
@@ -69,7 +68,7 @@ class PlanarYUVLuminanceSource extends LuminanceSource {
 
     // Otherwise copy one cropped row at a time.
     for (var y = 0; y < height; y++) {
-     var outputOffset = y * width;
+      var outputOffset = y * width;
       system.arraycopy(_yuvData, inputOffset, matrix, outputOffset, width);
       inputOffset += _dataWidth;
     }
@@ -95,9 +94,9 @@ class PlanarYUVLuminanceSource extends LuminanceSource {
     var inputOffset = _top * _dataWidth + _left;
 
     for (var y = 0; y < height; y++) {
-     var outputOffset = y * width;
+      var outputOffset = y * width;
       for (var x = 0; x < width; x++) {
-       var grey = yuv[inputOffset + x * _thumbnailScaleFactor] & 0xff;
+        var grey = yuv[inputOffset + x * _thumbnailScaleFactor] & 0xff;
         pixels[outputOffset + x] = 0xFF000000 | (grey * 0x00010101);
       }
       inputOffset += _dataWidth * _thumbnailScaleFactor;
@@ -124,7 +123,7 @@ class PlanarYUVLuminanceSource extends LuminanceSource {
       for (var x1 = rowStart, x2 = rowStart + width - 1;
           x1 < middle;
           x1++, x2--) {
-       var temp = yuvData[x1];
+        var temp = yuvData[x1];
         yuvData[x1] = yuvData[x2];
         yuvData[x2] = temp;
       }

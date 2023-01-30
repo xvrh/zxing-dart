@@ -14,8 +14,12 @@ void main() {
   for (var x = 0; x < matrix.width; x++) {
     for (var y = 0; y < matrix.height; y++) {
       if (matrix.get(x, y) == 1) {
-        img.fillRect(image, x1: x * scale, y1: y * scale, x2: x * scale + scale,
-            y2: y * scale + scale, color: img.ColorRgba8(0, 0, 0, 0xFF));
+        img.fillRect(image,
+            x1: x * scale,
+            y1: y * scale,
+            x2: x * scale + scale,
+            y2: y * scale + scale,
+            color: img.ColorRgba8(0, 0, 0, 0xFF));
       }
     }
   }
