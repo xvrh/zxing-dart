@@ -13,6 +13,7 @@ dependencies:
   meta: ^1.3.0
 
 dev_dependencies:
+  dart_style:
   image:
   lints:
   path:
