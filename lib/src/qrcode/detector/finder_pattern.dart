@@ -9,10 +9,8 @@ class FinderPattern extends ResultPoint {
   final double estimatedModuleSize;
   final int count;
 
-  FinderPattern(double posX, double posY, this.estimatedModuleSize,
-      {int? count})
-      : count = count ?? 1,
-        super(posX, posY);
+  FinderPattern(super.posX, super.posY, this.estimatedModuleSize, {int? count})
+      : count = count ?? 1;
 
   /// <p>Determines if this finder pattern "about equals" a finder pattern at the stated
   /// position and size -- meaning, it is at nearly the same center with nearly the same size.</p>
