@@ -1,3 +1,8 @@
+## [0.2.1]
+
+* Fix some lints
+* Require Dart >=3.0.0
+
 ## [0.2.0]
 
 * Update tests to use `package:image` v4.x

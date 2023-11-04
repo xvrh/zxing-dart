@@ -1,4 +1,4 @@
-part of sjis;
+part of 'sjis.dart';
 
 // This map is generated from http://x0213.org/codetable/sjis-0213-2004-std.txt , http://x0213.org/codetable/.
 final gSjisUtf = {
