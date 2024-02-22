@@ -1,3 +1,7 @@
+## [0.2.3]
+
+* Expose NotFoundException, FormatReaderException and ChecksumException
+
 ## [0.2.2]
 
 * Fix some lints
