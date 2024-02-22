@@ -6,7 +6,7 @@ import 'common/character_set_eci.dart';
 class EncodeHintType<T> {
   /// Specifies what degree of error correction to use, for example in QR Codes.
   /// Type depends on the encoder. For example for QR codes it's type
-  /// {@link com.google.zxing.qrcode.decoder.ErrorCorrectionLevel ErrorCorrectionLevel}.
+  /// {com.google.zxing.qrcode.decoder.ErrorCorrectionLevel ErrorCorrectionLevel}.
   /// For Aztec it is of type {@link Integer}, representing the minimal percentage of error correction words.
   /// For PDF417 it is of type {@link Integer}, valid values being 0 to 8.
   /// In all cases, it can also be a {@link String} representation of the desired value as well.
@@ -25,16 +25,16 @@ class EncodeHintType<T> {
   static final margin = EncodeHintType<Object>();
 
   /// Specifies whether to use compact mode for PDF417 (type {@link Boolean}, or "true" or "false"
-  /// {@link String} value).
+  /// {String} value).
   static final pdf417Compact = EncodeHintType<Object>();
 
   /// Specifies what compaction mode to use for PDF417 (type
-  /// {@link com.google.zxing.pdf417.encoder.Compaction Compaction} or {@link String} value of one of its
+  /// {com.google.zxing.pdf417.encoder.Compaction Compaction} or {@link String} value of one of its
   /// enum values).
   static final pdf417Compaction = EncodeHintType<Object>();
 
   /// Specifies the minimum and maximum number of rows and columns for PDF417 (type
-  /// {@link com.google.zxing.pdf417.encoder.Dimensions Dimensions}).
+  /// {com.google.zxing.pdf417.encoder.Dimensions Dimensions}).
   //static final PDF417_DIMENSIONS = EncodeHintType<Dimensions>();
 
   /// Specifies the required number of layers for an Aztec code.
@@ -55,7 +55,7 @@ class EncodeHintType<T> {
   static final qrMaskPattern = EncodeHintType<int>();
 
   /// Specifies whether the data should be encoded to the GS1 standard (type {@link Boolean}, or "true" or "false"
-  /// {@link String } value).
+  /// {String} value).
   static final gs1Format = EncodeHintType<bool>();
 }
 

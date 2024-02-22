@@ -1,0 +1,25 @@
+name: Coverage
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+jobs:
+  test:
+    name: Run tests with coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 'stable'
+      - uses: actions/checkout@v4
+      - run: dart pub get
+      - run: dart test
+      - name: Install coverage tools
+        run: dart pub global activate coverage
+      - name: format coverage
+        run: $HOME/.pub-cache/bin/format_coverage --lcov --in=coverage --out=coverage.lcov --report-on=lib
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
