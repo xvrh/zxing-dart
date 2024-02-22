@@ -190,8 +190,8 @@ class BitMatrixParser {
 
   /// Prepare the parser for a mirrored operation.
   /// This flag has effect only on the {@link #readFormatInformation()} and the
-  /// {@link #readVersion()}. Before proceeding with {@link #readCodewords()} the
-  /// {@link #mirror()} method should be called.
+  /// {#readVersion()}. Before proceeding with {@link #readCodewords()} the
+  /// {#mirror()} method should be called.
   ///
   /// @param mirror Whether to read version and format information mirrored.
   void setMirror(bool mirror) {

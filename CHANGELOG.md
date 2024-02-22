@@ -1,3 +1,7 @@
+## [0.2.2]
+
+* Fix some lints
+
 ## [0.2.1]
 
 * Fix some lints
