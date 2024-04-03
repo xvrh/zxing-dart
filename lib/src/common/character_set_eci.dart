@@ -133,8 +133,8 @@ class CharacterSetECI {
   static CharacterSetECI findByName(String name) {
     name = name.toLowerCase();
     for (var set in all) {
-      for (var name in set.encodingNames) {
-        if (name.toLowerCase() == name) {
+      for (var na in set.encodingNames) {
+        if (na.toLowerCase() == name) {
           return set;
         }
       }
