@@ -22,6 +22,9 @@ enum ResultMetadataType {
   /// raw bytes in the byte segments in the barcode, in order.</p>
   byteSegments,
 
+  /// version number, if applicable.
+  version,
+
   /// Error correction level used, if applicable. The value type depends on the
   /// format, but is typically a String.
   errorCorrectionLevel,

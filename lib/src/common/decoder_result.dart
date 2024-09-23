@@ -16,6 +16,9 @@ class DecoderResult {
   /// @return list of byte segments in the result, or {@code null} if not applicable
   final List<Int8List>? byteSegments;
 
+  /// @return version number, or {@code null} if not applicable
+  final int? version;
+
   /// @return name of error correction level used, or {@code null} if not applicable
   final String? ecLevel;
 
@@ -35,6 +38,7 @@ class DecoderResult {
     this.rawBytes,
     required this.text,
     required this.byteSegments,
+    required this.version,
     required this.ecLevel,
     this.structuredAppendParity = -1,
     this.structuredAppendSequenceNumber = -1,

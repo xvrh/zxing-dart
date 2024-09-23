@@ -120,6 +120,7 @@ class DecodedBitStreamParser {
         rawBytes: bytes,
         text: result.toString(),
         byteSegments: byteSegments.isEmpty ? null : byteSegments,
+        version: version.versionNumber,
         ecLevel: ecLevel?.toString(),
         structuredAppendParity: symbolSequence,
         structuredAppendSequenceNumber: parityData);

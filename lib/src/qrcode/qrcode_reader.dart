@@ -55,6 +55,10 @@ class QRCodeReader implements Reader {
     if (byteSegments != null) {
       result.putMetadata(ResultMetadataType.byteSegments, byteSegments);
     }
+    var version = decoderResult.version;
+    if (version != null) {
+      result.putMetadata(ResultMetadataType.version, version);
+    }
     var ecLevel = decoderResult.ecLevel;
     if (ecLevel != null) {
       result.putMetadata(ResultMetadataType.errorCorrectionLevel, ecLevel);
