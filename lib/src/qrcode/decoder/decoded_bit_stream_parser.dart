@@ -122,7 +122,8 @@ class DecodedBitStreamParser {
         byteSegments: byteSegments.isEmpty ? null : byteSegments,
         ecLevel: ecLevel?.toString(),
         structuredAppendParity: symbolSequence,
-        structuredAppendSequenceNumber: parityData);
+        structuredAppendSequenceNumber: parityData,
+        version: version.versionNumber);
   }
 
   /// See specification GBT 18284-2000
