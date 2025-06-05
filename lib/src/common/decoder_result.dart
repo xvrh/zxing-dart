@@ -31,6 +31,9 @@ class DecoderResult {
   final int structuredAppendParity;
   final int structuredAppendSequenceNumber;
 
+  /// The QR code version as an integer, if available
+  final int? version;
+
   DecoderResult({
     this.rawBytes,
     required this.text,
@@ -38,6 +41,7 @@ class DecoderResult {
     required this.ecLevel,
     this.structuredAppendParity = -1,
     this.structuredAppendSequenceNumber = -1,
+    this.version,
   }) : numBits = rawBytes == null ? 0 : 8 * rawBytes.length;
 
   bool get hasStructuredAppend {

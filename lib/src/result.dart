@@ -31,8 +31,11 @@ class Result {
 
   final DateTime time;
 
+  /// The QR code version as an integer, if available
+  final int? version;
+
   Result(this.text, this.rawBytes, this.format,
-      {List<ResultPoint>? points, int? numBits, DateTime? time})
+      {List<ResultPoint>? points, int? numBits, DateTime? time, this.version})
       : numBits = numBits ?? (rawBytes == null ? 0 : 8 * rawBytes.length),
         time = time ?? DateTime.now() {
     if (points != null) {

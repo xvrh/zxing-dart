@@ -50,4 +50,7 @@ enum ResultMetadataType {
   /// If the code format supports structured append and the current scanned code is part of one then the
   /// parity is given with it.
   structuredAppendParity,
+
+  /// QR code version number (int)
+  version,
 }
