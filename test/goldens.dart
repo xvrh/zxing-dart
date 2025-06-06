@@ -11,6 +11,7 @@ void testGolden(
   required int mustPassCount,
   int rotation = 0,
   List<String> skips = const [],
+  @Deprecated('For debugging') bool? solo,
 }) {
   test('Golden $folder', () {
     var passCount = 0;
@@ -50,5 +51,7 @@ void testGolden(
     }
 
     expect(passCount, greaterThanOrEqualTo(mustPassCount));
-  });
+  },
+      // ignore: deprecated_member_use, invalid_use_of_do_not_submit_member
+      solo: solo ?? false);
 }

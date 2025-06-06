@@ -1,3 +1,8 @@
+## [0.2.4]
+
+* Fix named overlay
+* Added version property to be visible as a part of decoding
+
 ## [0.2.3]
 
 * Expose NotFoundException, FormatReaderException and ChecksumException

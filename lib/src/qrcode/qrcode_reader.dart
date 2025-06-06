@@ -50,8 +50,7 @@ class QRCodeReader implements Reader {
 
     var result = Result(
         decoderResult.text, decoderResult.rawBytes, BarcodeFormat.qrCode,
-        points: points,
-        version: decoderResult.version);
+        points: points, version: decoderResult.version);
     var byteSegments = decoderResult.byteSegments;
     if (byteSegments != null) {
       result.putMetadata(ResultMetadataType.byteSegments, byteSegments);
