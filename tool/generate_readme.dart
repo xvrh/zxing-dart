@@ -2,11 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:dart_style/dart_style.dart';
 import 'package:path/path.dart' as p;
+import 'package:pub_semver/pub_semver.dart';
 
 final RegExp _importRegex = RegExp(r"import '([^']+)';\r?\n");
 
-final DartFormatter _dartFormatter =
-    DartFormatter(lineEnding: Platform.isWindows ? '\r\n' : '\n');
+final DartFormatter dartFormatter = DartFormatter(
+    lineEnding: Platform.isWindows ? '\r\n' : '\n',
+    languageVersion: Version(3, 6, 0));
 
 void main() {
   File('README.md')
@@ -32,7 +34,7 @@ String generateReadme(File source) {
     }
 
     fileContent = fileContent.replaceAll('//+', '');
-    fileContent = _dartFormatter.format(fileContent);
+    fileContent = dartFormatter.format(fileContent);
 
     return fileContent;
   });
