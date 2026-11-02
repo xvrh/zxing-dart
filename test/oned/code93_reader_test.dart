@@ -1,0 +1,19 @@
+import 'package:test/test.dart';
+import 'package:zxing2/oned.dart';
+
+/// @author Daisuke Makiuchi
+void main() {
+  void doTest(String expectedResult, String encodedResult) {
+    var sut = Code93Reader();
+    var matrix = BitMatrix.parseString(encodedResult, '1', '0');
+    var row = BitArray(matrix.width);
+    row = matrix.getRow(0, row);
+    var result = sut.decodeRow(0, row, DecodeHints());
+    expect(result.text, expectedResult);
+  }
+
+  test('Decode', () {
+    doTest('Code93!\n\$%/+ :\u001b;[{\u007f\u0000@`\u007f\u007f\u007f',
+        '0000001010111101101000101001100101001011001001100101100101001001100101100100101000010101010000101110101101101010001001001101001101001110010101101011101011011101011101101110100101110101101001110101110110101101010001110110101100010101110110101000110101110110101000101101110110101101001101110110101100101101110110101100110101110110101011011001110110101011001101110110101001101101110110101001110101001100101101010001010111101111');
+  });
+}
