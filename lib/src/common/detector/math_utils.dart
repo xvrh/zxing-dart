@@ -10,7 +10,22 @@ class MathUtils {
   /// @param d real value to round
   /// @return nearest {@code int}
   static int round(double d) {
-    return (d + (d < 0.0 ? -0.5 : 0.5)).toInt();
+    return toInt(d + (d < 0.0 ? -0.5 : 0.5));
+  }
+
+  /// Truncates like a Java `(int)` cast, where [double.toInt] would throw: NaN becomes 0 and
+  /// the infinities are clamped to the 32-bit range.
+  static int toInt(double d) {
+    if (d.isNaN) {
+      return 0;
+    }
+    if (d >= 0x7FFFFFFF) {
+      return 0x7FFFFFFF;
+    }
+    if (d <= -0x80000000) {
+      return -0x80000000;
+    }
+    return d.toInt();
   }
 
   /// @param aX point A x coordinate

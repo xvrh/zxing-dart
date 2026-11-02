@@ -47,6 +47,10 @@ class QRCodeMultiReader extends QRCodeReader implements MultipleBarcodeReader {
           result.putMetadata(ResultMetadataType.structuredAppendParity,
               decoderResult.structuredAppendParity);
         }
+        result.putMetadata(
+            ResultMetadataType.errorsCorrected, decoderResult.errorsCorrected!);
+        result.putMetadata(ResultMetadataType.symbologyIdentifier,
+            ']Q${decoderResult.symbologyModifier}');
         results.add(result);
       } on ReaderException catch (_) {
         // ignore and continue

@@ -111,6 +111,36 @@ void main() {
     expect(decode(builder), 'A%B\x1D');
   });
 
+  test('Symbology modifier', () {
+    int modifierOf(BitSourceBuilder builder) => DecodedBitStreamParser.decode(
+            builder.toByteArray(),
+            Version.getVersionForNumber(1),
+            null,
+            DecodeHints())
+        .symbologyModifier;
+
+    var plain = BitSourceBuilder()
+      ..write(0x04, 4) // Byte mode
+      ..write(0x01, 8) // 1 byte
+      ..write(0x41, 8);
+    expect(modifierOf(plain), 1);
+
+    var eci = BitSourceBuilder()
+      ..write(0x07, 4) // ECI mode
+      ..write(26, 8) // ECI 26 = UTF-8
+      ..write(0x04, 4) // Byte mode
+      ..write(0x01, 8) // 1 byte
+      ..write(0x41, 8);
+    expect(modifierOf(eci), 2);
+
+    var gs1 = BitSourceBuilder()
+      ..write(0x05, 4) // FNC1 in first position
+      ..write(0x01, 4) // Numeric mode
+      ..write(0x02, 10) // 2 digits
+      ..write(10, 7);
+    expect(modifierOf(gs1), 3);
+  });
+
   test('Structured append', () {
     var builder = BitSourceBuilder();
     builder.write(0x03, 4); // Structured append

@@ -17,6 +17,10 @@
 * Choose the QR code mask like ZXing 3.5: the encoder now outputs the same matrices as the Java library,
   which can differ from the previous versions
 * Throw `FormatReaderException` instead of `ArgumentError` when the detected size of a QR code matches no version
+* Fix `QRCodeReader.decode` throwing an `UnsupportedError` (NaN converted to int) on some images, instead of a `ReaderException`
+* Port the QR changes of ZXing 3.5.4: the detector accepts a size estimate that is off by one module, and results
+  include `ResultMetadataType.errorsCorrected` and the symbology identifier (`]Q1`...). `QRCodeWriter.renderResult` is public.
+* Ignore QR finder pattern candidates that were seen only once, like ZXing. Detection now gives the same results as ZXing 3.5.4
 * Export `PlanarYUVLuminanceSource`, to decode camera frames without converting them to RGB, and give it named crop parameters
 * Export `BitMatrix`, `BitArray`, `ByteMatrix` and `WriterException`.
 * Add `DecodeHintType.alsoInverted`, `EncodeHintType.forceCodeSet`, `EncodeHintType.code128Compact`,

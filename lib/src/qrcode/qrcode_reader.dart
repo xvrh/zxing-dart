@@ -65,6 +65,10 @@ class QRCodeReader implements Reader {
       result.putMetadata(ResultMetadataType.structuredAppendParity,
           decoderResult.structuredAppendParity);
     }
+    result.putMetadata(
+        ResultMetadataType.errorsCorrected, decoderResult.errorsCorrected!);
+    result.putMetadata(ResultMetadataType.symbologyIdentifier,
+        ']Q${decoderResult.symbologyModifier}');
     return result;
   }
 

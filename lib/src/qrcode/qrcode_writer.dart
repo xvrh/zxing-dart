@@ -46,7 +46,7 @@ class QRCodeWriter implements Writer {
     }
 
     var code = Encoder.encode(contents, errorCorrectionLevel, hints: hints);
-    return _renderResult(code, width, height, quietZone);
+    return renderResult(code, width, height, quietZone);
   }
 
   static ErrorCorrectionLevel _parseErrorCorrectionLevel(Object value) {
@@ -67,9 +67,16 @@ class QRCodeWriter implements Writer {
     throw ArgumentError.value(value, 'errorCorrection');
   }
 
+  /// Renders the given [QRCode] as a [BitMatrix], scaling the same to be compliant with the
+  /// provided dimensions.
+  ///
+  /// If no scaling is required, both [width] and [height] arguments should be non-positive
+  /// numbers. [quietZone] is the size of the quiet zone, in modules.
+  ///
+  /// Throws a [StateError] if [code] does not have a matrix.
   // Note that the input matrix uses 0 == white, 1 == black, while the output matrix
   // uses true == black.
-  static BitMatrix _renderResult(
+  static BitMatrix renderResult(
       QRCode code, int width, int height, int quietZone) {
     var input = code.matrix;
     if (input == null) {

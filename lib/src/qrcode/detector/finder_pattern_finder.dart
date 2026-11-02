@@ -568,6 +568,8 @@ class FinderPatternFinder {
       throw NotFoundException();
     }
 
+    possibleCenters.removeWhere((center) => center.count < kCenterQuorum);
+
     possibleCenters.sort(_comparePattern);
 
     var distortion = double.maxFinite;

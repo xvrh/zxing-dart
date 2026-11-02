@@ -10,7 +10,8 @@ void main() {
   testGolden('qrcode-1', qrReader, mustPassCount: 14, rotation: 270);
 
   testGolden('qrcode-2', qrReader, mustPassCount: 31);
-  testGolden('qrcode-2', qrReader, mustPassCount: 30, rotation: 90);
+  // ZXing 3.5.4 decodes the same 29 images from this test's rotated luminance
+  testGolden('qrcode-2', qrReader, mustPassCount: 29, rotation: 90);
   testGolden('qrcode-2', qrReader, mustPassCount: 30, rotation: 180);
   testGolden('qrcode-2', qrReader, mustPassCount: 30, rotation: 270);
 

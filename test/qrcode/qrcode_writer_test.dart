@@ -49,6 +49,24 @@ void main() {
     expect(result.resultMetadata[ResultMetadataType.errorCorrectionLevel], 'Q');
   });
 
+  test('Result metadata', () {
+    var code = Encoder.encode('Hello, World!', ErrorCorrectionLevel.h);
+    var result = decodeMatrix(QRCodeWriter.renderResult(code, 200, 200, 4));
+    expect(result.resultMetadata[ResultMetadataType.errorsCorrected], 0);
+    expect(
+        result.resultMetadata[ResultMetadataType.symbologyIdentifier], ']Q1');
+
+    // Damage a few data modules
+    var modules = code.matrix!;
+    for (var x = 10; x < 14; x++) {
+      modules.set(x, 14, 1 - modules.get(x, 14));
+    }
+    result = decodeMatrix(QRCodeWriter.renderResult(code, 200, 200, 4));
+    expect(result.text, 'Hello, World!');
+    expect(result.resultMetadata[ResultMetadataType.errorsCorrected],
+        greaterThan(0));
+  });
+
   test('Rejects other formats and empty contents', () {
     expect(() => QRCodeWriter().encode('ABC', BarcodeFormat.ean13, 10, 10),
         throwsArgumentError);

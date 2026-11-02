@@ -31,10 +31,13 @@ class DecodedBitStreamParser {
     var byteSegments = <Int8List>[];
     var symbolSequence = -1;
     var parityData = -1;
+    int symbologyModifier;
 
     try {
       CharacterSetECI? currentCharacterSetECI;
       var fc1InEffect = false;
+      var hasFNC1first = false;
+      var hasFNC1second = false;
       Mode mode;
       do {
         // While still another segment to read...
@@ -48,7 +51,12 @@ class DecodedBitStreamParser {
           case Mode.terminator:
             break;
           case Mode.fnc1FirstPosition:
+            hasFNC1first = true; // symbology detection
+            // We do little with FNC1 except alter the parsed result a bit according to the spec
+            fc1InEffect = true;
+            break;
           case Mode.fnc1SecondPosition:
+            hasFNC1second = true; // symbology detection
             // We do little with FNC1 except alter the parsed result a bit according to the spec
             fc1InEffect = true;
             break;
@@ -111,6 +119,24 @@ class DecodedBitStreamParser {
             break;
         }
       } while (mode != Mode.terminator);
+
+      if (currentCharacterSetECI != null) {
+        if (hasFNC1first) {
+          symbologyModifier = 4;
+        } else if (hasFNC1second) {
+          symbologyModifier = 6;
+        } else {
+          symbologyModifier = 2;
+        }
+      } else {
+        if (hasFNC1first) {
+          symbologyModifier = 3;
+        } else if (hasFNC1second) {
+          symbologyModifier = 5;
+        } else {
+          symbologyModifier = 1;
+        }
+      }
     } on ArgumentError catch (_) {
       // from readBits() calls
       throw FormatReaderException();
@@ -123,7 +149,8 @@ class DecodedBitStreamParser {
         ecLevel: ecLevel?.toString(),
         structuredAppendParity: parityData,
         structuredAppendSequenceNumber: symbolSequence,
-        version: version.versionNumber);
+        version: version.versionNumber,
+        symbologyModifier: symbologyModifier);
   }
 
   /// See specification GBT 18284-2000
