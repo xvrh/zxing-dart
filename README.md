@@ -8,13 +8,14 @@ Supported formats:
 | Format                                       | Decoding | Encoding |
 |----------------------------------------------|:--------:|:--------:|
 | QR Code                                      |    ✓     |    ✓     |
+| Data Matrix                                  |    ✓     |    ✓     |
 | UPC-A, UPC-E, EAN-8, EAN-13                  |    ✓     |    ✓     |
 | UPC/EAN 2 and 5 digits extensions            |    ✓     |          |
 | Code 39, Code 93, Code 128                   |    ✓     |    ✓     |
 | ITF (Interleaved 2 of 5)                     |    ✓     |    ✓     |
 | Codabar                                      |    ✓     |    ✓     |
 
-Data Matrix, Aztec, PDF 417, MaxiCode and RSS-14 / RSS Expanded are not ported yet.
+Aztec, PDF 417, MaxiCode and RSS-14 / RSS Expanded are not ported yet.
 
 [![pub package](https://img.shields.io/pub/v/zxing2.svg)](https://pub.dartlang.org/packages/zxing2)
 [![Build Status](https://github.com/xvrh/zxing-dart/workflows/Build/badge.svg?branch=master)](https://github.com/xvrh/zxing-dart)
@@ -158,6 +159,53 @@ When decoding, the ECI segment of the QR code is used, or the character set is g
 Use `DecodeHintType.characterSet` to force one.
 Codecs are bundled for UTF-8, UTF-16BE, ISO-8859-*, windows-125x, Cp437, Shift_JIS and GB2312.
 For Big5 or EUC-KR, assign a codec, for example: `CharacterSetECI.Big5.encoding = myBig5Codec;`.
+
+### Data Matrix
+
+`DataMatrixReader` and `DataMatrixWriter` are in `package:zxing2/datamatrix.dart`.
+The writer picks the smallest symbol that fits the text, square or rectangular: use `EncodeHintType.dataMatrixShape` to force one.
+Unlike `QRCodeWriter`, it adds no quiet zone around the code.
+
+```dart
+import 'package:image/image.dart' as img;
+import 'package:zxing2/datamatrix.dart';
+
+void main() {
+  var hints = EncodeHints()
+    ..put(EncodeHintType.dataMatrixShape, SymbolShapeHint.forceSquare);
+  var matrix = DataMatrixWriter()
+      .encode('Hello zxing2', BarcodeFormat.dataMatrix, 160, 160, hints: hints);
+
+  // Draw the code on a white margin: DataMatrixWriter doesn't add one.
+  const margin = 20;
+  var image = img.Image(
+      width: matrix.width + 2 * margin, height: matrix.height + 2 * margin);
+  img.fill(image, color: img.ColorRgb8(255, 255, 255));
+  for (var x = 0; x < matrix.width; x++) {
+    for (var y = 0; y < matrix.height; y++) {
+      if (matrix.get(x, y)) {
+        image.setPixelRgb(x + margin, y + margin, 0, 0, 0);
+      }
+    }
+  }
+
+  var source = RGBLuminanceSource(
+      image.width,
+      image.height,
+      image
+          .convert(numChannels: 4)
+          .getBytes(order: img.ChannelOrder.bgra)
+          .buffer
+          .asInt32List());
+  var result = DataMatrixReader().decode(BinaryBitmap(HybridBinarizer(source)));
+  print(result.text);
+}
+```
+
+With `EncodeHintType.dataMatrixCompact`, the writer uses the minimal encoder, which gives smaller symbols for mixed
+content and encodes text outside ISO-8859-1 with an ECI.
+Add `EncodeHintType.gs1Format` to it for GS1 data: an FNC1 is prepended, and the GS character (`\x1D`) in the text
+marks the other FNC1 positions.
 
 ## Flutter
 
