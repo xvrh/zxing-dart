@@ -1,24 +1,40 @@
 import 'dart:typed_data';
 import 'package:test/test.dart';
 import 'package:zxing2/oned.dart';
+import 'package:zxing2/qrcode.dart';
 
 void main() {
-  BinaryBitmap render(BitMatrix matrix) {
+  BinaryBitmap render(BitMatrix matrix, {bool inverted = false}) {
+    const white = 0xFFFFFFFF, black = 0xFF000000;
     // Surround the barcode with some white space, like in a real picture
     const margin = 20;
     var width = matrix.width + 2 * margin;
     var height = matrix.height + 2 * margin;
     var pixels = Int32List(width * height)
-      ..fillRange(0, width * height, 0xFFFFFFFF);
+      ..fillRange(0, width * height, inverted ? black : white);
     for (var y = 0; y < matrix.height; y++) {
       for (var x = 0; x < matrix.width; x++) {
         if (matrix.get(x, y)) {
-          pixels[(y + margin) * width + x + margin] = 0xFF000000;
+          pixels[(y + margin) * width + x + margin] = inverted ? white : black;
         }
       }
     }
     return BinaryBitmap(
         HybridBinarizer(RGBLuminanceSource(width, height, pixels)));
+  }
+
+  BitMatrix qrCode(String contents) {
+    const scale = 4;
+    var matrix = Encoder.encode(contents, ErrorCorrectionLevel.l).matrix!;
+    var bits = BitMatrix(matrix.width * scale, matrix.height * scale);
+    for (var y = 0; y < matrix.height; y++) {
+      for (var x = 0; x < matrix.width; x++) {
+        if (matrix.get(x, y) == 1) {
+          bits.setRegion(x * scale, y * scale, scale, scale);
+        }
+      }
+    }
+    return bits;
   }
 
   var cases = [
@@ -66,5 +82,50 @@ void main() {
         ..put(DecodeHintType.possibleFormats, [BarcodeFormat.code128]));
     expect(reader.decodeWithState(bitmap).text, 'zxing');
     expect(reader.decodeWithState(bitmap).text, 'zxing');
+  });
+
+  test('Decodes QR codes', () {
+    var bitmap = render(qrCode('zxing'));
+    expect(MultiFormatReader().decode(bitmap).format, BarcodeFormat.qrCode);
+    var result = MultiFormatReader().decode(bitmap,
+        hints: DecodeHints()
+          ..put(DecodeHintType.possibleFormats, [BarcodeFormat.qrCode]));
+    expect(result.text, 'zxing');
+  });
+
+  test('alsoInverted decodes white on black codes', () {
+    expect(
+        () =>
+            MultiFormatReader().decode(render(qrCode('zxing'), inverted: true)),
+        throwsA(isA<NotFoundException>()));
+
+    var result = MultiFormatReader().decode(
+        render(qrCode('zxing'), inverted: true),
+        hints: DecodeHints()..put(DecodeHintType.alsoInverted));
+    expect(result.text, 'zxing');
+  });
+
+  test('UPC-A is reported as EAN-13 only when UPC-A is not requested', () {
+    var bitmap =
+        render(UPCAWriter().encode('485963095124', BarcodeFormat.upcA, 0, 30));
+    DecodeHints formats(List<BarcodeFormat> formats) =>
+        DecodeHints()..put(DecodeHintType.possibleFormats, formats);
+
+    var upca = MultiFormatReader().decode(bitmap,
+        hints: formats([BarcodeFormat.upcA, BarcodeFormat.ean13]));
+    expect(upca.format, BarcodeFormat.upcA);
+    expect(upca.text, '485963095124');
+
+    var ean13 = MultiFormatReader()
+        .decode(bitmap, hints: formats([BarcodeFormat.ean13]));
+    expect(ean13.format, BarcodeFormat.ean13);
+    expect(ean13.text, '0485963095124');
+  });
+
+  test('reset can be called before and after decoding', () {
+    var reader = MultiFormatReader()..reset();
+    reader.decode(
+        render(Code128Writer().encode('zxing', BarcodeFormat.code128, 0, 30)));
+    reader.reset();
   });
 }
