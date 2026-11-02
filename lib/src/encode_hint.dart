@@ -57,6 +57,16 @@ class EncodeHintType<T> {
   /// Specifies whether the data should be encoded to the GS1 standard (type {@link Boolean}, or "true" or "false"
   /// {String} value).
   static final gs1Format = EncodeHintType<bool>();
+
+  /// Forces which encoding will be used. Currently only used for Code-128 code sets (Type {@link String}).
+  /// Valid values are "A", "B", "C".
+  /// This option and {@link #CODE128_COMPACT} are mutually exclusive.
+  static final forceCodeSet = EncodeHintType<String>();
+
+  /// Specifies whether to use compact mode for Code-128 code (type {@link Boolean}).
+  /// This can yield slightly smaller bar codes. This option and {@link #FORCE_CODE_SET} are mutually
+  /// exclusive.
+  static final code128Compact = EncodeHintType<bool>();
 }
 
 class EncodeHints {

@@ -26,6 +26,8 @@ void main() {
           .buffer
           .asInt32List());
   var bitmap = BinaryBitmap(HybridBinarizer(source));
-  var result = QRCodeReader().decode(bitmap);
-  print(result.text);
+
+  // Tries all the supported formats: QR Code and the 1D formats (EAN, UPC, Code 128...)
+  var result = MultiFormatReader().decode(bitmap);
+  print('${result.format}: ${result.text}');
 }

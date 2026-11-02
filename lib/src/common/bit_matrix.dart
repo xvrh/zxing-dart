@@ -149,6 +149,14 @@ class BitMatrix {
     }
   }
 
+  /// <p>Flips every bit in the matrix.</p>
+  void flipAll() {
+    var max = _bits.length;
+    for (var i = 0; i < max; i++) {
+      _bits[i] = ~_bits[i];
+    }
+  }
+
   /// Exclusive-or (XOR): Flip the bit in this {@code BitMatrix} if the corresponding
   /// mask bit is set.
   ///
