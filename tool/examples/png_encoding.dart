@@ -3,26 +3,20 @@ import 'package:image/image.dart' as img;
 import 'package:zxing2/qrcode.dart';
 
 void main() {
-  var qrcode = Encoder.encode('ABCDEF', ErrorCorrectionLevel.h);
-  var matrix = qrcode.matrix!;
-  var scale = 4;
+  var hints = EncodeHints()
+    ..put(EncodeHintType.errorCorrection, ErrorCorrectionLevel.h);
+  var matrix = QRCodeWriter()
+      .encode('ABCDEF', BarcodeFormat.qrCode, 200, 200, hints: hints);
 
-  var image = img.Image(
-      width: matrix.width * scale,
-      height: matrix.height * scale,
-      numChannels: 4);
+  // Paint a white background: readers need the light margin around the code.
+  var image = img.Image(width: matrix.width, height: matrix.height);
+  img.fill(image, color: img.ColorRgb8(255, 255, 255));
   for (var x = 0; x < matrix.width; x++) {
     for (var y = 0; y < matrix.height; y++) {
-      if (matrix.get(x, y) == 1) {
-        img.fillRect(image,
-            x1: x * scale,
-            y1: y * scale,
-            x2: x * scale + scale,
-            y2: y * scale + scale,
-            color: img.ColorRgba8(0, 0, 0, 0xFF));
+      if (matrix.get(x, y)) {
+        image.setPixelRgb(x, y, 0, 0, 0);
       }
     }
   }
-  var pngBytes = img.encodePng(image);
-  File('tool/examples/encoded.png').writeAsBytes(pngBytes);
+  File('tool/examples/encoded.png').writeAsBytesSync(img.encodePng(image));
 }

@@ -7,7 +7,16 @@ import 'luminance_source.dart';
 /// superfluous pixels around the perimeter and speed up decoding.
 ///
 /// It works for any pixel format where the Y channel is planar and appears first, including
-/// YCbCr_420_SP and YCbCr_422_SP.
+/// YCbCr_420_SP and YCbCr_422_SP. With the Flutter `camera` plugin, pass the
+/// bytes of the first plane, and its `bytesPerRow` as [dataWidth] if rows are
+/// padded:
+///
+/// ```dart
+/// var plane = cameraImage.planes.first;
+/// var source = PlanarYUVLuminanceSource(
+///     plane.bytes, plane.bytesPerRow, cameraImage.height,
+///     width: cameraImage.width);
+/// ```
 ///
 /// @author dswitkin@google.com (Daniel Switkin)
 class PlanarYUVLuminanceSource extends LuminanceSource {
@@ -19,11 +28,39 @@ class PlanarYUVLuminanceSource extends LuminanceSource {
   final int _left;
   final int _top;
 
-  PlanarYUVLuminanceSource(this._yuvData, this._dataWidth, this._dataHeight,
+  /// [yuvData] holds the Y plane, [dataWidth] bytes per row and [dataHeight]
+  /// rows. [left], [top], [width] and [height] select the area to decode and
+  /// default to the whole image. [reverseHorizontal] mirrors that area in
+  /// place, modifying [yuvData].
+  PlanarYUVLuminanceSource(Uint8List yuvData, int dataWidth, int dataHeight,
+      {int left = 0,
+      int top = 0,
+      int? width,
+      int? height,
+      bool reverseHorizontal = false})
+      : this._(
+            Int8List.view(
+                yuvData.buffer, yuvData.offsetInBytes, yuvData.length),
+            dataWidth,
+            dataHeight,
+            left,
+            top,
+            width ?? dataWidth - left,
+            height ?? dataHeight - top,
+            reverseHorizontal);
+
+  PlanarYUVLuminanceSource._(this._yuvData, this._dataWidth, this._dataHeight,
       this._left, this._top, int width, int height, bool reverseHorizontal)
       : super(width, height) {
-    if (_left + width > _dataWidth || _top + height > _dataHeight) {
+    if (_left < 0 ||
+        _top < 0 ||
+        _left + width > _dataWidth ||
+        _top + height > _dataHeight) {
       throw ArgumentError('Crop rectangle does not fit within image data.');
+    }
+    // The last row of camera planes can be shorter than the row stride
+    if (_yuvData.length < (_top + height - 1) * _dataWidth + _left + width) {
+      throw ArgumentError('yuvData is too short for the image dimensions.');
     }
 
     if (reverseHorizontal) {
@@ -82,7 +119,7 @@ class PlanarYUVLuminanceSource extends LuminanceSource {
 
   @override
   LuminanceSource crop(int left, int top, int width, int height) {
-    return PlanarYUVLuminanceSource(_yuvData, _dataWidth, _dataHeight,
+    return PlanarYUVLuminanceSource._(_yuvData, _dataWidth, _dataHeight,
         _left + left, _top + top, width, height, false);
   }
 

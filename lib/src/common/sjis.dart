@@ -1,18 +1,15 @@
-/// Converters for SJIS(shift_jis)
-///
-/// SjisEncoder and SjisDecoders are extended to implement MS932 d/encoder.
-/// Thus they clone the sjis_utf table in constructors of them.
-/// Because they patches these table in constructors of MS932 d/encoder.
-library;
-
 import 'dart:convert';
+import 'dart:typed_data';
+import 'charset_tables.dart';
+import 'charsets.dart';
 
-part 'sjis_utf_map.dart';
-
+/// Shift_JIS (JIS X 0213), with the bytes 0x00-0x7F kept as ASCII like Java's
+/// Shift_JIS.
+///
+/// Malformed input decodes to U+FFFD. Characters that can't be represented
+/// throw an [ArgumentError] when encoding.
 const SjisCodec sjis = SjisCodec();
 
-/// SjisCodec encodes strings to SJIS code units (bytes) and decodes
-/// SJIS code units to strings.
 class SjisCodec extends Encoding {
   const SjisCodec();
 
@@ -20,90 +17,107 @@ class SjisCodec extends Encoding {
   String get name => 'shift_jis';
 
   @override
-  Converter<String, List<int>> get encoder => SjisEncoder();
-  @override
-  Converter<List<int>, String> get decoder => SjisDecoder();
-}
-
-/// This class converts Strings to their SJIS code units.
-class SjisEncoder extends Converter<String, List<int>> {
-  static final _instance = SjisEncoder._internal();
-  final utfSjis =
-      <int, int>{}; // utf_sjis is generated at constructor of SjisEncoder.
-
-  factory SjisEncoder() => _instance;
-
-  SjisEncoder._internal() {
-    gSjisUtf.forEach((k, v) {
-      utfSjis[v] = k;
-    });
-  }
+  Converter<List<int>, String> get decoder => const _SjisDecoder();
 
   @override
-  List<int> convert(String input) {
-    var sjisCodeUnits = <int>[];
-
-    for (var codeUnit in input.runes) {
-      var sjisCodeUnit = utfSjis[codeUnit];
-      if (sjisCodeUnit != null) {
-        if (sjisCodeUnit < 256) {
-          sjisCodeUnits.add(sjisCodeUnit);
-        } else {
-          sjisCodeUnits.add(sjisCodeUnit >> 8);
-          sjisCodeUnits.add(sjisCodeUnit & 255);
-        }
-      } else {
-        throw FormatException(
-            "Couldn't find corresponding code to U+${codeUnit.toRadixString(16)}");
-      }
-    }
-
-    return sjisCodeUnits;
-  }
+  Converter<String, List<int>> get encoder => const _SjisEncoder();
 }
 
-/// This class converts SJIS code units to a string.
-class SjisDecoder extends Converter<List<int>, String> {
-  final sjisUtf = <int, int>{};
-  static final _instance = SjisDecoder._internal();
+const _trailFirst = 0x40;
+const _trailLast = 0xFC;
+const _rowLength = _trailLast - _trailFirst + 1;
+const _katakanaFirstByte = 0xA1;
+const _katakanaLastByte = 0xDF;
+const _katakanaFirstChar = 0xFF61;
 
-  factory SjisDecoder() => _instance;
+final _sjisTable = decodeCharsetTable(sjisTableData);
 
-  SjisDecoder._internal() {
-    sjisUtf.addAll(gSjisUtf);
-  }
+bool _isLeadByte(int byte) =>
+    (byte >= 0x81 && byte <= 0x9F) || (byte >= 0xE0 && byte <= 0xFC);
+
+int _rowOf(int lead) => lead <= 0x9F ? lead - 0x81 : lead - 0xE0 + 0x1F;
+
+int _leadOf(int row) => row < 0x1F ? row + 0x81 : row - 0x1F + 0xE0;
+
+class _SjisDecoder extends Converter<List<int>, String> {
+  const _SjisDecoder();
 
   @override
   String convert(List<int> input) {
-    var stringBuffer = StringBuffer();
-
-    void addToBuffer(int charCode) {
-      var key = sjisUtf[charCode];
-      if (key != null) {
-        stringBuffer.writeCharCode(key);
-      } else {
-        throw FormatException('Bad encoding 0x${charCode.toRadixString(16)}');
-      }
-    }
-
+    var result = StringBuffer();
     for (var i = 0; i < input.length; i++) {
-      var byte = input[i];
-
-      if (gDoubleBytes.contains(byte)) {
-        // Double byte char
-        i++;
-
-        if (i >= input.length) {
-          throw FormatException('Bad encoding 0x${byte.toRadixString(16)}');
-        }
-
-        var doubleBytes = (byte << 8) + input[i];
-        addToBuffer(doubleBytes);
+      var byte = input[i] & 0xFF;
+      if (byte < 0x80) {
+        result.writeCharCode(byte);
+      } else if (byte >= _katakanaFirstByte && byte <= _katakanaLastByte) {
+        // Half-width katakana
+        result.writeCharCode(_katakanaFirstChar + byte - _katakanaFirstByte);
+      } else if (!_isLeadByte(byte) ||
+          i + 1 >= input.length ||
+          (input[i + 1] & 0xFF) < _trailFirst ||
+          (input[i + 1] & 0xFF) > _trailLast) {
+        // The next byte, if any, is decoded on its own
+        result.writeCharCode(0xFFFD);
       } else {
-        addToBuffer(byte);
+        var trail = input[++i] & 0xFF;
+        var char = _sjisTable[_rowOf(byte) * _rowLength + trail - _trailFirst];
+        if (char == 0xFFFD) {
+          result.write(sjisExtras[(byte << 8) | trail] ?? '\uFFFD');
+        } else {
+          result.writeCharCode(char);
+        }
       }
     }
+    return result.toString();
+  }
+}
 
-    return stringBuffer.toString();
+class _SjisEncoder extends Converter<String, List<int>> {
+  static final _doubleBytes = () {
+    var codes = <int, int>{};
+    for (var i = 0; i < _sjisTable.length; i++) {
+      var char = _sjisTable[i];
+      if (char != 0xFFFD) {
+        var lead = _leadOf(i ~/ _rowLength);
+        var trail = i % _rowLength + _trailFirst;
+        codes.putIfAbsent(char, () => (lead << 8) | trail);
+      }
+    }
+    sjisExtras.forEach((code, text) {
+      if (text.runes.length == 1) {
+        codes.putIfAbsent(text.runes.first, () => code);
+      }
+    });
+    return codes;
+  }();
+
+  const _SjisEncoder();
+
+  @override
+  Uint8List convert(String input) {
+    var result = BytesBuilder(copy: false);
+    for (var rune in input.runes) {
+      if (rune < 0x80) {
+        result.addByte(rune);
+      } else if (rune == 0xA5) {
+        // ¥ and ‾ share the bytes of \ and ~ in JIS X 0201
+        result.addByte(0x5C);
+      } else if (rune == 0x203E) {
+        result.addByte(0x7E);
+      } else if (rune >= _katakanaFirstChar &&
+          rune <= _katakanaFirstChar + _katakanaLastByte - _katakanaFirstByte) {
+        result.addByte(rune - _katakanaFirstChar + _katakanaFirstByte);
+      } else {
+        var code = _doubleBytes[rune];
+        if (code == null) {
+          throw ArgumentError.value(
+              input, 'string', 'Contains characters not in Shift_JIS');
+        }
+        result
+          ..addByte(code >> 8)
+          ..addByte(code & 0xFF);
+      }
+    }
+    return result.takeBytes();
   }
 }

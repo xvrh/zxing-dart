@@ -38,9 +38,9 @@ class StringUtils {
     var isoHighOther = 0;
 
     var utf8bom = bytes.length > 3 &&
-        bytes[0] == 0xEF &&
-        bytes[1] == 0xBB &&
-        bytes[2] == 0xBF;
+        (bytes[0] & 0xFF) == 0xEF &&
+        (bytes[1] & 0xFF) == 0xBB &&
+        (bytes[2] & 0xFF) == 0xBF;
 
     for (var i = 0;
         i < length && (canBeISO88591 || canBeShiftJIS || canBeUTF8);
