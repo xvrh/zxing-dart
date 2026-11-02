@@ -121,8 +121,8 @@ class DecodedBitStreamParser {
         text: result.toString(),
         byteSegments: byteSegments.isEmpty ? null : byteSegments,
         ecLevel: ecLevel?.toString(),
-        structuredAppendParity: symbolSequence,
-        structuredAppendSequenceNumber: parityData,
+        structuredAppendParity: parityData,
+        structuredAppendSequenceNumber: symbolSequence,
         version: version.versionNumber);
   }
 
@@ -136,7 +136,7 @@ class DecodedBitStreamParser {
 
     // Each character will require 2 bytes. Read the characters as 2-byte pairs
     // and decode as GB2312 afterwards
-    var buffer = Int8List(2 * count);
+    var buffer = Uint8List(2 * count);
     var offset = 0;
     while (count > 0) {
       // Each 13 bits encodes a 2-byte character
@@ -167,7 +167,7 @@ class DecodedBitStreamParser {
 
     // Each character will require 2 bytes. Read the characters as 2-byte pairs
     // and decode as Shift_JIS afterwards
-    var buffer = Int8List(2 * count);
+    var buffer = Uint8List(2 * count);
     var offset = 0;
     while (count > 0) {
       // Each 13 bits encodes a 2-byte character
@@ -180,8 +180,8 @@ class DecodedBitStreamParser {
         // In the 0xE040 to 0xEBBF range
         assembledTwoBytes += 0x0C140;
       }
-      buffer[offset] = assembledTwoBytes >> 8;
-      buffer[offset + 1] = assembledTwoBytes;
+      buffer[offset] = (assembledTwoBytes >> 8) & 0xFF;
+      buffer[offset + 1] = assembledTwoBytes & 0xFF;
       offset += 2;
       count--;
     }
@@ -215,7 +215,9 @@ class DecodedBitStreamParser {
     } else {
       encoding = currentCharacterSetECI.encoding;
     }
-    result.write(encoding.decode(readBytes));
+    // Encoding.decode expects unsigned bytes
+    result.write(encoding.decode(Uint8List.view(
+        readBytes.buffer, readBytes.offsetInBytes, readBytes.length)));
     byteSegments.add(readBytes);
   }
 
@@ -228,15 +230,15 @@ class DecodedBitStreamParser {
 
   static void _decodeAlphanumericSegment(
       BitSource bits, StringBuffer result, int count, bool fc1InEffect) {
+    var segment = StringBuffer();
     // Read two characters at a time
-    //int start = result.length;
     while (count > 1) {
       if (bits.available() < 11) {
         throw FormatReaderException();
       }
       var nextTwoCharsBits = bits.readBits(11);
-      result.write(_toAlphaNumericChar(nextTwoCharsBits ~/ 45));
-      result.write(_toAlphaNumericChar(nextTwoCharsBits % 45));
+      segment.write(_toAlphaNumericChar(nextTwoCharsBits ~/ 45));
+      segment.write(_toAlphaNumericChar(nextTwoCharsBits % 45));
       count -= 2;
     }
     if (count == 1) {
@@ -244,25 +246,27 @@ class DecodedBitStreamParser {
       if (bits.available() < 6) {
         throw FormatReaderException();
       }
-      result.write(_toAlphaNumericChar(bits.readBits(6)));
+      segment.write(_toAlphaNumericChar(bits.readBits(6)));
+    }
+    if (!fc1InEffect) {
+      result.write(segment);
+      return;
     }
     // See section 6.4.8.1, 6.4.8.2
-    if (fc1InEffect) {
-      assert(false);
-      //TODO(xha): this need to use a custom implementation of StringBuffer to
-      // support changing a previous character
-      // We need to massage the result a bit if in an FNC1 mode:
-      //for (int i = start; i < result.length; i++) {
-      //  if (result.charAt(i) == '%') {
-      //    if (i < result.length - 1 && result.charAt(i + 1) == '%') {
-      //      // %% is rendered as %
-      //      result.deleteCharAt(i + 1);
-      //    } else {
-      //      // In alpha mode, % should be converted to FNC1 separator 0x1D
-      //      result.setCharAt(i, (char) 0x1D);
-      //    }
-      //  }
-      //}
+    // We need to massage the result a bit if in an FNC1 mode:
+    var chars = segment.toString();
+    for (var i = 0; i < chars.length; i++) {
+      var c = chars[i];
+      if (c == '%') {
+        if (i < chars.length - 1 && chars[i + 1] == '%') {
+          // %% is rendered as %
+          i++;
+        } else {
+          // In alpha mode, % should be converted to FNC1 separator 0x1D
+          c = '\x1D';
+        }
+      }
+      result.write(c);
     }
   }
 

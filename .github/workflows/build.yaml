@@ -16,11 +16,13 @@ jobs:
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: ${{ matrix.sdk }}
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: dart --version
       - run: dart pub get
       - run: dart analyze --fatal-infos .
       - run: dart test
+      - run: dart run example/main.dart
+      - run: dart run tool/examples/png_decoding.dart
       - run: dart tool/prepare_submit.dart
       - name: "check for uncommitted changes"
         run: |

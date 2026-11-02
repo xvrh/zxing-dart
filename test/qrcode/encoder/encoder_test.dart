@@ -3,7 +3,6 @@ import 'package:charcode/charcode.dart';
 import 'package:test/test.dart';
 import 'package:zxing2/src/common/bit_array.dart';
 import 'package:zxing2/src/common/character_set_eci.dart';
-import 'package:zxing2/src/common/sjis.dart';
 import 'package:zxing2/src/encode_hint.dart';
 import 'package:zxing2/src/qrcode/decoder/error_correction_level.dart';
 import 'package:zxing2/src/qrcode/decoder/mode.dart';
@@ -13,8 +12,6 @@ import 'package:zxing2/src/qrcode/encoder/qr_code.dart';
 import 'package:zxing2/src/writer_exception.dart';
 
 void main() {
-  CharacterSetECI.SJIS.encoding = sjis;
-
   test('Get alphanumeric code', () {
     // The first ten code points are numbers.
     for (var i = 0; i < 10; ++i) {
@@ -577,7 +574,7 @@ void main() {
     Encoder.appendKanjiBytes(
         shiftJISString(Int8List.fromList([0xe4, 0xaa])), bits);
     expect(' .XX.XX.. XXXXXXX. X.X.X.X. X.', bits.toString());
-  }, skip: 'Investigate');
+  });
 
   // Numbers are from http://www.swetake.com/qr/qr3.html and
   // http://www.swetake.com/qr/qr9.html
@@ -652,6 +649,23 @@ void main() {
       builder.write('0');
     }
     Encoder.encode(builder.toString(), ErrorCorrectionLevel.l);
+  });
+
+  test('Falls back to UTF-8 for content outside ISO-8859-1', () {
+    var content = '这是一个二维码';
+    var withoutHint = Encoder.encode(content, ErrorCorrectionLevel.h);
+    var withHint = Encoder.encode(content, ErrorCorrectionLevel.h,
+        hints: EncodeHints()
+          ..put(EncodeHintType.characterSet, CharacterSetECI.UTF8));
+    expect(withoutHint.mode, Mode.byte);
+    expect(withoutHint.toString(), withHint.toString());
+  });
+
+  test('Throws WriterException for content outside the character set', () {
+    var hints = EncodeHints()
+      ..put(EncodeHintType.characterSet, CharacterSetECI.ISO8859_1);
+    expect(() => Encoder.encode('这是', ErrorCorrectionLevel.h, hints: hints),
+        throwsA(isA<WriterException>()));
   });
 }
 

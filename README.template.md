@@ -17,18 +17,55 @@ For now, it only supports **QR-Code** (encoding and decoding). New format can ea
 
 #### Decoding
 
-The `QRCodeReader` class takes a list of bytes and returns the decoded barcode.
+`QRCodeReader` decodes a `BinaryBitmap`, built from a `LuminanceSource` that wraps the image pixels.
+`RGBLuminanceSource` takes one `0xAARRGGBB` int per pixel.
+Flatten images with a transparent background onto white first: transparent pixels are read as black.
+
 ```dart
 import 'tool/examples/png_decoding.dart';
 ```
 
+`decode` throws a `NotFoundException` when there is no QR code in the image.
+`result.resultPoints` holds the position of the finder patterns (and of the alignment pattern, if found).
+
 #### Encoding
 
-The `QRCodeReader` class takes a list of bytes and returns the decoded barcode.
+`QRCodeWriter` returns a `BitMatrix` scaled to the requested size, with a white margin (the "quiet zone") around the code.
+Use `EncodeHintType.margin` to change its size, in modules.
+
 ```dart
 import 'tool/examples/png_encoding.dart';
 ```
 
+`Encoder.encode` gives the raw `QRCode` matrix, without margin or scaling.
+
+#### Text encoding
+
+Text that doesn't fit in ISO-8859-1 is encoded as UTF-8, with an ECI segment so readers know the character set.
+Use `EncodeHintType.characterSet` to pick another one.
+
+When decoding, the ECI segment of the QR code is used, or the character set is guessed (UTF-8, ISO-8859-1 or Shift_JIS).
+Use `DecodeHintType.characterSet` to force one.
+Codecs are bundled for UTF-8, UTF-16BE, ISO-8859-*, windows-125x, Cp437, Shift_JIS and GB2312.
+For Big5 or EUC-KR, assign a codec, for example: `CharacterSetECI.Big5.encoding = myBig5Codec;`.
+
 ## Flutter
-The `example` folder contains a full example that uses the official camera plugin connected to this
-package to decode barcode from the bytes stream.
+
+With the `camera` plugin, request YUV frames (`imageFormatGroup: ImageFormatGroup.yuv420`) and decode the first plane,
+which holds the luminance:
+
+```dart
+Result? decodeCameraImage(CameraImage image) {
+  var plane = image.planes.first;
+  var source = PlanarYUVLuminanceSource(
+      plane.bytes, plane.bytesPerRow, image.height,
+      width: image.width);
+  try {
+    return QRCodeReader().decode(BinaryBitmap(HybridBinarizer(source)));
+  } on NotFoundException {
+    return null;
+  }
+}
+```
+
+Decoding is synchronous. For a live preview, run it outside the UI isolate, for example with `Isolate.run`.

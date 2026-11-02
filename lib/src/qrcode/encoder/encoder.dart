@@ -64,12 +64,21 @@ class Encoder {
     // multiple modes / segments even if that were more efficient. Twould be nice.
     var mode = chooseMode(content, encoding: encoding);
 
+    // Without a hint, fall back to UTF-8 (signalled with an ECI segment) for
+    // content that ISO-8859-1 can't represent.
+    var useUtf8 = mode == Mode.byte &&
+        !hasEncodingHint &&
+        !_canEncode(content, defaultByteModeEncoding);
+    if (useUtf8) {
+      encoding = CharacterSetECI.UTF8;
+    }
+
     // This will store the header information, like mode and
     // length, as well as "header" segments like an ECI segment.
     var headerBits = BitArray();
 
     // Append ECI segment if applicable
-    if (mode == Mode.byte && hasEncodingHint) {
+    if (mode == Mode.byte && (hasEncodingHint || useUtf8)) {
       var eci = encoding;
       _appendECI(eci, headerBits);
     }
@@ -211,7 +220,21 @@ class Encoder {
     return Mode.byte;
   }
 
+  static bool _canEncode(String content, CharacterSetECI encoding) {
+    try {
+      encoding.encoding.encode(content);
+      return true;
+    } on ArgumentError catch (_) {
+      return false;
+    } on FormatException catch (_) {
+      return false;
+    }
+  }
+
   static bool _isOnlyDoubleByteKanji(String content) {
+    if (!_canEncode(content, CharacterSetECI.SJIS)) {
+      return false;
+    }
     var bytes = CharacterSetECI.SJIS.encoding.encode(content);
     var length = bytes.length;
     if (length % 2 != 0) {
@@ -528,7 +551,16 @@ class Encoder {
 
   static void append8BitBytes(
       String content, BitArray bits, Encoding encoding) {
-    var bytes = encoding.encode(content);
+    List<int> bytes;
+    try {
+      bytes = encoding.encode(content);
+    } on ArgumentError catch (e) {
+      throw WriterException("Content can't be encoded as ${encoding.name}",
+          cause: e);
+    } on FormatException catch (e) {
+      throw WriterException("Content can't be encoded as ${encoding.name}",
+          cause: e);
+    }
     for (var b in bytes) {
       bits.appendBits(b, 8);
     }
