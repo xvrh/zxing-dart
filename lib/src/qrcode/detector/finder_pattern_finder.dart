@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:meta/meta.dart';
 import '../../common/bit_matrix.dart';
 import '../../decode_hint.dart';
 import '../../not_found_exception.dart';
@@ -68,7 +69,7 @@ class FinderPatternFinder {
               // A winner?
               if (foundPatternCross(stateCount)) {
                 // Yes
-                var confirmed = _handlePossibleCenter(stateCount, i, j);
+                var confirmed = handlePossibleCenter(stateCount, i, j);
                 if (confirmed) {
                   // Start examining every other line. Checking each line turned out to be too
                   // expensive and didn't improve performance.
@@ -113,7 +114,7 @@ class FinderPatternFinder {
         }
       }
       if (foundPatternCross(stateCount)) {
-        var confirmed = _handlePossibleCenter(stateCount, i, maxJ);
+        var confirmed = handlePossibleCenter(stateCount, i, maxJ);
         if (confirmed) {
           iSkip = stateCount[0];
           if (_hasSkipped) {
@@ -451,7 +452,8 @@ class FinderPatternFinder {
   /// @param i row where finder pattern may be found
   /// @param j end of possible finder pattern in row
   /// @return true if a finder pattern candidate was found this time
-  bool _handlePossibleCenter(Int32List stateCount, int i, int j) {
+  @protected
+  bool handlePossibleCenter(Int32List stateCount, int i, int j) {
     var stateCountTotal = stateCount[0] +
         stateCount[1] +
         stateCount[2] +

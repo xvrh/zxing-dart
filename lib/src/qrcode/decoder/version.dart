@@ -59,7 +59,7 @@ class Version {
     try {
       return getVersionForNumber((dimension - 17) ~/ 4);
     } on ArgumentError catch (_) {
-      rethrow;
+      throw FormatReaderException();
     }
   }
 
