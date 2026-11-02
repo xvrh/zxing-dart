@@ -36,6 +36,18 @@ class ReedSolomonDecoder {
   /// @param twoS number of error-correction codewords available
   /// @throws ReedSolomonException if decoding fails for any reason
   void decode(Int32List received, int twoS) {
+    decodeWithECCount(received, twoS);
+  }
+
+  /// <p>Decodes given set of received codewords, which include both data and error-correction
+  /// codewords. Really, this means it uses Reed-Solomon to detect and correct errors, in-place,
+  /// in the input.</p>
+  ///
+  /// @param received data and error-correction codewords
+  /// @param twoS number of error-correction codewords available
+  /// @return the number of errors corrected
+  /// @throws ReedSolomonException if decoding fails for any reason
+  int decodeWithECCount(Int32List received, int twoS) {
     var poly = GenericGFPoly(field, received);
     var syndromeCoefficients = Int32List(twoS);
     var noError = true;
@@ -47,7 +59,7 @@ class ReedSolomonDecoder {
       }
     }
     if (noError) {
-      return;
+      return 0;
     }
     var syndrome = GenericGFPoly(field, syndromeCoefficients);
     var sigmaOmega =
@@ -64,6 +76,7 @@ class ReedSolomonDecoder {
       received[position] =
           GenericGF.addOrSubtract(received[position], errorMagnitudes[i]);
     }
+    return errorLocations.length;
   }
 
   List<GenericGFPoly> runEuclideanAlgorithm(

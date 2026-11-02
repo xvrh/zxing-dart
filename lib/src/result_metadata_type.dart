@@ -58,4 +58,8 @@ enum ResultMetadataType {
   /// Note: According to the GS1 specification the identifier may have to replace a leading FNC1/GS character
   /// when prepending to the barcode content.
   symbologyIdentifier,
+
+  /// The number of errors corrected. If applicable, maps to an {@link Integer} of value
+  /// greater than or equal to zero.
+  errorsCorrected,
 }

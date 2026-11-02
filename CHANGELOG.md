@@ -3,7 +3,11 @@
 * Add 1D barcode readers ported from ZXing 3.5.4 (`package:zxing2/oned.dart`): UPC-A, UPC-E, EAN-8, EAN-13
   (with 2 and 5 digits UPC/EAN extensions), Code 39, Code 93, Code 128, ITF and Codabar.
 * Add the matching 1D writers (`EAN13Writer`, `Code128Writer`...) and the `Writer` interface.
-* Add `MultiFormatReader` to decode any supported format (1D and QR Code).
+* Add `MultiFormatReader` to decode any supported format (1D, QR Code and Data Matrix).
+* Add the Data Matrix reader and writer ported from ZXing 3.5.4 (`package:zxing2/datamatrix.dart`), with the
+  rectangular and DMRE sizes, the C40/Text/X12/EDIFACT/Base 256 modes, ECI, GS1 and the minimal encoder.
+* Add `EncodeHintType.dataMatrixShape`, `dataMatrixCompact`, `forceC40`, `minSize`, `maxSize` and
+  `ResultMetadataType.errorsCorrected`.
 * Add `QRCodeWriter`, which renders a `BitMatrix` with a quiet zone and supports the `margin` and `errorCorrection` hints (#23)
 * Fix decoding of non-ASCII text: UTF-8 and other byte-mode content was returned as `�` (#21)
 * Decode Shift_JIS (byte and Kanji mode) and GB2312 (Hanzi mode) with bundled codecs, which were decoded as ASCII

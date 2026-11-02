@@ -9,6 +9,7 @@ export 'src/common/global_histogram_binarizer.dart'
     show GlobalHistogramBinarizer;
 export 'src/common/hybrid_binarizer.dart' show HybridBinarizer;
 export 'src/decode_hint.dart' show DecodeHints, DecodeHintType;
+export 'src/dimension.dart' show Dimension;
 export 'src/encode_hint.dart' show EncodeHints, EncodeHintType;
 export 'src/format_reader_exception.dart' show FormatReaderException;
 export 'src/inverted_luminance_source.dart' show InvertedLuminanceSource;

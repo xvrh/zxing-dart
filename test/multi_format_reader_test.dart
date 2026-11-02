@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:test/test.dart';
+import 'package:zxing2/datamatrix.dart';
 import 'package:zxing2/oned.dart';
 import 'package:zxing2/qrcode.dart';
 
@@ -90,6 +91,16 @@ void main() {
     var result = MultiFormatReader().decode(bitmap,
         hints: DecodeHints()
           ..put(DecodeHintType.possibleFormats, [BarcodeFormat.qrCode]));
+    expect(result.text, 'zxing');
+  });
+
+  test('Decodes Data Matrix codes', () {
+    var bitmap = render(
+        DataMatrixWriter().encode('zxing', BarcodeFormat.dataMatrix, 48, 48));
+    expect(MultiFormatReader().decode(bitmap).format, BarcodeFormat.dataMatrix);
+    var result = MultiFormatReader().decode(bitmap,
+        hints: DecodeHints()
+          ..put(DecodeHintType.possibleFormats, [BarcodeFormat.dataMatrix]));
     expect(result.text, 'zxing');
   });
 

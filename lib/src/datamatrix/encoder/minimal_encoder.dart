@@ -1,0 +1,1049 @@
+import 'dart:convert';
+import 'dart:math' as math;
+import 'dart:typed_data';
+import 'package:charcode/charcode.dart';
+import '../../common/character_set_eci.dart';
+import '../../common/minimal_eci_input.dart';
+import 'high_level_encoder.dart';
+import 'symbol_shape_hint.dart';
+
+enum _Mode {
+  ascii,
+  c40,
+  text,
+  x12,
+  edf,
+  b256,
+}
+
+/// Encoder that encodes minimally
+///
+/// Algorithm:
+///
+/// Uses Dijkstra to produce mathematically minimal encodings that are in some cases smaller than the results produced
+/// by the algorithm described in annex S in the specification ISO/IEC 16022:200(E). The biggest improvment of this
+/// algorithm over that one is the case when the algorithm enters the most inefficient mode, the B256 mode. The
+/// algorithm from the specification algorithm will exit this mode only if it encounters digits so that arbitrarily
+/// inefficient results can be produced if the postfix contains no digits.
+///
+/// Multi ECI support and ECI switching:
+///
+/// For multi language content the algorithm selects the most compact representation using ECI modes. Note that unlike
+/// the compaction algorithm used for QR-Codes, this implementation operates in two stages and therfore is not
+/// mathematically optimal. In the first stage, the input string is encoded minimally as a stream of ECI character set
+/// selectors and bytes encoded in the selected encoding. In this stage the algorithm might for example decide to
+/// encode ocurrences of the characters "\u0150\u015C" (O-double-acute, S-circumflex) in UTF-8 by a single ECI or
+/// alternatively by multiple ECIs that switch between IS0-8859-2 and ISO-8859-3 (e.g. in the case that the input
+/// contains many * characters from ISO-8859-2 (Latin 2) and few from ISO-8859-3 (Latin 3)).
+/// In a second stage this stream of ECIs and bytes is minimally encoded using the various Data Matrix encoding modes.
+/// While both stages encode mathematically minimally it is not ensured that the result is mathematically minimal since
+/// the size growth for inserting an ECI in the first stage can only be approximated as the first stage does not know
+/// in which mode the ECI will occur in the second stage (may, or may not require an extra latch to ASCII depending on
+/// the current mode). The reason for this shortcoming are difficulties in implementing it in a straightforward and
+/// readable manner.
+///
+/// GS1 support
+///
+/// FNC1 delimiters can be encoded in the input string by using the FNC1 character specified in the encoding function.
+/// When a FNC1 character is specified then a leading FNC1 will be encoded and all ocurrences of delimiter characters
+/// while result in FNC1 codewords in the symbol.
+///
+/// @author Alex Geller
+class MinimalEncoder {
+  static const _c40Shift2Chars = [
+    $exclamation, $quot, $hash, $dollar, $percent, $ampersand, $apostrophe, //
+    $lparen, $rparen, $asterisk, $plus, $comma, $minus, $dot, $slash,
+    $colon, $semicolon, $lt, $equal, $gt, $question, $at, $lbracket,
+    $backslash, $rbracket, $caret, $underscore
+  ];
+
+  static const _maxInt = 0x7fffffff;
+
+  MinimalEncoder._();
+
+  static bool isExtendedASCII(int ch, int fnc1) {
+    return ch != fnc1 && ch >= 128 && ch <= 255;
+  }
+
+  static bool _isInC40Shift1Set(int ch) {
+    return ch <= 31;
+  }
+
+  static bool _isInC40Shift2Set(int ch, int fnc1) {
+    return _c40Shift2Chars.contains(ch) || ch == fnc1;
+  }
+
+  static bool _isInTextShift1Set(int ch) {
+    return _isInC40Shift1Set(ch);
+  }
+
+  static bool _isInTextShift2Set(int ch, int fnc1) {
+    return _isInC40Shift2Set(ch, fnc1);
+  }
+
+  /// Performs message encoding of a DataMatrix message
+  ///
+  /// @param msg the message
+  /// @param priorityCharset The preferred {@link Charset}. When the value of the argument is null, the algorithm
+  ///   chooses charsets that leads to a minimal representation. Otherwise the algorithm will use the priority
+  ///   charset to encode any character in the input that can be encoded by it if the charset is among the
+  ///   supported charsets.
+  /// @param fnc1 denotes the character in the input that represents the FNC1 character or -1 if this is not a GS1
+  ///   bar code. If the value is not -1 then a FNC1 is also prepended.
+  /// @param shape requested shape.
+  /// @return the encoded message (the char values range from 0 to 255)
+  static String encodeHighLevel(String msg,
+      {CharacterSetECI? priorityCharset,
+      int fnc1 = -1,
+      SymbolShapeHint shape = SymbolShapeHint.forceNone}) {
+    var macroId = 0;
+    if (msg.startsWith(HighLevelEncoder.macro05Header) &&
+        msg.endsWith(HighLevelEncoder.macroTrailer)) {
+      macroId = 5;
+      msg =
+          msg.substring(HighLevelEncoder.macro05Header.length, msg.length - 2);
+    } else if (msg.startsWith(HighLevelEncoder.macro06Header) &&
+        msg.endsWith(HighLevelEncoder.macroTrailer)) {
+      macroId = 6;
+      msg =
+          msg.substring(HighLevelEncoder.macro06Header.length, msg.length - 2);
+    }
+    return latin1.decode(_encode(msg, priorityCharset, fnc1, shape, macroId));
+  }
+
+  /// Encodes input minimally and returns an array of the codewords
+  ///
+  /// @param input The string to encode
+  /// @param priorityCharset The preferred {@link Charset}. When the value of the argument is null, the algorithm
+  ///   chooses charsets that leads to a minimal representation. Otherwise the algorithm will use the priority
+  ///   charset to encode any character in the input that can be encoded by it if the charset is among the
+  ///   supported charsets.
+  /// @param fnc1 denotes the character in the input that represents the FNC1 character or -1 if this is not a GS1
+  ///   bar code. If the value is not -1 then a FNC1 is also prepended.
+  /// @param shape requested shape.
+  /// @param macroId Prepends the specified macro function in case that a value of 5 or 6 is specified.
+  /// @return An array of bytes representing the codewords of a minimal encoding.
+  static Uint8List _encode(String input, CharacterSetECI? priorityCharset,
+      int fnc1, SymbolShapeHint shape, int macroId) {
+    return _encodeMinimally(
+            _Input(input, priorityCharset, fnc1, shape, macroId))
+        .bytes;
+  }
+
+  static void _addEdge(List<List<_Edge?>> edges, _Edge edge) {
+    var vertexIndex = edge.fromPosition + edge.characterLength;
+    var current = edges[vertexIndex][edge.endMode.index];
+    if (current == null || current.cachedTotalSize > edge.cachedTotalSize) {
+      edges[vertexIndex][edge.endMode.index] = edge;
+    }
+  }
+
+  /// @return the number of words in which the string starting at from can be encoded in c40 or text mode.
+  ///  The number of characters encoded is returned in characterLength.
+  ///  The number of characters encoded is also minimal in the sense that the algorithm stops as soon
+  ///  as a character encoding fills a C40 word competely (three C40 values). An exception is at the
+  ///  end of the string where two C40 values are allowed (according to the spec the third c40 value
+  ///  is filled  with 0 (Shift 1) in this case).
+  static int _getNumberOfC40Words(
+      _Input input, int from, bool c40, Int32List characterLength) {
+    var thirdsCount = 0;
+    for (var i = from; i < input.length; i++) {
+      if (input.isECI(i)) {
+        characterLength[0] = 0;
+        return 0;
+      }
+      var ci = input.charAt(i);
+      if (c40 && HighLevelEncoder.isNativeC40(ci) ||
+          !c40 && HighLevelEncoder.isNativeText(ci)) {
+        thirdsCount++; //native
+      } else if (!isExtendedASCII(ci, input.fnc1Character)) {
+        thirdsCount += 2; //shift
+      } else {
+        var asciiValue = ci & 0xff;
+        if (asciiValue >= 128 &&
+            (c40 && HighLevelEncoder.isNativeC40(asciiValue - 128) ||
+                !c40 && HighLevelEncoder.isNativeText(asciiValue - 128))) {
+          thirdsCount += 3; // shift, Upper shift
+        } else {
+          thirdsCount += 4; // shift, Upper shift, shift
+        }
+      }
+
+      if (thirdsCount % 3 == 0 ||
+          ((thirdsCount - 2) % 3 == 0 && i + 1 == input.length)) {
+        characterLength[0] = i - from + 1;
+        return (thirdsCount / 3.0).ceil();
+      }
+    }
+    characterLength[0] = 0;
+    return 0;
+  }
+
+  static void _addEdges(
+      _Input input, List<List<_Edge?>> edges, int from, _Edge? previous) {
+    if (input.isECI(from)) {
+      _addEdge(edges, _Edge(input, _Mode.ascii, from, 1, previous));
+      return;
+    }
+
+    var ch = input.charAt(from);
+    if (previous == null || previous.endMode != _Mode.edf) {
+      //not possible to unlatch a full EDF edge to something
+      //else
+      if (HighLevelEncoder.isDigit(ch) &&
+          input.haveNCharacters(from, 2) &&
+          HighLevelEncoder.isDigit(input.charAt(from + 1))) {
+        // two digits ASCII encoded
+        _addEdge(edges, _Edge(input, _Mode.ascii, from, 2, previous));
+      } else {
+        // one ASCII encoded character or an extended character via Upper Shift
+        _addEdge(edges, _Edge(input, _Mode.ascii, from, 1, previous));
+      }
+
+      var modes = [_Mode.c40, _Mode.text];
+      for (var mode in modes) {
+        var characterLength = Int32List(1);
+        if (_getNumberOfC40Words(
+                input, from, mode == _Mode.c40, characterLength) >
+            0) {
+          _addEdge(
+              edges, _Edge(input, mode, from, characterLength[0], previous));
+        }
+      }
+
+      if (input.haveNCharacters(from, 3) &&
+          HighLevelEncoder.isNativeX12(input.charAt(from)) &&
+          HighLevelEncoder.isNativeX12(input.charAt(from + 1)) &&
+          HighLevelEncoder.isNativeX12(input.charAt(from + 2))) {
+        _addEdge(edges, _Edge(input, _Mode.x12, from, 3, previous));
+      }
+
+      _addEdge(edges, _Edge(input, _Mode.b256, from, 1, previous));
+    }
+
+    //We create 4 EDF edges,  with 1, 2 3 or 4 characters length. The fourth normally doesn't have a latch to ASCII
+    //unless it is 2 characters away from the end of the input.
+    int i;
+    for (i = 0; i < 3; i++) {
+      var pos = from + i;
+      if (input.haveNCharacters(pos, 1) &&
+          HighLevelEncoder.isNativeEDIFACT(input.charAt(pos))) {
+        _addEdge(edges, _Edge(input, _Mode.edf, from, i + 1, previous));
+      } else {
+        break;
+      }
+    }
+    if (i == 3 &&
+        input.haveNCharacters(from, 4) &&
+        HighLevelEncoder.isNativeEDIFACT(input.charAt(from + 3))) {
+      _addEdge(edges, _Edge(input, _Mode.edf, from, 4, previous));
+    }
+  }
+
+  static _Result _encodeMinimally(_Input input) {
+    // The minimal encoding is computed by Dijkstra. The acyclic graph is modeled as follows:
+    // A vertex represents a combination of a position in the input and an encoding mode where position 0
+    // denotes the position left of the first character, 1 the position left of the second character and so on.
+    // Likewise the end vertices are located after the last character at position input.length().
+    // For any position there might be up to six vertices, one for each of the encoding types ASCII, C40, TEXT, X12,
+    // EDF and B256.
+    //
+    // As an example consider the input string "ABC123" then at position 0 there is only one vertex with the default
+    // ASCII encodation. At position 3 there might be vertices for the types ASCII, C40, X12, EDF and B256.
+    //
+    // An edge leading to such a vertex encodes one or more of the characters left of the position that the vertex
+    // represents. It encodes the characters in the encoding mode of the vertex that it ends on. In other words,
+    // all edges leading to a particular vertex encode the same characters (the length of the suffix can vary) using the same
+    // encoding mode.
+    // As an example consider the input string "ABC123" and the vertex (4,EDF). Possible edges leading to this vertex
+    // are:
+    //   (0,ASCII)  --EDF(ABC1)--> (4,EDF)
+    //   (1,ASCII)  --EDF(BC1)-->  (4,EDF)
+    //   (1,B256)   --EDF(BC1)-->  (4,EDF)
+    //   (1,EDF)    --EDF(BC1)-->  (4,EDF)
+    //   (2,ASCII)  --EDF(C1)-->   (4,EDF)
+    //   (2,B256)   --EDF(C1)-->   (4,EDF)
+    //   (2,EDF)    --EDF(C1)-->   (4,EDF)
+    //   (3,ASCII)  --EDF(1)-->    (4,EDF)
+    //   (3,B256)   --EDF(1)-->    (4,EDF)
+    //   (3,EDF)    --EDF(1)-->    (4,EDF)
+    //   (3,C40)    --EDF(1)-->    (4,EDF)
+    //   (3,X12)    --EDF(1)-->    (4,EDF)
+    //
+    // The edges leading to a vertex are stored in such a way that there is a fast way to enumerate the edges ending
+    // on a particular vertex.
+    //
+    // The algorithm processes the vertices in order of their position thereby performing the following:
+    //
+    // For every vertex at position i the algorithm enumerates the edges ending on the vertex and removes all but the
+    // shortest from that list.
+    // Then it processes the vertices for the position i+1. If i+1 == input.length() then the algorithm ends
+    // and chooses the the edge with the smallest size from any of the edges leading to vertices at this position.
+    // Otherwise the algorithm computes all possible outgoing edges for the vertices at the position i+1
+    //
+    // Examples:
+    // The process is illustrated by showing the graph (edges) after each iteration from left to right over the input:
+    // An edge is drawn as follows "(" + fromVertex + ") -- " + encodingMode + "(" + encodedInput + ") (" +
+    // accumulatedSize + ") --> (" + toVertex + ")"
+    //
+    // Example 1 encoding the string "ABCDEFG":
+    //
+    //
+    // Situation after adding edges to the start vertex (0,ASCII)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII)
+    // (0,ASCII) B256(A) (3) --> (1,B256)
+    // (0,ASCII) EDF(AB) (4) --> (2,EDF)
+    // (0,ASCII) C40(ABC) (3) --> (3,C40)
+    // (0,ASCII) TEXT(ABC) (5) --> (3,TEXT)
+    // (0,ASCII) X12(ABC) (3) --> (3,X12)
+    // (0,ASCII) EDF(ABC) (4) --> (3,EDF)
+    // (0,ASCII) EDF(ABCD) (4) --> (4,EDF)
+    //
+    // Situation after adding edges to vertices at position 1
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII)
+    // (0,ASCII) B256(A) (3) --> (1,B256)
+    // (0,ASCII) EDF(AB) (4) --> (2,EDF)
+    // (0,ASCII) C40(ABC) (3) --> (3,C40)
+    // (0,ASCII) TEXT(ABC) (5) --> (3,TEXT)
+    // (0,ASCII) X12(ABC) (3) --> (3,X12)
+    // (0,ASCII) EDF(ABC) (4) --> (3,EDF)
+    // (0,ASCII) EDF(ABCD) (4) --> (4,EDF)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) ASCII(B) (2) --> (2,ASCII)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) B256(B) (4) --> (2,B256)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) EDF(BC) (5) --> (3,EDF)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) C40(BCD) (4) --> (4,C40)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) TEXT(BCD) (6) --> (4,TEXT)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) X12(BCD) (4) --> (4,X12)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) EDF(BCD) (5) --> (4,EDF)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) EDF(BCDE) (5) --> (5,EDF)
+    // (0,ASCII) B256(A) (3) --> (1,B256) ASCII(B) (4) --> (2,ASCII)
+    // (0,ASCII) B256(A) (3) --> (1,B256) B256(B) (3) --> (2,B256)
+    // (0,ASCII) B256(A) (3) --> (1,B256) EDF(BC) (6) --> (3,EDF)
+    // (0,ASCII) B256(A) (3) --> (1,B256) C40(BCD) (5) --> (4,C40)
+    // (0,ASCII) B256(A) (3) --> (1,B256) TEXT(BCD) (7) --> (4,TEXT)
+    // (0,ASCII) B256(A) (3) --> (1,B256) X12(BCD) (5) --> (4,X12)
+    // (0,ASCII) B256(A) (3) --> (1,B256) EDF(BCD) (6) --> (4,EDF)
+    // (0,ASCII) B256(A) (3) --> (1,B256) EDF(BCDE) (6) --> (5,EDF)
+    //
+    // Edge "(1,ASCII) ASCII(B) (2) --> (2,ASCII)" is minimal for the vertex (2,ASCII) so that edge "(1,B256) ASCII(B) (4) --> (2,ASCII)" is removed.
+    // Edge "(1,B256) B256(B) (3) --> (2,B256)" is minimal for the vertext (2,B256) so that the edge "(1,ASCII) B256(B) (4) --> (2,B256)" is removed.
+    //
+    // Situation after adding edges to vertices at position 2
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII)
+    // (0,ASCII) B256(A) (3) --> (1,B256)
+    // (0,ASCII) EDF(AB) (4) --> (2,EDF)
+    // (0,ASCII) C40(ABC) (3) --> (3,C40)
+    // (0,ASCII) TEXT(ABC) (5) --> (3,TEXT)
+    // (0,ASCII) X12(ABC) (3) --> (3,X12)
+    // (0,ASCII) EDF(ABC) (4) --> (3,EDF)
+    // (0,ASCII) EDF(ABCD) (4) --> (4,EDF)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) ASCII(B) (2) --> (2,ASCII)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) EDF(BC) (5) --> (3,EDF)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) C40(BCD) (4) --> (4,C40)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) TEXT(BCD) (6) --> (4,TEXT)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) X12(BCD) (4) --> (4,X12)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) EDF(BCD) (5) --> (4,EDF)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) EDF(BCDE) (5) --> (5,EDF)
+    // (0,ASCII) B256(A) (3) --> (1,B256) B256(B) (3) --> (2,B256)
+    // (0,ASCII) B256(A) (3) --> (1,B256) EDF(BC) (6) --> (3,EDF)
+    // (0,ASCII) B256(A) (3) --> (1,B256) C40(BCD) (5) --> (4,C40)
+    // (0,ASCII) B256(A) (3) --> (1,B256) TEXT(BCD) (7) --> (4,TEXT)
+    // (0,ASCII) B256(A) (3) --> (1,B256) X12(BCD) (5) --> (4,X12)
+    // (0,ASCII) B256(A) (3) --> (1,B256) EDF(BCD) (6) --> (4,EDF)
+    // (0,ASCII) B256(A) (3) --> (1,B256) EDF(BCDE) (6) --> (5,EDF)
+    // (0,ASCII) EDF(AB) (4) --> (2,EDF) ASCII(C) (5) --> (3,ASCII)
+    // (0,ASCII) EDF(AB) (4) --> (2,EDF) B256(C) (6) --> (3,B256)
+    // (0,ASCII) EDF(AB) (4) --> (2,EDF) EDF(CD) (7) --> (4,EDF)
+    // (0,ASCII) EDF(AB) (4) --> (2,EDF) C40(CDE) (6) --> (5,C40)
+    // (0,ASCII) EDF(AB) (4) --> (2,EDF) TEXT(CDE) (8) --> (5,TEXT)
+    // (0,ASCII) EDF(AB) (4) --> (2,EDF) X12(CDE) (6) --> (5,X12)
+    // (0,ASCII) EDF(AB) (4) --> (2,EDF) EDF(CDE) (7) --> (5,EDF)
+    // (0,ASCII) EDF(AB) (4) --> (2,EDF) EDF(CDEF) (7) --> (6,EDF)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) ASCII(B) (2) --> (2,ASCII) ASCII(C) (3) --> (3,ASCII)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) ASCII(B) (2) --> (2,ASCII) B256(C) (5) --> (3,B256)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) ASCII(B) (2) --> (2,ASCII) EDF(CD) (6) --> (4,EDF)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) ASCII(B) (2) --> (2,ASCII) C40(CDE) (5) --> (5,C40)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) ASCII(B) (2) --> (2,ASCII) TEXT(CDE) (7) --> (5,TEXT)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) ASCII(B) (2) --> (2,ASCII) X12(CDE) (5) --> (5,X12)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) ASCII(B) (2) --> (2,ASCII) EDF(CDE) (6) --> (5,EDF)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) ASCII(B) (2) --> (2,ASCII) EDF(CDEF) (6) --> (6,EDF)
+    // (0,ASCII) B256(A) (3) --> (1,B256) B256(B) (3) --> (2,B256) ASCII(C) (4) --> (3,ASCII)
+    // (0,ASCII) B256(A) (3) --> (1,B256) B256(B) (3) --> (2,B256) B256(C) (4) --> (3,B256)
+    // (0,ASCII) B256(A) (3) --> (1,B256) B256(B) (3) --> (2,B256) EDF(CD) (6) --> (4,EDF)
+    // (0,ASCII) B256(A) (3) --> (1,B256) B256(B) (3) --> (2,B256) C40(CDE) (5) --> (5,C40)
+    // (0,ASCII) B256(A) (3) --> (1,B256) B256(B) (3) --> (2,B256) TEXT(CDE) (7) --> (5,TEXT)
+    // (0,ASCII) B256(A) (3) --> (1,B256) B256(B) (3) --> (2,B256) X12(CDE) (5) --> (5,X12)
+    // (0,ASCII) B256(A) (3) --> (1,B256) B256(B) (3) --> (2,B256) EDF(CDE) (6) --> (5,EDF)
+    // (0,ASCII) B256(A) (3) --> (1,B256) B256(B) (3) --> (2,B256) EDF(CDEF) (6) --> (6,EDF)
+    //
+    // Edge "(2,ASCII) ASCII(C) (3) --> (3,ASCII)" is minimal for the vertex (3,ASCII) so that edges "(2,EDF) ASCII(C) (5) --> (3,ASCII)"
+    // and "(2,B256) ASCII(C) (4) --> (3,ASCII)" can be removed.
+    // Edge "(0,ASCII) EDF(ABC) (4) --> (3,EDF)" is minimal for the vertex (3,EDF) so that edges "(1,ASCII) EDF(BC) (5) --> (3,EDF)"
+    // and "(1,B256) EDF(BC) (6) --> (3,EDF)" can be removed.
+    // Edge "(2,B256) B256(C) (4) --> (3,B256)" is minimal for the vertex (3,B256) so that edges "(2,ASCII) B256(C) (5) --> (3,B256)"
+    // and "(2,EDF) B256(C) (6) --> (3,B256)" can be removed.
+    //
+    // This continues for vertices 3 thru 7
+    //
+    // Situation after adding edges to vertices at position 7
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII)
+    // (0,ASCII) B256(A) (3) --> (1,B256)
+    // (0,ASCII) EDF(AB) (4) --> (2,EDF)
+    // (0,ASCII) C40(ABC) (3) --> (3,C40)
+    // (0,ASCII) TEXT(ABC) (5) --> (3,TEXT)
+    // (0,ASCII) X12(ABC) (3) --> (3,X12)
+    // (0,ASCII) EDF(ABC) (4) --> (3,EDF)
+    // (0,ASCII) EDF(ABCD) (4) --> (4,EDF)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) ASCII(B) (2) --> (2,ASCII)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) C40(BCD) (4) --> (4,C40)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) TEXT(BCD) (6) --> (4,TEXT)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) X12(BCD) (4) --> (4,X12)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) EDF(BCDE) (5) --> (5,EDF)
+    // (0,ASCII) B256(A) (3) --> (1,B256) B256(B) (3) --> (2,B256)
+    // (0,ASCII) C40(ABC) (3) --> (3,C40) C40(DEF) (5) --> (6,C40)
+    // (0,ASCII) X12(ABC) (3) --> (3,X12) X12(DEF) (5) --> (6,X12)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) ASCII(B) (2) --> (2,ASCII) ASCII(C) (3) --> (3,ASCII)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) ASCII(B) (2) --> (2,ASCII) C40(CDE) (5) --> (5,C40)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) ASCII(B) (2) --> (2,ASCII) TEXT(CDE) (7) --> (5,TEXT)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) ASCII(B) (2) --> (2,ASCII) X12(CDE) (5) --> (5,X12)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) ASCII(B) (2) --> (2,ASCII) EDF(CDEF) (6) --> (6,EDF)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) C40(BCD) (4) --> (4,C40) C40(EFG) (6) --> (7,C40)    //Solution 1
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) X12(BCD) (4) --> (4,X12) X12(EFG) (6) --> (7,X12)    //Solution 2
+    // (0,ASCII) B256(A) (3) --> (1,B256) B256(B) (3) --> (2,B256) B256(C) (4) --> (3,B256)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) ASCII(B) (2) --> (2,ASCII) ASCII(C) (3) --> (3,ASCII) ASCII(D) (4) --> (4,ASCII)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) ASCII(B) (2) --> (2,ASCII) ASCII(C) (3) --> (3,ASCII) TEXT(DEF) (8) --> (6,TEXT)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) ASCII(B) (2) --> (2,ASCII) ASCII(C) (3) --> (3,ASCII) EDF(DEFG) (7) --> (7,EDF)
+    // (0,ASCII) B256(A) (3) --> (1,B256) B256(B) (3) --> (2,B256) B256(C) (4) --> (3,B256) B256(D) (5) --> (4,B256)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) ASCII(B) (2) --> (2,ASCII) ASCII(C) (3) --> (3,ASCII) ASCII(D) (4) --> (4,ASCII) ASCII(E) (5) --> (5,ASCII)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) ASCII(B) (2) --> (2,ASCII) ASCII(C) (3) --> (3,ASCII) ASCII(D) (4) --> (4,ASCII) TEXT(EFG) (9) --> (7,TEXT)
+    // (0,ASCII) B256(A) (3) --> (1,B256) B256(B) (3) --> (2,B256) B256(C) (4) --> (3,B256) B256(D) (5) --> (4,B256) B256(E) (6) --> (5,B256)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) ASCII(B) (2) --> (2,ASCII) ASCII(C) (3) --> (3,ASCII) ASCII(D) (4) --> (4,ASCII) ASCII(E) (5) --> (5,ASCII) ASCII(F) (6) --> (6,ASCII)
+    // (0,ASCII) B256(A) (3) --> (1,B256) B256(B) (3) --> (2,B256) B256(C) (4) --> (3,B256) B256(D) (5) --> (4,B256) B256(E) (6) --> (5,B256) B256(F) (7) --> (6,B256)
+    // (0,ASCII) ASCII(A) (1) --> (1,ASCII) ASCII(B) (2) --> (2,ASCII) ASCII(C) (3) --> (3,ASCII) ASCII(D) (4) --> (4,ASCII) ASCII(E) (5) --> (5,ASCII) ASCII(F) (6) --> (6,ASCII) ASCII(G) (7) --> (7,ASCII)
+    // (0,ASCII) B256(A) (3) --> (1,B256) B256(B) (3) --> (2,B256) B256(C) (4) --> (3,B256) B256(D) (5) --> (4,B256) B256(E) (6) --> (5,B256) B256(F) (7) --> (6,B256) B256(G) (8) --> (7,B256)
+    //
+    // Hence a minimal encoding of "ABCDEFG" is either ASCII(A),C40(BCDEFG) or ASCII(A), X12(BCDEFG) with a size of 5 bytes.
+
+    var inputLength = input.length;
+
+    // Array that represents vertices. There is a vertex for every character and mode.
+    // The last dimension in the array below encodes the 6 modes ASCII, C40, TEXT, X12, EDF and B256
+    var edges =
+        List.generate(inputLength + 1, (_) => List<_Edge?>.filled(6, null));
+    _addEdges(input, edges, 0, null);
+
+    for (var i = 1; i <= inputLength; i++) {
+      for (var j = 0; j < 6; j++) {
+        var edge = edges[i][j];
+        if (edge != null && i < inputLength) {
+          _addEdges(input, edges, i, edge);
+        }
+      }
+      //optimize memory by removing edges that have been passed.
+      for (var j = 0; j < 6; j++) {
+        edges[i - 1][j] = null;
+      }
+    }
+
+    var minimalJ = -1;
+    var minimalSize = _maxInt;
+    for (var j = 0; j < 6; j++) {
+      var edge = edges[inputLength][j];
+      if (edge != null) {
+        var size = j >= 1 && j <= 3
+            ? edge.cachedTotalSize + 1
+            : edge.cachedTotalSize; //C40, TEXT and X12 need an
+        // extra unlatch at the end
+        if (size < minimalSize) {
+          minimalSize = size;
+          minimalJ = j;
+        }
+      }
+    }
+
+    if (minimalJ < 0) {
+      throw StateError('Failed to encode "$input"');
+    }
+    return _Result(edges[inputLength][minimalJ]!);
+  }
+}
+
+class _Edge {
+  static const _allCodewordCapacities = [
+    3, 5, 8, 10, 12, 16, 18, 22, 30, 32, 36, 44, 49, 62, 86, 114, //
+    144, 174, 204, 280, 368, 456, 576, 696, 816, 1050, 1304, 1558
+  ];
+  static const _squareCodewordCapacities = [
+    3, 5, 8, 12, 18, 22, 30, 36, 44, 62, 86, 114, 144, 174, 204, //
+    280, 368, 456, 576, 696, 816, 1050, 1304, 1558
+  ];
+  static const _rectangularCodewordCapacities = [5, 10, 16, 33, 32, 49];
+  final _Input input;
+  final _Mode mode; //the mode at the start of this edge.
+  final int fromPosition;
+  final int characterLength;
+  final _Edge? previous;
+  late final int cachedTotalSize;
+
+  _Edge(this.input, this.mode, this.fromPosition, this.characterLength,
+      this.previous) {
+    assert(fromPosition + characterLength <= input.length);
+
+    var size = previous?.cachedTotalSize ?? 0;
+
+    var previousMode = this.previousMode;
+
+    // Switching modes
+    // ASCII -> C40: latch 230
+    // ASCII -> TEXT: latch 239
+    // ASCII -> X12: latch 238
+    // ASCII -> EDF: latch 240
+    // ASCII -> B256: latch 231
+    // C40 -> ASCII: word(c1,c2,c3), 254
+    // TEXT -> ASCII: word(c1,c2,c3), 254
+    // X12 -> ASCII: word(c1,c2,c3), 254
+    // EDIFACT -> ASCII: Unlatch character,0,0,0 or c1,Unlatch character,0,0 or c1,c2,Unlatch character,0 or
+    // c1,c2,c3,Unlatch character
+    // B256 -> ASCII: without latch after n bytes
+    switch (mode) {
+      case _Mode.ascii:
+        size++;
+        if (input.isECI(fromPosition) ||
+            MinimalEncoder.isExtendedASCII(
+                input.charAt(fromPosition), input.fnc1Character)) {
+          size++;
+        }
+        if (previousMode == _Mode.c40 ||
+            previousMode == _Mode.text ||
+            previousMode == _Mode.x12) {
+          size++; // unlatch 254 to ASCII
+        }
+      case _Mode.b256:
+        size++;
+        if (previousMode != _Mode.b256) {
+          size++; //byte count
+        } else if (b256Size == 250) {
+          size++; //extra byte count
+        }
+        if (previousMode == _Mode.ascii) {
+          size++; //latch to B256
+        } else if (previousMode == _Mode.c40 ||
+            previousMode == _Mode.text ||
+            previousMode == _Mode.x12) {
+          size += 2; //unlatch to ASCII, latch to B256
+        }
+      case _Mode.c40:
+      case _Mode.text:
+      case _Mode.x12:
+        if (mode == _Mode.x12) {
+          size += 2;
+        } else {
+          var charLen = Int32List(1);
+          size += MinimalEncoder._getNumberOfC40Words(
+                  input, fromPosition, mode == _Mode.c40, charLen) *
+              2;
+        }
+
+        if (previousMode == _Mode.ascii || previousMode == _Mode.b256) {
+          size++; //additional byte for latch from ASCII to this mode
+        } else if (previousMode != mode &&
+            (previousMode == _Mode.c40 ||
+                previousMode == _Mode.text ||
+                previousMode == _Mode.x12)) {
+          size += 2; //unlatch 254 to ASCII followed by latch to this mode
+        }
+      case _Mode.edf:
+        size += 3;
+        if (previousMode == _Mode.ascii || previousMode == _Mode.b256) {
+          size++; //additional byte for latch from ASCII to this mode
+        } else if (previousMode == _Mode.c40 ||
+            previousMode == _Mode.text ||
+            previousMode == _Mode.x12) {
+          size += 2; //unlatch 254 to ASCII followed by latch to this mode
+        }
+    }
+    cachedTotalSize = size;
+  }
+
+  // does not count beyond 250
+  int get b256Size {
+    var cnt = 0;
+    _Edge? current = this;
+    while (current != null && current.mode == _Mode.b256 && cnt <= 250) {
+      cnt++;
+      current = current.previous;
+    }
+    return cnt;
+  }
+
+  _Mode get previousStartMode {
+    return previous?.mode ?? _Mode.ascii;
+  }
+
+  _Mode get previousMode {
+    return previous?.endMode ?? _Mode.ascii;
+  }
+
+  /// Returns Mode.ASCII in case that:
+  ///  - Mode is EDIFACT and characterLength is less than 4 or the remaining characters can be encoded in at most 2
+  ///    ASCII bytes.
+  ///  - Mode is C40, TEXT or X12 and the remaining characters can be encoded in at most 1 ASCII byte.
+  ///  Returns mode in all other cases.
+  _Mode get endMode {
+    if (mode == _Mode.edf) {
+      if (characterLength < 4) {
+        return _Mode.ascii;
+      }
+      var lastASCII = this.lastASCII; // see 5.2.8.2 EDIFACT encodation Rules
+      if (lastASCII > 0 &&
+          getCodewordsRemaining(cachedTotalSize + lastASCII) <= 2 - lastASCII) {
+        return _Mode.ascii;
+      }
+    }
+    if (mode == _Mode.c40 || mode == _Mode.text || mode == _Mode.x12) {
+      // see 5.2.5.2 C40 encodation rules and 5.2.7.2 ANSI X12 encodation rules
+      if (fromPosition + characterLength >= input.length &&
+          getCodewordsRemaining(cachedTotalSize) == 0) {
+        return _Mode.ascii;
+      }
+      var lastASCII = this.lastASCII;
+      if (lastASCII == 1 && getCodewordsRemaining(cachedTotalSize + 1) == 0) {
+        return _Mode.ascii;
+      }
+    }
+    return mode;
+  }
+
+  /// Peeks ahead and returns 1 if the postfix consists of exactly two digits, 2 if the postfix consists of exactly
+  ///  two consecutive digits and a non extended character or of 4 digits.
+  ///  Returns 0 in any other case
+  int get lastASCII {
+    var length = input.length;
+    var from = fromPosition + characterLength;
+    if (length - from > 4 || from >= length) {
+      return 0;
+    }
+    if (length - from == 1) {
+      if (MinimalEncoder.isExtendedASCII(
+          input.charAt(from), input.fnc1Character)) {
+        return 0;
+      }
+      return 1;
+    }
+    if (length - from == 2) {
+      if (MinimalEncoder.isExtendedASCII(
+              input.charAt(from), input.fnc1Character) ||
+          MinimalEncoder.isExtendedASCII(
+              input.charAt(from + 1), input.fnc1Character)) {
+        return 0;
+      }
+      if (HighLevelEncoder.isDigit(input.charAt(from)) &&
+          HighLevelEncoder.isDigit(input.charAt(from + 1))) {
+        return 1;
+      }
+      return 2;
+    }
+    if (length - from == 3) {
+      if (HighLevelEncoder.isDigit(input.charAt(from)) &&
+          HighLevelEncoder.isDigit(input.charAt(from + 1)) &&
+          !MinimalEncoder.isExtendedASCII(
+              input.charAt(from + 2), input.fnc1Character)) {
+        return 2;
+      }
+      if (HighLevelEncoder.isDigit(input.charAt(from + 1)) &&
+          HighLevelEncoder.isDigit(input.charAt(from + 2)) &&
+          !MinimalEncoder.isExtendedASCII(
+              input.charAt(from), input.fnc1Character)) {
+        return 2;
+      }
+      return 0;
+    }
+    if (HighLevelEncoder.isDigit(input.charAt(from)) &&
+        HighLevelEncoder.isDigit(input.charAt(from + 1)) &&
+        HighLevelEncoder.isDigit(input.charAt(from + 2)) &&
+        HighLevelEncoder.isDigit(input.charAt(from + 3))) {
+      return 2;
+    }
+    return 0;
+  }
+
+  /// Returns the capacity in codewords of the smallest symbol that has enough capacity to fit the given minimal
+  /// number of codewords.
+  int getMinSymbolSize(int minimum) {
+    switch (input.shapeHint) {
+      case SymbolShapeHint.forceSquare:
+        for (var capacity in _squareCodewordCapacities) {
+          if (capacity >= minimum) {
+            return capacity;
+          }
+        }
+      case SymbolShapeHint.forceRectangle:
+        for (var capacity in _rectangularCodewordCapacities) {
+          if (capacity >= minimum) {
+            return capacity;
+          }
+        }
+      case SymbolShapeHint.forceNone:
+        break;
+    }
+    for (var capacity in _allCodewordCapacities) {
+      if (capacity >= minimum) {
+        return capacity;
+      }
+    }
+    return _allCodewordCapacities[_allCodewordCapacities.length - 1];
+  }
+
+  /// Returns the remaining capacity in codewords of the smallest symbol that has enough capacity to fit the given
+  /// minimal number of codewords.
+  int getCodewordsRemaining(int minimum) {
+    return getMinSymbolSize(minimum) - minimum;
+  }
+
+  static Uint8List getBytes(int c1, [int? c2]) {
+    return Uint8List.fromList([c1, if (c2 != null) c2]);
+  }
+
+  static void setC40Word(Uint8List bytes, int offset, int c1, int c2, int c3) {
+    var val16 = (1600 * (c1 & 0xff)) + (40 * (c2 & 0xff)) + (c3 & 0xff) + 1;
+    bytes[offset] = val16 ~/ 256;
+    bytes[offset + 1] = val16 % 256;
+  }
+
+  static int _getX12Value(int c) {
+    return c == 13
+        ? 0
+        : c == 42
+            ? 1
+            : c == 62
+                ? 2
+                : c == 32
+                    ? 3
+                    : c >= 48 && c <= 57
+                        ? c - 44
+                        : c >= 65 && c <= 90
+                            ? c - 51
+                            : c;
+  }
+
+  Uint8List getX12Words() {
+    assert(characterLength % 3 == 0);
+    var result = Uint8List(characterLength ~/ 3 * 2);
+    for (var i = 0; i < result.length; i += 2) {
+      setC40Word(
+          result,
+          i,
+          _getX12Value(input.charAt(fromPosition + i ~/ 2 * 3)),
+          _getX12Value(input.charAt(fromPosition + i ~/ 2 * 3 + 1)),
+          _getX12Value(input.charAt(fromPosition + i ~/ 2 * 3 + 2)));
+    }
+    return result;
+  }
+
+  static int getShiftValue(int c, bool c40, int fnc1) {
+    return (c40 && MinimalEncoder._isInC40Shift1Set(c) ||
+            !c40 && MinimalEncoder._isInTextShift1Set(c))
+        ? 0
+        : (c40 && MinimalEncoder._isInC40Shift2Set(c, fnc1) ||
+                !c40 && MinimalEncoder._isInTextShift2Set(c, fnc1))
+            ? 1
+            : 2;
+  }
+
+  static int _getC40Value(bool c40, int setIndex, int c, int fnc1) {
+    if (c == fnc1) {
+      assert(setIndex == 2);
+      return 27;
+    }
+    if (c40) {
+      return c <= 31
+          ? c
+          : c == 32
+              ? 3
+              : c <= 47
+                  ? c - 33
+                  : c <= 57
+                      ? c - 44
+                      : c <= 64
+                          ? c - 43
+                          : c <= 90
+                              ? c - 51
+                              : c <= 95
+                                  ? c - 69
+                                  : c <= 127
+                                      ? c - 96
+                                      : c;
+    } else {
+      return c == 0
+          ? 0
+          : setIndex == 0 && c <= 3
+              ? c - 1
+              : //is this a bug in the spec?
+              setIndex == 1 && c <= 31
+                  ? c
+                  : c == 32
+                      ? 3
+                      : c >= 33 && c <= 47
+                          ? c - 33
+                          : c >= 48 && c <= 57
+                              ? c - 44
+                              : c >= 58 && c <= 64
+                                  ? c - 43
+                                  : c >= 65 && c <= 90
+                                      ? c - 64
+                                      : c >= 91 && c <= 95
+                                          ? c - 69
+                                          : c == 96
+                                              ? 0
+                                              : c >= 97 && c <= 122
+                                                  ? c - 83
+                                                  : c >= 123 && c <= 127
+                                                      ? c - 96
+                                                      : c;
+    }
+  }
+
+  Uint8List getC40Words(bool c40, int fnc1) {
+    var c40Values = <int>[];
+    for (var i = 0; i < characterLength; i++) {
+      var ci = input.charAt(fromPosition + i);
+      if (c40 && HighLevelEncoder.isNativeC40(ci) ||
+          !c40 && HighLevelEncoder.isNativeText(ci)) {
+        c40Values.add(_getC40Value(c40, 0, ci, fnc1));
+      } else if (!MinimalEncoder.isExtendedASCII(ci, fnc1)) {
+        var shiftValue = getShiftValue(ci, c40, fnc1);
+        c40Values.add(shiftValue); //Shift[123]
+        c40Values.add(_getC40Value(c40, shiftValue, ci, fnc1));
+      } else {
+        var asciiValue = (ci & 0xff) - 128;
+        if (c40 && HighLevelEncoder.isNativeC40(asciiValue) ||
+            !c40 && HighLevelEncoder.isNativeText(asciiValue)) {
+          c40Values.add(1); //Shift 2
+          c40Values.add(30); //Upper Shift
+          c40Values.add(_getC40Value(c40, 0, asciiValue, fnc1));
+        } else {
+          c40Values.add(1); //Shift 2
+          c40Values.add(30); //Upper Shift
+          var shiftValue = getShiftValue(asciiValue, c40, fnc1);
+          c40Values.add(shiftValue); // Shift[123]
+          c40Values.add(_getC40Value(c40, shiftValue, asciiValue, fnc1));
+        }
+      }
+    }
+
+    if ((c40Values.length % 3) != 0) {
+      assert((c40Values.length - 2) % 3 == 0 &&
+          fromPosition + characterLength == input.length);
+      c40Values.add(0); // pad with 0 (Shift 1)
+    }
+
+    var result = Uint8List(c40Values.length ~/ 3 * 2);
+    var byteIndex = 0;
+    for (var i = 0; i < c40Values.length; i += 3) {
+      setC40Word(result, byteIndex, c40Values[i] & 0xff,
+          c40Values[i + 1] & 0xff, c40Values[i + 2] & 0xff);
+      byteIndex += 2;
+    }
+    return result;
+  }
+
+  Uint8List getEDFBytes() {
+    var numberOfThirds = (characterLength / 4.0).ceil();
+    var result = Uint8List(numberOfThirds * 3);
+    var pos = fromPosition;
+    var endPos = math.min(fromPosition + characterLength - 1, input.length - 1);
+    for (var i = 0; i < numberOfThirds; i += 3) {
+      var edfValues = Int32List(4);
+      for (var j = 0; j < 4; j++) {
+        if (pos <= endPos) {
+          edfValues[j] = input.charAt(pos++) & 0x3f;
+        } else {
+          edfValues[j] = pos == endPos + 1 ? 0x1f : 0;
+        }
+      }
+      var val24 = edfValues[0] << 18;
+      val24 |= edfValues[1] << 12;
+      val24 |= edfValues[2] << 6;
+      val24 |= edfValues[3];
+      result[i] = (val24 >> 16) & 0xff;
+      result[i + 1] = (val24 >> 8) & 0xff;
+      result[i + 2] = val24 & 0xff;
+    }
+    return result;
+  }
+
+  Uint8List getLatchBytes() {
+    switch (previousMode) {
+      case _Mode.ascii:
+      case _Mode.b256: //after B256 ends (via length) we are back to ASCII
+        switch (mode) {
+          case _Mode.b256:
+            return getBytes(231);
+          case _Mode.c40:
+            return getBytes(230);
+          case _Mode.text:
+            return getBytes(239);
+          case _Mode.x12:
+            return getBytes(238);
+          case _Mode.edf:
+            return getBytes(240);
+          case _Mode.ascii:
+            break;
+        }
+      case _Mode.c40:
+      case _Mode.text:
+      case _Mode.x12:
+        if (mode != previousMode) {
+          switch (mode) {
+            case _Mode.ascii:
+              return getBytes(254);
+            case _Mode.b256:
+              return getBytes(254, 231);
+            case _Mode.c40:
+              return getBytes(254, 230);
+            case _Mode.text:
+              return getBytes(254, 239);
+            case _Mode.x12:
+              return getBytes(254, 238);
+            case _Mode.edf:
+              return getBytes(254, 240);
+          }
+        }
+      case _Mode.edf:
+        //The rightmost EDIFACT edge always contains an unlatch character
+        assert(mode == _Mode.edf);
+    }
+    return Uint8List(0);
+  }
+
+  // Important: The function does not return the length bytes (one or two) in case of B256 encoding
+  Uint8List getDataBytes() {
+    switch (mode) {
+      case _Mode.ascii:
+        if (input.isECI(fromPosition)) {
+          return getBytes(241, input.getECIValue(fromPosition) + 1);
+        } else if (MinimalEncoder.isExtendedASCII(
+            input.charAt(fromPosition), input.fnc1Character)) {
+          return getBytes(235, input.charAt(fromPosition) - 127);
+        } else if (characterLength == 2) {
+          return getBytes((input.charAt(fromPosition) - $0) * 10 +
+              input.charAt(fromPosition + 1) -
+              $0 +
+              130);
+        } else if (input.isFNC1(fromPosition)) {
+          return getBytes(232);
+        } else {
+          return getBytes(input.charAt(fromPosition) + 1);
+        }
+      case _Mode.b256:
+        return getBytes(input.charAt(fromPosition));
+      case _Mode.c40:
+        return getC40Words(true, input.fnc1Character);
+      case _Mode.text:
+        return getC40Words(false, input.fnc1Character);
+      case _Mode.x12:
+        return getX12Words();
+      case _Mode.edf:
+        return getEDFBytes();
+    }
+  }
+}
+
+class _Result {
+  final Uint8List bytes;
+
+  _Result._(this.bytes);
+
+  factory _Result(_Edge solution) {
+    var input = solution.input;
+    var size = 0;
+    var bytesAL = <int>[];
+    var randomizePostfixLength = <int>[];
+    var randomizeLengths = <int>[];
+    if ((solution.mode == _Mode.c40 ||
+            solution.mode == _Mode.text ||
+            solution.mode == _Mode.x12) &&
+        solution.endMode != _Mode.ascii) {
+      size += _prepend(_Edge.getBytes(254), bytesAL);
+    }
+    _Edge? current = solution;
+    while (current != null) {
+      size += _prepend(current.getDataBytes(), bytesAL);
+
+      if (current.previous == null ||
+          current.previousStartMode != current.mode) {
+        if (current.mode == _Mode.b256) {
+          if (size <= 249) {
+            bytesAL.insert(0, size);
+            size++;
+          } else {
+            bytesAL.insert(0, size % 250);
+            bytesAL.insert(0, size ~/ 250 + 249);
+            size += 2;
+          }
+          randomizePostfixLength.add(bytesAL.length);
+          randomizeLengths.add(size);
+        }
+        _prepend(current.getLatchBytes(), bytesAL);
+        size = 0;
+      }
+
+      current = current.previous;
+    }
+    if (input.macroId == 5) {
+      size += _prepend(_Edge.getBytes(236), bytesAL);
+    } else if (input.macroId == 6) {
+      size += _prepend(_Edge.getBytes(237), bytesAL);
+    }
+
+    if (input.fnc1Character > 0) {
+      size += _prepend(_Edge.getBytes(232), bytesAL);
+    }
+    for (var i = 0; i < randomizePostfixLength.length; i++) {
+      _applyRandomPattern(bytesAL, bytesAL.length - randomizePostfixLength[i],
+          randomizeLengths[i]);
+    }
+    //add padding
+    var capacity = solution.getMinSymbolSize(bytesAL.length);
+    if (bytesAL.length < capacity) {
+      bytesAL.add(129);
+    }
+    while (bytesAL.length < capacity) {
+      bytesAL.add(_randomize253State(bytesAL.length + 1));
+    }
+
+    return _Result._(Uint8List.fromList(bytesAL));
+  }
+
+  static int _prepend(Uint8List bytes, List<int> into) {
+    into.insertAll(0, bytes);
+    return bytes.length;
+  }
+
+  static int _randomize253State(int codewordPosition) {
+    var pseudoRandom = ((149 * codewordPosition) % 253) + 1;
+    var tempVariable = 129 + pseudoRandom;
+    return tempVariable <= 254 ? tempVariable : tempVariable - 254;
+  }
+
+  static void _applyRandomPattern(
+      List<int> bytesAL, int startPosition, int length) {
+    for (var i = 0; i < length; i++) {
+      //See "B.1 253-state algorithm
+      var padCodewordPosition = startPosition + i;
+      var padCodewordValue = bytesAL[padCodewordPosition] & 0xff;
+      var pseudoRandomNumber = ((149 * (padCodewordPosition + 1)) % 255) + 1;
+      var tempVariable = padCodewordValue + pseudoRandomNumber;
+      bytesAL[padCodewordPosition] =
+          tempVariable <= 255 ? tempVariable : tempVariable - 256;
+    }
+  }
+}
+
+class _Input extends MinimalECIInput {
+  final SymbolShapeHint shapeHint;
+  final int macroId;
+
+  _Input(super.stringToEncode, super.priorityCharset, super.fnc1,
+      this.shapeHint, this.macroId);
+}

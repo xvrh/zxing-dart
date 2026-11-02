@@ -1,5 +1,6 @@
 import 'barcode_format.dart';
 import 'binary_bitmap.dart';
+import 'datamatrix/data_matrix_reader.dart';
 import 'decode_hint.dart';
 import 'not_found_exception.dart';
 import 'oned/multi_format_one_d_reader.dart';
@@ -12,8 +13,8 @@ import 'result.dart';
 /// By default it attempts to decode all barcode formats that the library supports. Optionally, you
 /// can provide a hints object to request different behavior, for example only decoding QR codes.
 ///
-/// The supported formats are QR Code and the 1D formats (UPC-A, UPC-E, EAN-8, EAN-13, Code 39,
-/// Code 93, Code 128, ITF and Codabar).
+/// The supported formats are QR Code, Data Matrix and the 1D formats (UPC-A, UPC-E, EAN-8, EAN-13,
+/// Code 39, Code 93, Code 128, ITF and Codabar).
 ///
 /// @author Sean Owen
 /// @author dswitkin@google.com (Daniel Switkin)
@@ -75,6 +76,9 @@ class MultiFormatReader implements Reader {
       if (formats.contains(BarcodeFormat.qrCode)) {
         readers.add(QRCodeReader());
       }
+      if (formats.contains(BarcodeFormat.dataMatrix)) {
+        readers.add(DataMatrixReader());
+      }
       // At end in "try harder" mode
       if (addOneDReader && tryHarder) {
         readers.add(MultiFormatOneDReader(hints));
@@ -86,6 +90,7 @@ class MultiFormatReader implements Reader {
       }
 
       readers.add(QRCodeReader());
+      readers.add(DataMatrixReader());
 
       if (tryHarder) {
         readers.add(MultiFormatOneDReader(hints));
