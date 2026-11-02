@@ -54,6 +54,10 @@ class DecodeHintType<T> {
   /// and a UPC or EAN barcode is found but an extension is not, then no result will be returned
   /// at all.
   static final allowedEanExtensions = DecodeHintType<List<int>>();
+
+  /// If true, also tries to decode as inverted image. All configured decoders are simply called a
+  /// second time with an inverted image. Doesn't matter what it maps to; use {@link Boolean#TRUE}.
+  static final alsoInverted = DecodeHintType<void>();
 }
 
 class DecodeHints {
@@ -69,5 +73,14 @@ class DecodeHints {
 
   bool contains(DecodeHintType type) {
     return _hints.containsKey(type);
+  }
+
+  void remove(DecodeHintType type) {
+    _hints.remove(type);
+  }
+
+  /// Returns a shallow copy of these hints.
+  DecodeHints clone() {
+    return DecodeHints().._hints.addAll(_hints);
   }
 }
