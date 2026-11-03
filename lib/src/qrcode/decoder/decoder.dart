@@ -101,17 +101,21 @@ class Decoder {
     var resultOffset = 0;
 
     // Error-correct and copy data blocks together into a stream of bytes
+    var errorsCorrected = 0;
     for (var dataBlock in dataBlocks) {
       var codewordBytes = dataBlock.codewords;
       var numDataCodewords = dataBlock.getNumDataCodewords();
-      _correctErrors(codewordBytes, numDataCodewords);
+      errorsCorrected += _correctErrors(codewordBytes, numDataCodewords);
       for (var i = 0; i < numDataCodewords; i++) {
         resultBytes[resultOffset++] = codewordBytes[i];
       }
     }
 
     // Decode the contents of that stream of bytes
-    return DecodedBitStreamParser.decode(resultBytes, version, ecLevel, hints);
+    var result =
+        DecodedBitStreamParser.decode(resultBytes, version, ecLevel, hints);
+    result.errorsCorrected = errorsCorrected;
+    return result;
   }
 
   /// <p>Given data and error-correction codewords received, possibly corrupted by errors, attempts to
@@ -119,16 +123,19 @@ class Decoder {
   ///
   /// @param codewordBytes data and error correction codewords
   /// @param numDataCodewords number of codewords that are data bytes
+  /// @return the number of errors corrected
   /// @throws ChecksumException if error correction fails
-  void _correctErrors(Int8List codewordBytes, int numDataCodewords) {
+  int _correctErrors(Int8List codewordBytes, int numDataCodewords) {
     var numCodewords = codewordBytes.length;
     // First read into an array of ints
     var codewordsInts = Int32List(numCodewords);
     for (var i = 0; i < numCodewords; i++) {
       codewordsInts[i] = codewordBytes[i] & 0xFF;
     }
+    int errorsCorrected;
     try {
-      rsDecoder.decode(codewordsInts, codewordBytes.length - numDataCodewords);
+      errorsCorrected = rsDecoder.decodeWithECCount(
+          codewordsInts, codewordBytes.length - numDataCodewords);
     } on ReedSolomonException catch (e) {
       throw ChecksumException(e);
     }
@@ -137,5 +144,6 @@ class Decoder {
     for (var i = 0; i < numDataCodewords; i++) {
       codewordBytes[i] = codewordsInts[i];
     }
+    return errorsCorrected;
   }
 }

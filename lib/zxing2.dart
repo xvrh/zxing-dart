@@ -14,6 +14,7 @@ export 'src/format_reader_exception.dart' show FormatReaderException;
 export 'src/inverted_luminance_source.dart' show InvertedLuminanceSource;
 export 'src/luminance_source.dart' show LuminanceSource;
 export 'src/multi_format_reader.dart' show MultiFormatReader;
+export 'src/multi_format_writer.dart' show MultiFormatWriter;
 export 'src/not_found_exception.dart' show NotFoundException;
 export 'src/planar_yuv_luminance_source.dart' show PlanarYUVLuminanceSource;
 export 'src/reader.dart' show Reader;

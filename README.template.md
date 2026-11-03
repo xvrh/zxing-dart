@@ -32,6 +32,16 @@ Data Matrix, Aztec, PDF 417, MaxiCode and RSS-14 / RSS Expanded are not ported y
 import 'tool/examples/oned_decoding.dart';
 ```
 
+`MultiFormatWriter` encodes any format that has a writer (QR Code and the 1D formats).
+
+### Several barcodes in one image
+
+`QRCodeMultiReader`, in `package:zxing2/multi.dart`, returns all the QR codes found in the image.
+`GenericMultipleBarcodeReader` works with any reader: after a barcode is found, it decodes the areas around it again.
+```dart
+import 'tool/examples/multi_decoding.dart';
+```
+
 ### 1D barcodes
 
 The readers and writers for each 1D format (`EAN13Reader`, `Code128Writer`...) are in `package:zxing2/oned.dart`.
@@ -53,6 +63,10 @@ import 'tool/examples/png_decoding.dart';
 
 `decode` throws a `NotFoundException` when there is no QR code in the image.
 `result.resultPoints` holds the position of the finder patterns (and of the alignment pattern, if found).
+
+Like ZXing, `QRCodeReader` stops looking for finder patterns as soon as it has three that fit together.
+In dense codes, a part of the data can look like a finder pattern and the decoding fails with a `FormatReaderException`.
+`QRCodeMultiReader` tries every combination of finder patterns and reads these codes.
 
 #### Encoding
 

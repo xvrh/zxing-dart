@@ -1,4 +1,5 @@
 import 'package:test/test.dart';
+import 'package:zxing2/src/format_reader_exception.dart';
 import 'package:zxing2/src/qrcode/decoder/error_correction_level.dart';
 import 'package:zxing2/src/qrcode/decoder/version.dart';
 
@@ -11,6 +12,31 @@ void main() {
     for (var i = 1; i <= 40; i++) {
       checkVersion(Version.getVersionForNumber(i), i, 4 * i + 17);
     }
+  });
+
+  test('Provisional version for dimension', () {
+    for (var i = 1; i <= 40; i++) {
+      expect(
+          Version.getProvisionalVersionForDimension(4 * i + 17).versionNumber,
+          i);
+    }
+  });
+
+  test('Bad dimension', () {
+    for (var dimension in [16, 17, 22, 185]) {
+      expect(() => Version.getProvisionalVersionForDimension(dimension),
+          throwsA(isA<FormatReaderException>()));
+    }
+  });
+
+  test('Decode version information', () {
+    // Spot check
+    expect(Version.decodeVersionInformation(0x07C94)!.versionNumber, 7);
+    expect(Version.decodeVersionInformation(0x0C762)!.versionNumber, 12);
+    expect(Version.decodeVersionInformation(0x1145D)!.versionNumber, 17);
+    expect(Version.decodeVersionInformation(0x168C9)!.versionNumber, 22);
+    expect(Version.decodeVersionInformation(0x1B08E)!.versionNumber, 27);
+    expect(Version.decodeVersionInformation(0x209D5)!.versionNumber, 32);
   });
 }
 

@@ -1,5 +1,6 @@
 import '../not_found_exception.dart';
 import 'bit_matrix.dart';
+import 'detector/math_utils.dart';
 import 'default_grid_sampler.dart';
 import 'perspective_transform.dart';
 
@@ -95,8 +96,8 @@ abstract class GridSampler {
     var nudged = true;
     var maxOffset = points.length - 1; // points.length must be even
     for (var offset = 0; offset < maxOffset && nudged; offset += 2) {
-      var x = points[offset].toInt();
-      var y = points[offset + 1].toInt();
+      var x = MathUtils.toInt(points[offset]);
+      var y = MathUtils.toInt(points[offset + 1]);
       if (x < -1 || x > width || y < -1 || y > height) {
         throw NotFoundException();
       }
@@ -119,8 +120,8 @@ abstract class GridSampler {
     // Check and nudge points from end:
     nudged = true;
     for (var offset = points.length - 2; offset >= 0 && nudged; offset -= 2) {
-      var x = points[offset].toInt();
-      var y = points[offset + 1].toInt();
+      var x = MathUtils.toInt(points[offset]);
+      var y = MathUtils.toInt(points[offset + 1]);
       if (x < -1 || x > width || y < -1 || y > height) {
         throw NotFoundException();
       }

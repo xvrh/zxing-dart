@@ -171,7 +171,8 @@ class Detector {
         dimension--;
         break;
       case 3:
-        throw NotFoundException();
+        dimension -= 2;
+        break;
     }
     return dimension;
   }
@@ -324,7 +325,7 @@ class Detector {
       int estAlignmentX, int estAlignmentY, double allowanceFactor) {
     // Look for an alignment pattern (3 modules in size) around where it
     // should be
-    var allowance = (allowanceFactor * overallEstModuleSize).toInt();
+    var allowance = MathUtils.toInt(allowanceFactor * overallEstModuleSize);
     var alignmentAreaLeftX = math.max(0, estAlignmentX - allowance);
     var alignmentAreaRightX =
         math.min(image.width - 1, estAlignmentX + allowance);

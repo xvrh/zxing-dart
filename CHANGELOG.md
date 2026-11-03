@@ -3,7 +3,9 @@
 * Add 1D barcode readers ported from ZXing 3.5.4 (`package:zxing2/oned.dart`): UPC-A, UPC-E, EAN-8, EAN-13
   (with 2 and 5 digits UPC/EAN extensions), Code 39, Code 93, Code 128, ITF and Codabar.
 * Add the matching 1D writers (`EAN13Writer`, `Code128Writer`...) and the `Writer` interface.
-* Add `MultiFormatReader` to decode any supported format (1D and QR Code).
+* Add `MultiFormatReader` to decode any supported format (1D and QR Code), and `MultiFormatWriter` to encode them.
+* Add `package:zxing2/multi.dart` to read several barcodes in one image: `QRCodeMultiReader`,
+  `GenericMultipleBarcodeReader` and `ByQuadrantReader`.
 * Add `QRCodeWriter`, which renders a `BitMatrix` with a quiet zone and supports the `margin` and `errorCorrection` hints (#23)
 * Fix decoding of non-ASCII text: UTF-8 and other byte-mode content was returned as `�` (#21)
 * Decode Shift_JIS (byte and Kanji mode) and GB2312 (Hanzi mode) with bundled codecs, which were decoded as ASCII
@@ -12,6 +14,13 @@
 * Fix structured append sequence number and parity, which were swapped
 * `Encoder.encode` uses UTF-8 (with an ECI segment) for text that doesn't fit in ISO-8859-1, instead of throwing
 * Throw `WriterException` when the text can't be encoded in the requested character set
+* Choose the QR code mask like ZXing 3.5: the encoder now outputs the same matrices as the Java library,
+  which can differ from the previous versions
+* Throw `FormatReaderException` instead of `ArgumentError` when the detected size of a QR code matches no version
+* Fix `QRCodeReader.decode` throwing an `UnsupportedError` (NaN converted to int) on some images, instead of a `ReaderException`
+* Port the QR changes of ZXing 3.5.4: the detector accepts a size estimate that is off by one module, and results
+  include `ResultMetadataType.errorsCorrected` and the symbology identifier (`]Q1`...). `QRCodeWriter.renderResult` is public.
+* Ignore QR finder pattern candidates that were seen only once, like ZXing. Detection now gives the same results as ZXing 3.5.4
 * Export `PlanarYUVLuminanceSource`, to decode camera frames without converting them to RGB, and give it named crop parameters
 * Export `BitMatrix`, `BitArray`, `ByteMatrix` and `WriterException`.
 * Add `DecodeHintType.alsoInverted`, `EncodeHintType.forceCodeSet`, `EncodeHintType.code128Compact`,

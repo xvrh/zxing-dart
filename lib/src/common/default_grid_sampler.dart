@@ -1,5 +1,6 @@
 import '../not_found_exception.dart';
 import 'bit_matrix.dart';
+import 'detector/math_utils.dart';
 import 'grid_sampler.dart';
 import 'perspective_transform.dart';
 
@@ -67,7 +68,8 @@ class DefaultGridSampler extends GridSampler {
       GridSampler.checkAndNudgePoints(image, points);
       try {
         for (var x = 0; x < max; x += 2) {
-          if (image.get(points[x].toInt(), points[x + 1].toInt())) {
+          if (image.get(
+              MathUtils.toInt(points[x]), MathUtils.toInt(points[x + 1]))) {
             // Black(-ish) pixel
             bits.set(x ~/ 2, y);
           }
