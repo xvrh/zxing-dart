@@ -153,6 +153,10 @@ void main() {
 `decode` throws a `NotFoundException` when there is no QR code in the image.
 `result.resultPoints` holds the position of the finder patterns (and of the alignment pattern, if found).
 
+Like ZXing, `QRCodeReader` stops looking for finder patterns as soon as it has three that fit together.
+In dense codes, a part of the data can look like a finder pattern and the decoding fails with a `FormatReaderException`.
+`QRCodeMultiReader` tries every combination of finder patterns and reads these codes.
+
 #### Encoding
 
 `QRCodeWriter` returns a `BitMatrix` scaled to the requested size, with a white margin (the "quiet zone") around the code.
